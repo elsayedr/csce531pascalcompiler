@@ -179,12 +179,12 @@ typename:
   {};
 
 identifier:
-    LEX_ID
-  {};
+    LEX_ID	{ /*Enrolls the identifier*/ $$ = st_enter_id($1); }
+  ;
 
 new_identifier:
-    new_identifier_1
-  {};
+    new_identifier_1	{ /*Enrolls the identifier*/ $$ = st_enter_id($1); }
+    ;
 
 new_identifier_1:
     LEX_ID
@@ -346,22 +346,22 @@ string:
   {};
 
 type_definition_part:
-    LEX_TYPE type_definition_list semi
-  {};
+    LEX_TYPE type_definition_list semi 	{ /*Need to resolve unresolved pointer types here*/ }
+    ;
 
 type_definition_list:
-    type_definition
-  {}| type_definition_list semi type_definition
-  {};
+    type_definition {}
+    | type_definition_list semi type_definition	{}
+    ;
 
 type_definition:
-    new_identifier '=' type_denoter
-  {};
+    new_identifier '=' type_denoter { /*Installs a ndw identifier in the symtab as a new TYPENAME*/ make_type($1, $3); }
+    ;
 
 type_denoter:
-    typename
-  {}| type_denoter_1
-  {};
+    typename	{}
+    | type_denoter_1	{}
+    ;
 
 type_denoter_1:
     new_ordinal_type
@@ -389,11 +389,11 @@ enumerator:
   {};
 
 subrange_type:
-    constant LEX_RANGE constant
-  {};
+    constant LEX_RANGE constant		{ /*Builds the subrange type*/ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);}
+    ;
 
 new_pointer_type:
-    pointer_char pointer_domain_type
+    pointer_char pointer_domain_type { $$ = ty_build_ptr($2.id, $2.type); }
   {};
 
 pointer_char:
@@ -402,9 +402,9 @@ pointer_char:
   {};
 
 pointer_domain_type:
-    new_identifier
-  {}| new_procedural_type
-  {};
+    new_identifier	{ $$.id = $1; $$.type = NULL; }
+    | new_procedural_type	{ $$.id = NULL; $$.type = $1; }
+    ;
 
 new_procedural_type:
     LEX_PROCEDURE optional_procedural_type_formal_parameter_list
