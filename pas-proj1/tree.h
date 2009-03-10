@@ -1,4 +1,5 @@
-/* Tree building function definitions */
+#ifndef TREE_H
+#define TREE_H
 
 #include "defs.h"
 #include "types.h"
@@ -41,6 +42,8 @@ ST make_type(ST_ID, TYPE);
 ST make_unop(char, ST);
 ST make_binop(ST, char, ST);
 long eval_id(ST);
+
+#endif
 
 
 
