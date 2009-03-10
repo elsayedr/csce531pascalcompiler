@@ -19,7 +19,7 @@ ST make_int(long n)
 	p=(ST) malloc(sizeof(ST_NODE));
 	p->tag=INTCONST;
 	p->u.intconst=n;
-	if (debug) printf("INTCONST %d\n",n);
+	/*if (debug) printf("INTCONST %d\n",n);*/
 	return p;
 }
 
@@ -30,7 +30,7 @@ ST make_real(double n)
 	p=(ST) malloc(sizeof(ST_NODE));
 	p->tag=REALCONST;
 	p->u.realconst=n;
-	if (debug) printf("REALCONST %f\n",n);
+	/*if (debug) printf("REALCONST %f\n",n);*/
 	return p;
 }
 
@@ -41,7 +41,7 @@ ST make_unop(char c, ST a)
 	p->tag=UNOP;
 	p->u.unop.op=c;
 	p->u.unop.arg=a;
-	if (debug) printf("UNOP %c\n",c);
+	/*if (debug) printf("UNOP %c\n",c);*/
 	return p;
 }
 
@@ -53,7 +53,7 @@ ST make_binop(ST a1, char c, ST a2)
 	p->u.binop.op=c;
 	p->u.binop.arg1=a1;
 	p->u.binop.arg2=a2;
-	if (debug) printf("BINOP %c\n",c);
+	/*if (debug) printf("BINOP %c\n",c);*/
 	return p;
 }
 
