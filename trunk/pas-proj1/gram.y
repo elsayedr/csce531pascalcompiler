@@ -64,9 +64,12 @@ void yyerror(const char *);
     char  *y_string;
     long   y_int;
     double y_real;
+	ST_ID  y_id;
 }
 
-%token LEX_ID
+%type <y_id> identifier new_identifier new_identifier_1
+
+%token <y_string> LEX_ID
 
 /* Reserved words. */
 
@@ -355,7 +358,8 @@ type_definition_list:
     ;
 
 type_definition:
-    new_identifier '=' type_denoter { /*Installs a ndw identifier in the symtab as a new TYPENAME*/ make_type($1, $3); }
+    // $3 has no declared type
+	new_identifier '=' type_denoter { /*Installs a new identifier in the symtab as a new TYPENAME*/ make_type($1, $3); }
     ;
 
 type_denoter:
@@ -389,12 +393,14 @@ enumerator:
   {};
 
 subrange_type:
-    constant LEX_RANGE constant		{ /*Builds the subrange type*/ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);}
+    // $$, $1, $3 have no declared type
+	constant LEX_RANGE constant		{ /*Builds the subrange type*/ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);}
     ;
 
 new_pointer_type:
-    pointer_char pointer_domain_type { $$ = ty_build_ptr($2.id, $2.type); }
-  {};
+    // $$, $2 have no declared type
+	pointer_char pointer_domain_type { $$ = ty_build_ptr($2.id, $2.type); }
+    ;
 
 pointer_char:
     '^'
@@ -402,8 +408,10 @@ pointer_char:
   {};
 
 pointer_domain_type:
-    new_identifier	{ $$.id = $1; $$.type = NULL; }
-    | new_procedural_type	{ $$.id = NULL; $$.type = $1; }
+    // $$ has no declared type
+	new_identifier	{ $$.id = $1; $$.type = NULL; }
+    // $$, $1 have no declared type
+	| new_procedural_type	{ $$.id = NULL; $$.type = $1; }
     ;
 
 new_procedural_type:
