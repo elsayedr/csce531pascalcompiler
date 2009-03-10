@@ -1,3 +1,9 @@
+/* Team Project:
+Jeff Barton
+Glenn Robertson
+Jeremiah Shepherd
+Josh Van Buren */
+
 /*A Bison parser for the programming language Pascal.
   Copyright (C) 1989-2002 Free Software Foundation, Inc.
 
@@ -44,6 +50,8 @@
  */
 
 %{
+#include "defs.h"
+#include "tree.h"
 
 /* Cause the `yydebug' variable to be defined.  */
 #define YYDEBUG 1
@@ -61,13 +69,25 @@ void yyerror(const char *);
 
 /* The union representing a semantic stack entry */
 %union {
-    char  *y_string;
-    long   y_int;
-    double y_real;
-	ST_ID  y_id;
+    char * 	y_string;
+    char	y_char;
+    long 	y_int;
+    double 	y_real;
+    ST_ID 	y_id;
+    ST		y_tree;
+    TYPE	y_type;
+    PARAM	y_param;
 }
 
-%type <y_id> identifier new_identifier new_identifier_1
+%type <y_string> string
+
+%type <y_char> sign
+%type <y_int> constant number unsigned_number enumerator enumerated_type enum_list
+%type <y_id> identifier new_identifier new_identifier_1 typename
+%type <y_tree> type_definition label 
+%type <y_type> type_denoter type_denoter_1 new_ordinal_type new_pointer_type new_structured_type 
+	subrange_type new_procedural_type
+%type <y_param> pointer_domain_type
 
 %token <y_string> LEX_ID
 
@@ -110,7 +130,9 @@ void yyerror(const char *);
 %token LEX_LABEL_ADDR
 
 /* GPC internal tokens */
-%token LEX_INTCONST LEX_STRCONST LEX_REALCONST
+%token <y_int> LEX_INTCONST
+%token <y_string> LEX_STRCONST 
+%token <y_real> LEX_REALCONST
 %token LEX_RANGE LEX_ELLIPSIS
 
 /* We don't declare precedences for operators etc. We don't need
@@ -178,15 +200,15 @@ id_list:
   {};
 
 typename:
-    LEX_ID
-  {};
+    LEX_ID	{ $$ = /*Enrolls the identifier*/(ST_ID)st_enter_id($1); }
+    ;
 
 identifier:
-    LEX_ID	{ /*Enrolls the identifier*/ $$ = st_enter_id($1); }
+    LEX_ID	{ /*Enrolls the identifier*/ $$ = (ST_ID)st_enter_id($1); }
   ;
 
 new_identifier:
-    new_identifier_1	{ /*Enrolls the identifier*/ $$ = st_enter_id($1); }
+    new_identifier_1	{ /*Enrolls the identifier*/ $$ = (ST_ID)st_enter_id($1); }
     ;
 
 new_identifier_1:
@@ -287,7 +309,7 @@ label_list:
 
 /* Labels are returned as identifier nodes for compatibility with gcc */
 label:
-    LEX_INTCONST
+    LEX_INTCONST	{ /*Makes an integer node*/$$ = make_int($1); }
   {}| new_identifier
   {};
 
@@ -307,26 +329,25 @@ constant_definition:
   {};
 
 constant:
-    identifier
-  {}| sign identifier
-  {}| number
+    identifier	{ /*Evaluates the value of the identifier*/$$ = eval_id($1); }
+    | sign identifier	{ /*Negative sign so flip the value*/if ($1=='-') $$ = -eval_id($2); else $$ = eval_id($2); }
+    | number
   {}| constant_literal
   {};
 
 number:
-    sign unsigned_number
-  {}| unsigned_number
+    sign unsigned_number	{ /*Negates the number if the sign is negative*/if ($1=='-') $$ = -$2; else $$ = $2; }
+    | unsigned_number
   {};
 
 unsigned_number:
     LEX_INTCONST
-  {}| LEX_REALCONST
-  {};
+  {}| LEX_REALCONST	{ /*Caste as long*/$$ = (long) $1; };
 
-sign:
-    '+'
-  {}| '-'
-  {};
+sign 
+    : '+'	{ $$ = '+'; }
+    | '-'	{ $$ = '-'; }
+    ;
 
 constant_literal:
     combined_string
@@ -358,7 +379,6 @@ type_definition_list:
     ;
 
 type_definition:
-    // $3 has no declared type
 	new_identifier '=' type_denoter { /*Installs a new identifier in the symtab as a new TYPENAME*/ make_type($1, $3); }
     ;
 
@@ -380,20 +400,19 @@ new_ordinal_type:
   {};
 
 enumerated_type:
-    '(' enum_list ')'
-  {};
+    '(' enum_list ')'		{ $$ = $2; }
+    ;
 
-enum_list:
-    enumerator
-  {}| enum_list ',' enumerator
-  {};
+enum_list
+    : enumerator		{ $$ = $1; }
+    | enum_list ',' enumerator 	{ $$ = $1 + $3; }
+    ;
 
-enumerator:
-    new_identifier
-  {};
+enumerator:			
+    new_identifier		{ $$ = 1; }
+    ;
 
 subrange_type:
-    // $$, $1, $3 have no declared type
 	constant LEX_RANGE constant		{ /*Builds the subrange type*/ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);}
     ;
 
@@ -408,9 +427,7 @@ pointer_char:
   {};
 
 pointer_domain_type:
-    // $$ has no declared type
 	new_identifier	{ $$.id = $1; $$.type = NULL; }
-    // $$, $1 have no declared type
 	| new_procedural_type	{ $$.id = NULL; $$.type = $1; }
     ;
 
