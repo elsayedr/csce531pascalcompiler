@@ -12,6 +12,7 @@
 #include "symtab.h"
 #include "message.h"
 #include "backend.h"
+#include "tree.h"
 #include "y.tab.h"
 
 #undef yywrap
