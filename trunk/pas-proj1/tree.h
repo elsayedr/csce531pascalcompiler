@@ -4,40 +4,73 @@
 #include "defs.h"
 #include "types.h"
 
-typedef enum {INTCONST,REALCONST,ID_NODE,TYPE_NODE,UNOP,BINOP} st_tagtype;
+/*Enumerates the possible node types*/
+typedef enum 
+{
+  /*Possible node types*/
+  INTCONST,REALCONST,ID_NODE,TYPE_NODE,UNOP,BINOP
+} st_tagtype;
 
-typedef struct st_node {
-	st_tagtype tag;
-	union {
-		long intconst;
+/*Structure for the syntax tree node*/
+typedef struct st_node 
+{
+  /*Tag that specifies the node type*/
+  st_tagtype tag;
 
-		double realconst;
+  /*Union*/
+  union 
+  {
+    /*Value if the node is an intconst*/
+    long intconst;
+    
+    /*Value if the node is a real constant*/
+    double realconst;
 
-		struct {
-			ST_ID id;
-		} id_node;
+    /*Structure if the node is an id node*/
+    struct 
+    {
+      /*Pointer to the id in the symbol table*/
+      ST_ID id;
+    } id_node;
 
-		struct {
-			ST_ID id;
-			TYPE type;
-		} type_node;
-		
-		struct {
-			char op;	
-			struct st_node *arg;
-		} unop;
+    /*Structure if the node is a type node*/
+    struct 
+    {
+      /*Pointer to the id in the symbol table*/
+      ST_ID id;
 
-		struct {
-			char op;	
-			struct st_node *arg1;
-			struct st_node *arg2;
-		} binop;
+      /*Specifies the type*/
+      TYPE type;
+    } type_node;
+	
+    /*Structure if the node is a unary operator*/
+    struct 
+    {
+      /*Character representing the operator*/
+      char op;
 
-	} u;
+      /*Structure representing the argument for the node*/
+      struct st_node *arg;
+    } unop;
+
+    /*Structure if the node is a binary operator*/
+    struct 
+    {
+      /*Character represnting the operator */
+      char op;	
+
+      /*Pointers to the arguments*/
+      struct st_node *arg1;
+      struct st_node *arg2;
+    } binop;
+
+  } u; /*End of the union*/
 } ST_NODE, *ST;
 
+/*Function definitions*/
 ST make_int(long);
 ST make_real(double);
+ST make_id(ST_ID);
 ST make_type(ST_ID, TYPE);
 ST make_unop(char, ST);
 ST make_binop(ST, char, ST);

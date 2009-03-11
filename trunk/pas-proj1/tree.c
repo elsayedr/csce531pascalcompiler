@@ -7,54 +7,90 @@
 #include "types.h"
 #include "tree.h"
 
-ST make_type(ST_ID iden, TYPE newtype)
-{}
-
+/*Function that evaluates the value of an identifier*/
 long eval_id(ST iden)
-{}
+{
+}
 
+/*Function that makes an integer node*/
 ST make_int(long n)
 {
-	ST p;
-	p=(ST) malloc(sizeof(ST_NODE));
-	p->tag=INTCONST;
-	p->u.intconst=n;
-	/*if (debug) printf("INTCONST %d\n",n);*/
-	return p;
+  /*Creates the node and allocates memory*/
+  ST p;
+  p = (ST)malloc(sizeof(ST_NODE));
+
+  /*Sets the value of the node and returns it*/
+  p->tag = INTCONST;
+  p->u.intconst = n;
+  return p;
 }
 
-
+/*Function that makes a real node*/
 ST make_real(double n)
 {
-	ST p;
-	p=(ST) malloc(sizeof(ST_NODE));
-	p->tag=REALCONST;
-	p->u.realconst=n;
-	/*if (debug) printf("REALCONST %f\n",n);*/
-	return p;
+  /*Creates the node and allocates memory*/
+  ST p;
+  p = (ST)malloc(sizeof(ST_NODE));
+	
+  /*Sets the value of the node attributes and returns them*/
+  p->tag = REALCONST;
+  p->u.realconst = n;
+  return p;
 }
 
+/*Make an identifier node*/
+ST make_id(ST_ID iden)
+{
+  /*Creates the node and allocates memory*/
+  ST p;
+  p = (ST)malloc(sizeof(ST_NODE));
+
+  /*Sets the value of the node attributes and returns the node*/
+  p->tag = ID_NODE;
+  p->u.id_node.id = iden;
+  return p;
+}
+
+/*Function that makes a type node*/
+ST make_type(ST_ID iden, TYPE newtype)
+{
+  /*Creates the node and allocates memory*/
+  ST p;
+  p = (ST)malloc(sizeof(ST_NODE));
+
+  /*Sets the node attributes and returns the node*/
+  p->tag = TYPE_NODE;
+  p->u.type_node.id = iden;
+  p->u.type_node.type = newtype;
+  return p;
+}
+
+/*Function that makes a unary operator node*/
 ST make_unop(char c, ST a)
 {
-	ST p;
-	p=(ST) malloc(sizeof(ST_NODE));
-	p->tag=UNOP;
-	p->u.unop.op=c;
-	p->u.unop.arg=a;
-	/*if (debug) printf("UNOP %c\n",c);*/
-	return p;
+  /*Creates the node and allocates memory*/
+  ST p;
+  p = (ST)malloc(sizeof(ST_NODE));
+  
+  /*Sets the node attributes and returns the node*/
+  p->tag = UNOP;
+  p->u.unop.op = c;
+  p->u.unop.arg = a;
+  return p;
 }
 
+/*Function that makes a binary operator node*/
 ST make_binop(ST a1, char c, ST a2)
 {
-	ST p;
-	p=(ST) malloc(sizeof(ST_NODE));
-	p->tag=BINOP;
-	p->u.binop.op=c;
-	p->u.binop.arg1=a1;
-	p->u.binop.arg2=a2;
-	/*if (debug) printf("BINOP %c\n",c);*/
-	return p;
-}
+  /*Creates the node and allocates memory*/
+  ST p;
+  p = (ST)malloc(sizeof(ST_NODE));
 
+  /*Sets the node attributes and returns the node*/
+  p->tag = BINOP;
+  p->u.binop.op = c;
+  p->u.binop.arg1 = a1;
+  p->u.binop.arg2 = a2;
+  return p;
+}
 
