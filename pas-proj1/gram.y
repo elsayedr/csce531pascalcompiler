@@ -56,6 +56,9 @@ Josh Van Buren */
 /* Cause the `yydebug' variable to be defined.  */
 #define YYDEBUG 1
 
+ST_DR data_rec;
+int block;
+
 void set_yydebug(int);
 void yyerror(const char *);
 
@@ -383,7 +386,7 @@ type_definition:
     ;
 
 type_denoter:
-    typename	{}
+    typename	{ data_rec = st_lookup($1, &block); $$ = data_rec->u.typename.type; }
     | type_denoter_1	{}
     ;
 
