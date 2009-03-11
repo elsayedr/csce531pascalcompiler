@@ -310,8 +310,8 @@ label_list:
 /* Labels are returned as identifier nodes for compatibility with gcc */
 label:
     LEX_INTCONST	{ /*Makes an integer node*/$$ = make_int($1); }
-  {}| new_identifier
-  {};
+  | new_identifier	{ $$ = $1; }
+  ;
 
 /* constant definition part */
 
