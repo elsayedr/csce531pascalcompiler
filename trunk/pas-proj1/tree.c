@@ -58,11 +58,24 @@ ST make_type(ST_ID iden, TYPE newtype)
   ST p;
   p = (ST)malloc(sizeof(ST_NODE));
 
-  /*Sets the node attributes and returns the node*/
+  /*Sets the node attributes and installs the type*/
   p->tag = TYPE_NODE;
   p->u.type_node.id = iden;
   p->u.type_node.type = newtype;
-  return p;
+  st_install(iden, p);
+}
+
+/*Function that makes a variable*/
+void make_var(ST_ID iden, TYPE newtype)
+{
+  /*Creates the node and allocates memory*/
+  ST_DR p;
+  p = stdr_alloc();
+
+  /*Sets the node attributes and installs the variable in the symbol table*/
+  p->tag = GDECL;
+  p->u.decl.type = newtype;
+  st_install(iden, p);
 }
 
 /*Function that makes a unary operator node*/

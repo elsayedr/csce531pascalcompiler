@@ -68,10 +68,11 @@ typedef struct st_node
 } ST_NODE, *ST;
 
 /*Function definitions*/
+void make_type(ST_ID, TYPE);
+void make_var(ST_ID, TYPE);
+ST make_id(ST_ID);
 ST make_int(long);
 ST make_real(double);
-ST make_id(ST_ID);
-ST make_type(ST_ID, TYPE);
 ST make_unop(char, ST);
 ST make_binop(ST, char, ST);
 long eval_id(ST);
