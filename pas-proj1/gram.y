@@ -52,18 +52,20 @@ Josh Van Buren */
 %{
 #include "defs.h"
 #include "tree.h"
+#include "symtab.h"
 
 /* Cause the `yydebug' variable to be defined.  */
 #define YYDEBUG 1
-
-ST_DR data_rec;
-int block;
 
 void set_yydebug(int);
 void yyerror(const char *);
 
 /* Like YYERROR but do call yyerror */
 #define YYERROR1 { yyerror ("syntax error"); YYERROR; }
+
+ST_DR data_rec;
+int block;
+
 %}
 
 /* Start symbol for the grammar */

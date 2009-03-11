@@ -6,6 +6,7 @@
 #include "defs.h"
 #include "types.h"
 #include "tree.h"
+#include "symtab.h"
 
 /*Function that evaluates the value of an identifier*/
 long eval_id(ST iden)
@@ -52,16 +53,15 @@ ST make_id(ST_ID iden)
 }
 
 /*Function that makes a type node*/
-ST make_type(ST_ID iden, TYPE newtype)
+void make_type(ST_ID iden, TYPE newtype)
 {
-  /*Creates the node and allocates memory*/
-  ST p;
-  p = (ST)malloc(sizeof(ST_NODE));
+  /*Creates the symbol table entry and allocates memory*/
+  ST_DR p;
+  p = stdr_alloc();
 
-  /*Sets the node attributes and installs the type*/
-  p->tag = TYPE_NODE;
-  p->u.type_node.id = iden;
-  p->u.type_node.type = newtype;
+  /*Sets the attributes and installs the entry*/
+  p->tag = TYPENAME;
+  p->u.typename.type = newtype;
   st_install(iden, p);
 }
 
