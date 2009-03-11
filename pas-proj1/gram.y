@@ -315,7 +315,7 @@ label_list
 /* Labels are returned as identifier nodes for compatibility with gcc */
 label
 	: LEX_INTCONST	{ /*Makes an integer node*/ $$ = make_int($1); }
-	| new_identifier	/*default action*/
+	| new_identifier	{ $$ = $1; }
 	;
 
 /* constant definition part */
@@ -410,12 +410,12 @@ enumerated_type
     ;
 
 enum_list
-    : enumerator	/*default action*/
+    : enumerator	{ $$ = $1; }
     | enum_list ',' enumerator	{ $$ = $1 + $3; }
     ;
 
 enumerator
-	: new_identifier	/*default action*/
+	: new_identifier	{ $$ = 1; }
     ;
 
 subrange_type
