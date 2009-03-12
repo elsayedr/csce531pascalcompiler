@@ -1,8 +1,5 @@
 /* Tree building functions */
 
-/*Set debug to 1 to post debug info*/
-#define debug 0
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +7,35 @@
 #include "types.h"
 #include "tree.h"
 #include "symtab.h"
+
+/*Function that creates an index list*/
+INDEX_LIST create_index(TYPE newtype)
+{
+  /*Creates the index list and allocates memory*/
+  INDEX_LIST list;
+  list = (INDEX_LIST)malloc(sizeof(INDEX));
+
+  /*Sets the list attributes and returns the index list*/
+  list->type = newtype;
+  list->next = NULL;
+  list->prev = NULL;
+  return list;
+}
+
+/*Function that inserts an index into the index list*/
+INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
+{
+  /*Works by using the prev field to link back to the current list*/
+  /*Creates the index list and allocates memory*/
+  INDEX_LIST new, p;
+  new = (INDEX_LIST) malloc(sizeof(INDEX));
+  
+  /*Inserts the element and returns the list*/
+  new->type = newtype;
+  new->next = NULL;
+  new->prev = list;
+  return new;
+}
 
 /*Function that evaluates the value of an identifier*/
 long eval_id(ST iden)
@@ -26,7 +52,10 @@ ST make_int(long n)
   /*Sets the value of the node attributes and returns it*/
   p->tag = INTCONST;
   p->u.intconst = n;
-  if (debug) printf("INTCONST %d created\n",n);
+  if(debug)
+  {
+    printf("INTCONST %d created\n",(int)n);
+  }
   return p;
 }
 
@@ -40,7 +69,10 @@ ST make_real(double n)
   /*Sets the value of the node attributes and returns them*/
   p->tag = REALCONST;
   p->u.realconst = n;
-  if (debug) printf("REALCONST %f created\n",n);
+  if(debug) 
+  {
+    printf("REALCONST %f created\n",n);
+  }
   return p;
 }
 
@@ -54,7 +86,10 @@ ST make_id(ST_ID iden)
   /*Sets the value of the node attributes and returns the node*/
   p->tag = ID_NODE;
   p->u.id_node.id = iden;
-  if (debug) printf("ID_NODE created\n");
+  if(debug) 
+  {
+    printf("ID_NODE created\n");
+  }
   return p;
 }
 
@@ -68,7 +103,10 @@ void make_type(ST_ID iden, TYPE newtype)
   /*Sets the data record attributes and installs the type in the symbol table*/
   p->tag = TYPENAME;
   p->u.typename.type = newtype;
-  if (debug) printf("TYPENAME created\n");
+  if(debug)
+  {
+    printf("TYPENAME created\n");
+  }
   st_install(iden, p);
 }
 
@@ -82,7 +120,10 @@ void make_var(ST_ID iden, TYPE newtype)
   /*Sets the data record attributes and installs the variable in the symbol table*/
   p->tag = GDECL;
   p->u.decl.type = newtype;
-  if (debug) printf("GDECL created\n");
+  if(debug)
+  {
+    printf("GDECL created\n");
+  }
   st_install(iden, p);
 }
 
@@ -97,7 +138,10 @@ ST make_unop(char c, ST a)
   p->tag = UNOP;
   p->u.unop.op = c;
   p->u.unop.arg = a;
-  if (debug) printf("UNOP %c created\n",c);
+  if(debug) 
+  {
+    printf("UNOP %c created\n",c);
+  }
   return p;
 }
 
@@ -113,7 +157,10 @@ ST make_binop(ST a1, char c, ST a2)
   p->u.binop.op = c;
   p->u.binop.arg1 = a1;
   p->u.binop.arg2 = a2;
-  if (debug) printf("BINOP %c created\n",c);
+  if(debug) 
+  {
+    printf("BINOP %c created\n",c);
+  }
   return p;
 }
 
