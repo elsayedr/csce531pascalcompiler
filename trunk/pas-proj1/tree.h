@@ -72,6 +72,8 @@ typedef struct st_node
 /*Function definitions*/
 void make_type(ST_ID, TYPE);
 void make_var(ST_ID, TYPE);
+INDEX_LIST create_index(TYPE);
+INDEX_LIST insert_index(INDEX_LIST, TYPE);
 ST make_id(ST_ID);
 ST make_int(long);
 ST make_real(double);

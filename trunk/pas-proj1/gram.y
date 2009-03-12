@@ -82,17 +82,18 @@ int block;
     ST		y_tree;
     TYPE	y_type;
     PARAM	y_param;
+    INDEX_LIST 	y_index;
 }
 
 %type <y_string> string
 
 %type <y_char> sign
 %type <y_int> constant number unsigned_number enumerator enumerated_type enum_list
-%type <y_id> identifier new_identifier new_identifier_1 typename
-%type <y_tree> type_definition label 
-%type <y_type> type_denoter type_denoter_1 new_ordinal_type new_pointer_type new_structured_type 
-	subrange_type new_procedural_type
+%type <y_id> identifier new_identifier new_identifier_1 typename label id_list
+%type <y_type> type_denoter type_denoter_1 new_ordinal_type new_pointer_type 				new_structured_type subrange_type new_procedural_type
+%type <y_type> unpacked_structured_type array_type ordinal_index_type
 %type <y_param> pointer_domain_type
+%type <y_index> array_index_list
 
 %token <y_string> LEX_ID
 
@@ -401,9 +402,9 @@ type_denoter_1
   {};
 
 new_ordinal_type
-	: enumerated_type
-  {}| subrange_type
-  {};
+	: enumerated_type	{ $$ = ty_build_enum($1); }
+    | subrange_type
+    ;
 
 enumerated_type
 	: '(' enum_list ')'		{ $$ = $2; }
@@ -477,14 +478,14 @@ array_type
   {};
 
 array_index_list
-	: ordinal_index_type
-  {}| array_index_list ',' ordinal_index_type
-  {};
+	: ordinal_index_type	{ $$ = create_index($1);}
+    | array_index_list ',' ordinal_index_type	{ $$ = insert_index($1, $3);}
+  ;
 
 ordinal_index_type
-	: new_ordinal_type
-  {}| typename
-  {};
+	: new_ordinal_type	/*Passes TYPE*/
+    | typename			{ data_rec = st_lookup($1, &block); $$ = data_rec->u.typename.type; }
+    ;
 
 /* FILE */
 
@@ -572,8 +573,8 @@ variable_declaration_list
   {};
 
 variable_declaration
-	: id_list ':' type_denoter semi
-  {};
+	: id_list ':' type_denoter semi	{ make_var($1, $3); }
+    ;
 
 function_declaration
 	: function_heading semi directive_list semi
