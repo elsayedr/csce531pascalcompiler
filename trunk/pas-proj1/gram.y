@@ -1,4 +1,9 @@
-/* Team Project:
+/* Build 11
+change summary:
+removed structure for ID list and used Member list instead
+added ty_build_struct to create record types
+
+Team Project:
 Jeff Barton
 Glenn Robertson
 Jeremiah Shepherd
@@ -83,18 +88,20 @@ int block;
     TYPE	y_type;
     PARAM	y_param;
     INDEX_LIST 	y_index;
+    MEMBER_LIST	y_member;
 }
 
 %type <y_string> string
 
 %type <y_char> sign
 %type <y_int> constant number unsigned_number enumerator enumerated_type enum_list
-%type <y_id> identifier new_identifier new_identifier_1 typename label id_list
+%type <y_id> identifier new_identifier new_identifier_1 typename label 
 %type <y_type> type_denoter type_denoter_1 new_ordinal_type new_pointer_type 
 %type <y_type> new_structured_type subrange_type new_procedural_type
-%type <y_type> unpacked_structured_type array_type ordinal_index_type set_type
+%type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type  
 %type <y_param> pointer_domain_type
 %type <y_index> array_index_list
+%type <y_member> id_list record_field_list fixed_part record_section variant_part
 
 %token <y_string> LEX_ID
 
@@ -478,9 +485,9 @@ new_structured_type
 
 unpacked_structured_type
     : array_type
-    | file_type		{} 	/* not configured yet */
+    | file_type		{ $$=NULL; } 	/* not configured yet */
     | set_type
-    | record_type	{}	/* not configured yet */
+    | record_type	
     ;
 
 /* Array */
@@ -524,27 +531,32 @@ set_type
 	;
 
 record_type
-	: LEX_RECORD record_field_list LEX_END {}
-  	;
+	: LEX_RECORD record_field_list LEX_END	{ $$ = ty_build_struct($2);
+					  	  if (debug) {
+							printf("Created record with members:\n"); 
+							ty_print_memlist($2);
+							printf("\n");
+						  }
+						}
 
 record_field_list
-	: /* empty */
-  {}| fixed_part optional_semicolon
-  {}| fixed_part semi variant_part
-  {}| variant_part
-  {};
+    : /* empty */			{ $$ = NULL; }
+    | fixed_part optional_semicolon	/* $$ = $1; */
+    | fixed_part semi variant_part	/* add combiner later */
+    | variant_part			{}
+    ;
 
 fixed_part
-	: record_section
-  {}| fixed_part semi record_section
-  {};
+    : record_section			{ $$ = $1; }
+    | fixed_part semi record_section	{ $$ = combine_members($1,$3); }
+    ;
 
 record_section
-	: id_list ':' type_denoter
-  {};
+    : id_list ':' type_denoter  	{ $$ = type_members($1,$3); }
+    ;
 
 variant_part
-	: LEX_CASE variant_selector LEX_OF variant_list rest_of_variant
+    : LEX_CASE variant_selector LEX_OF variant_list rest_of_variant
   {};
 
 rest_of_variant
@@ -593,7 +605,7 @@ variable_declaration_list
   {};
 
 variable_declaration
-	: id_list ':' type_denoter semi	{ make_var($1, $3); }
+    : id_list ':' type_denoter semi		{ make_var($1,$3); }
     ;
 
 function_declaration
