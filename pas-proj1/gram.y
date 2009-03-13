@@ -202,24 +202,24 @@ optional_par_id_list
   {};
 
 id_list
-    : new_identifier				//{ $$ = insert_id(NULL,$1); }
-    | id_list ',' new_identifier { $$ = $3;}	//{ $$ = insert_id($1,$3); }
+    : new_identifier			{ $$ = insert_id(NULL,$1); }
+    | id_list ',' new_identifier 	{ $$ = insert_id($1,$3); }
     ;
 
 typename
-    : LEX_ID		{ /*Enrolls the identifier*/ $$ = (ST_ID)st_enter_id($1); }
+    : LEX_ID		{ $$ = (ST_ID)st_enter_id($1); if (debug) printf("Type: %s\n",$1); }
     ;
 
 identifier
-    : LEX_ID		{ /*Enrolls the identifier*/ $$ = (ST_ID)st_enter_id($1); }
+    : LEX_ID		{ $$ = (ST_ID)st_enter_id($1); if (debug) printf("ID: %s\n",$1); }
     ;
 
 new_identifier
-    : new_identifier_1	/* pass ID up to new_id */
+    : new_identifier_1	
     ;
 
 new_identifier_1
-    : LEX_ID		{ $$ = (ST_ID) st_enter_id($1); }	/*Enrolls the identifier*/
+    : LEX_ID		{ $$ = (ST_ID) st_enter_id($1); if (debug) printf("NEW ID: %s\n",$1); }
 /* Standard Pascal constants */
     | p_MAXINT
   {}| p_FALSE
@@ -384,20 +384,22 @@ type_definition_part
     ;
 
 type_definition_list
-    : type_definition 				{ /* action occurs during assignment below */}
+    : type_definition 	{ /* action occurs during assignment below */}
     | type_definition_list semi type_definition	{}
     ;
 
-type_definition
-    : new_identifier '=' type_denoter { /*Installs a new identifier in the symtab as a new TYPENAME*/ make_type($1,$3); }
+type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/ 
+    : new_identifier '=' type_denoter 	{ make_type($1,$3); }
     ;
 
 type_denoter
     : typename		{ data_rec = st_lookup($1, &block); 
 			  $$ = data_rec->u.typename.type; 
 			  if (debug) { 
-				printf("Typename: %s\n", st_get_id_str($1) );
-			  	printf("REF NODE TYPE: %d\n", ty_query(data_rec->u.typename.type) ); 
+				printf("Denoter typename: %s\n", st_get_id_str($1) );
+			  	printf("Reference TYPE:\n");
+				ty_print_type(data_rec->u.typename.type); 
+				printf("\n");
 			  }
 			}
     | type_denoter_1	/* default action */
@@ -512,8 +514,13 @@ direct_access_index_type
 
 /* sets */
 set_type
-	: LEX_SET LEX_OF type_denoter	{ if (debug) printf("Building set of type: %d\n",ty_query($3));
-					  $$ = ty_build_set($3); }
+	: LEX_SET LEX_OF type_denoter	{ $$ = ty_build_set($3);
+					  if (debug) {
+						printf("Building set of type: \n");
+						ty_print_typetag(ty_query($3));
+						printf("\n");
+					  }
+					}
 	;
 
 record_type

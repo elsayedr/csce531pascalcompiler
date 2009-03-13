@@ -7,19 +7,32 @@
 #include "types.h"
 #include "tree.h"
 #include "symtab.h"
+#include "message.h"
 
 /*Function that inserts an index into the index list*/
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
 {
   /*Works by using the prev field to link back to the current list*/
   /*Creates the index list and allocates memory*/
-  INDEX_LIST new, p;
+  INDEX_LIST new;
   new = (INDEX_LIST) malloc(sizeof(INDEX));
   
   /*Inserts the element and returns the list*/
   new->type = newtype;
-  new->next = NULL;
-  new->prev = list;
+  new->next = list;
+  new->prev = NULL;
+  return new;
+}
+
+/*Function that inserts an ST_ID into an ID list*/
+ID_LIST insert_id(ID_LIST list, ST_ID newid)
+{
+  ID_LIST new;
+  new = (ID_LIST) malloc(sizeof(ID_LIST_NODE));
+  
+  /*Inserts the element and returns the list*/
+  new->id = newid;
+  new->next = list;
   return new;
 }
 
@@ -74,7 +87,7 @@ ST make_id(ST_ID iden)
   p->u.id_node.id = iden;
   if(debug) 
   {
-    printf("ID_NODE created\n");
+    printf("ID NODE %s created\n", st_get_id_str(iden) );
   }
   return p;
 }
@@ -91,26 +104,29 @@ void make_type(ST_ID iden, TYPE newtype)
   p->u.typename.type = newtype;
   if(debug)
   {
-    printf("TYPENAME created\n");
+    printf("TYPE name %s installed\n", st_get_id_str(iden) );
   }
   st_install(iden, p);
 }
 
 /*Function that makes a variable data record and installs it in the symbol table*/
-void make_var(ST_ID iden, TYPE newtype)
+void make_var(ID_LIST list, TYPE newtype)
 {
   /*Creates the data record and allocates memory*/
   ST_DR p;
-  p = stdr_alloc();
-
-  /*Sets the data record attributes and installs the variable in the symbol table*/
-  p->tag = GDECL;
-  p->u.decl.type = newtype;
-  if(debug)
-  {
-    printf("GDECL created\n");
+  
+  if (!list) bug("Empty list passed to make_var");
+  while (list) {
+	p = stdr_alloc();	  
+	p->tag = GDECL;
+	p->u.decl.type = newtype;
+	if(debug)
+  	{
+  	  printf("GDECL created with type: %d\n",ty_query(newtype));
+ 	}
+  	st_install(list->id, p); /* installs the variable in the symbol table*/
+	list=list->next;
   }
-  st_install(iden, p);
 }
 
 /*Function that makes a unary operator node*/

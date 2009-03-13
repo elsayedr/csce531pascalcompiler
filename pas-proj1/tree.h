@@ -69,10 +69,17 @@ typedef struct st_node
   } u; /*End of the union*/
 } ST_NODE, *ST;
 
+/* structure for ID list */
+typedef struct id_list_node {
+	ST_ID id;
+	struct id_list_node *next;
+} ID_LIST_NODE, *ID_LIST;
+
 /*Function definitions*/
 void make_type(ST_ID, TYPE);
-void make_var(ST_ID, TYPE);
+void make_var(ID_LIST, TYPE);
 INDEX_LIST insert_index(INDEX_LIST, TYPE);
+ID_LIST insert_id(ID_LIST, ST_ID);
 ST make_id(ST_ID);
 ST make_int(long);
 ST make_real(double);
