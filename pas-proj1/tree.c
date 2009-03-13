@@ -9,7 +9,7 @@
 #include "symtab.h"
 #include "message.h"
 
-/*Function that inserts an index into the index list*/
+/* Function that inserts an index into the index list */
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
 {
   /*Works by using the prev field to link back to the current list*/
@@ -24,11 +24,11 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
   return new;
 }
 
-/*Function that inserts an ST_ID into an ID list*/
-ID_LIST insert_id(ID_LIST list, ST_ID newid)
+/* Function that inserts an ST_ID into a member list */
+MEMBER_LIST insert_id(MEMBER_LIST list, ST_ID newid)
 {
-  ID_LIST new;
-  new = (ID_LIST) malloc(sizeof(ID_LIST_NODE));
+  MEMBER_LIST new;
+  new = (MEMBER_LIST) malloc(sizeof(MEMBER));
   
   /*Inserts the element and returns the list*/
   new->id = newid;
@@ -36,7 +36,73 @@ ID_LIST insert_id(ID_LIST list, ST_ID newid)
   return new;
 }
 
-/*Function that evaluates the value of an identifier*/
+/* Function that takes a member list and assigns a type to each member */
+MEMBER_LIST type_members(MEMBER_LIST list, TYPE newtype)
+{
+  MEMBER_LIST p = list;
+
+  if (!p) bug("Empty list passed to add members");
+
+  while (p) {
+	p->type = newtype;
+	p=p->next;
+  }
+  return list;
+}
+
+/* Function that adds two member lists together */
+MEMBER_LIST combine_members(MEMBER_LIST list1, MEMBER_LIST list2)
+{
+  MEMBER_LIST p = list1;
+
+  if (!p) bug("Empty list passed to combine members");
+
+  while (p->next) p=p->next;
+  p->next = list2;	
+  
+  return list1;
+}
+
+/* Function that makes a variable data record and installs it in the symbol table */
+void make_var(MEMBER_LIST list, TYPE newtype)
+{
+  /* Creates the data record and allocates memory */
+  ST_DR p;
+  
+  if (!list) bug("Empty list passed to make_var");
+  while (list) {
+	p = stdr_alloc();	  
+	p->tag = GDECL;
+	p->u.decl.type = newtype;
+	if(debug)
+  	{
+  	  printf("GDECL created with type:\n");
+	  ty_print_type(newtype);
+	  printf("\n");
+ 	}
+  	st_install(list->id, p); /* installs the variable in the symbol table */
+	list=list->next;
+  }
+}
+
+/* Function that makes a type data record and installs it in the symbol table */
+void make_type(ST_ID iden, TYPE newtype)
+{
+  /* Creates the data record and allocates memory */
+  ST_DR p;
+  p = stdr_alloc();
+
+  /* Sets the data record attributes and installs the type in the symbol table */
+  p->tag = TYPENAME;
+  p->u.typename.type = newtype;
+  if(debug)
+  {
+    printf("TYPE name %s installed\n", st_get_id_str(iden) );
+  }
+  st_install(iden, p);
+}
+
+/* Function that evaluates the value of an identifier */
 long eval_id(ST iden)
 {
 }
@@ -90,43 +156,6 @@ ST make_id(ST_ID iden)
     printf("ID NODE %s created\n", st_get_id_str(iden) );
   }
   return p;
-}
-
-/*Function that makes a type data record and installs it in the symbol table*/
-void make_type(ST_ID iden, TYPE newtype)
-{
-  /*Creates the data record and allocates memory*/
-  ST_DR p;
-  p = stdr_alloc();
-
-  /*Sets the data record attributes and installs the type in the symbol table*/
-  p->tag = TYPENAME;
-  p->u.typename.type = newtype;
-  if(debug)
-  {
-    printf("TYPE name %s installed\n", st_get_id_str(iden) );
-  }
-  st_install(iden, p);
-}
-
-/*Function that makes a variable data record and installs it in the symbol table*/
-void make_var(ID_LIST list, TYPE newtype)
-{
-  /*Creates the data record and allocates memory*/
-  ST_DR p;
-  
-  if (!list) bug("Empty list passed to make_var");
-  while (list) {
-	p = stdr_alloc();	  
-	p->tag = GDECL;
-	p->u.decl.type = newtype;
-	if(debug)
-  	{
-  	  printf("GDECL created with type: %d\n",ty_query(newtype));
- 	}
-  	st_install(list->id, p); /* installs the variable in the symbol table*/
-	list=list->next;
-  }
 }
 
 /*Function that makes a unary operator node*/
