@@ -90,8 +90,9 @@ int block;
 %type <y_char> sign
 %type <y_int> constant number unsigned_number enumerator enumerated_type enum_list
 %type <y_id> identifier new_identifier new_identifier_1 typename label id_list
-%type <y_type> type_denoter type_denoter_1 new_ordinal_type new_pointer_type 				new_structured_type subrange_type new_procedural_type
-%type <y_type> unpacked_structured_type array_type ordinal_index_type
+%type <y_type> type_denoter type_denoter_1 new_ordinal_type new_pointer_type 
+%type <y_type> new_structured_type subrange_type new_procedural_type
+%type <y_type> unpacked_structured_type array_type ordinal_index_type set_type
 %type <y_param> pointer_domain_type
 %type <y_index> array_index_list
 
@@ -201,26 +202,26 @@ optional_par_id_list
   {};
 
 id_list
-	: new_identifier
-  {}| id_list ',' new_identifier
-  {};
+    : new_identifier				//{ $$ = insert_id(NULL,$1); }
+    | id_list ',' new_identifier { $$ = $3;}	//{ $$ = insert_id($1,$3); }
+    ;
 
 typename
-	: LEX_ID	{ $$ = /*Enrolls the identifier*/ (ST_ID)st_enter_id($1); }
+    : LEX_ID		{ /*Enrolls the identifier*/ $$ = (ST_ID)st_enter_id($1); }
     ;
 
 identifier
-	: LEX_ID	{ /*Enrolls the identifier*/ $$ = (ST_ID)st_enter_id($1); }
-  ;
+    : LEX_ID		{ /*Enrolls the identifier*/ $$ = (ST_ID)st_enter_id($1); }
+    ;
 
 new_identifier
-	: new_identifier_1	{ /*Enrolls the identifier*/ $$ = (ST_ID)st_enter_id($1); }
+    : new_identifier_1	/* pass ID up to new_id */
     ;
 
 new_identifier_1
-	: LEX_ID
+    : LEX_ID		{ $$ = (ST_ID) st_enter_id($1); }	/*Enrolls the identifier*/
 /* Standard Pascal constants */
-  {}| p_MAXINT
+    | p_MAXINT
   {}| p_FALSE
   {}| p_TRUE
 /* Standard Pascal I/O */
@@ -315,41 +316,41 @@ label_list
 
 /* Labels are returned as identifier nodes for compatibility with gcc */
 label
-	: LEX_INTCONST	{ /*Makes an integer node*/ $$ = make_int($1); }
+	: LEX_INTCONST		{ /* convert integer to string and call st_enter_id */ }
 	| new_identifier	{ $$ = $1; }
 	;
 
 /* constant definition part */
 
 constant_definition_part
-	: LEX_CONST constant_definition_list
+    : LEX_CONST constant_definition_list
   {};
 
 constant_definition_list
-	: constant_definition
+    : constant_definition
   {}| constant_definition_list constant_definition
   {};
 
 constant_definition
-	: new_identifier '=' static_expression semi
+    : new_identifier '=' static_expression semi
   {};
 
 constant
-	: identifier	{ /*Evaluates the value of the identifier*/ $$ = eval_id($1); }
+    : identifier	{ /*Evaluates the value of the identifier*/ $$ = eval_id($1); }
     | sign identifier	{ /*Negative sign so flip the value*/ if ($1=='-') $$ = -eval_id($2); else $$ = eval_id($2); }
     | number
   {}| constant_literal
   {};
 
 number
-	: sign unsigned_number	{ /*Negates the number if the sign is negative*/ if ($1=='-') $$ = -$2; else $$ = $2; }
+    : sign unsigned_number	{ /*Negates the number if the sign is negative*/ if ($1=='-') $$ = -$2; else $$ = $2; }
     | unsigned_number
   {};
 
 unsigned_number
-	: LEX_INTCONST
-  {}| LEX_REALCONST	{ /*Cast as long*/ $$ = (long) $1; }
-	;
+    : LEX_INTCONST	/* $$ = $1 */
+    | LEX_REALCONST	{ /*Cast as long*/ $$ = (long) $1; }
+    ;
 
 sign
     : '+'	{ $$ = '+'; }
@@ -357,155 +358,167 @@ sign
     ;
 
 constant_literal
-	: combined_string
+    : combined_string
   {}| predefined_literal
   {};
 
 predefined_literal
-	: LEX_NIL
+    : LEX_NIL
   {}| p_FALSE
   {}| p_TRUE
   {};
 
 combined_string
-	: string
+    : string
   {};
 
 string
-	: LEX_STRCONST
+    : LEX_STRCONST
   {}| string LEX_STRCONST
   {};
 
+/* type definition part */
+
 type_definition_part
-	: LEX_TYPE type_definition_list semi	{ /*Need to resolve unresolved pointer types here*/ }
+    : LEX_TYPE type_definition_list semi	{ /*Need to resolve unresolved pointer types here*/ }
     ;
 
 type_definition_list
-	: type_definition {/*Suppose to be empty action?*/}
-    | type_definition_list semi type_definition	{ /*Suppose to be empty action?*/ }
+    : type_definition 				{ /* action occurs during assignment below */}
+    | type_definition_list semi type_definition	{}
     ;
 
 type_definition
-	: new_identifier '=' type_denoter { /*Installs a new identifier in the symtab as a new TYPENAME*/ make_type($1, $3); }
+    : new_identifier '=' type_denoter { /*Installs a new identifier in the symtab as a new TYPENAME*/ make_type($1,$3); }
     ;
 
 type_denoter
-	: typename	{ data_rec = st_lookup($1, &block); $$ = data_rec->u.typename.type; }
-    | type_denoter_1	{ /*Suppose to be empty action?*/ }
+    : typename		{ data_rec = st_lookup($1, &block); 
+			  $$ = data_rec->u.typename.type; 
+			  if (debug) { 
+				printf("Typename: %s\n", st_get_id_str($1) );
+			  	printf("REF NODE TYPE: %d\n", ty_query(data_rec->u.typename.type) ); 
+			  }
+			}
+    | type_denoter_1	/* default action */
     ;
 
 type_denoter_1
-	: new_ordinal_type
-  {}| new_pointer_type
-  {}| new_procedural_type
-  {}| new_structured_type
-  {};
+    : new_ordinal_type
+    | new_pointer_type
+    | new_procedural_type	{}
+    | new_structured_type	
+    ;
 
 new_ordinal_type
-	: enumerated_type	{ $$ = ty_build_enum($1); }
-    | subrange_type
+    : enumerated_type	{ $$ = ty_build_enum($1); }
+    | subrange_type	/* default */
     ;
 
 enumerated_type
-	: '(' enum_list ')'		{ $$ = $2; }
-    ;
+	: '(' enum_list ')'	{ $$ = $2; if (debug) printf("Enumerated list with %d elements\n",$2); }
+    	;
 
 enum_list
-    : enumerator	{ $$ = $1; }
+    : enumerator		{ $$ = $1; }		
     | enum_list ',' enumerator	{ $$ = $1 + $3; }
     ;
 
 enumerator
-	: new_identifier	{ $$ = 1; }
+    : new_identifier	{ $$ = 1; }	/* start count of enumerated type entries at 1 */
     ;
 
-subrange_type
-	: constant LEX_RANGE constant	{ /*Builds the subrange type*/ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3); }
+subrange_type				/*Builds the subrange type*/ 
+    : constant LEX_RANGE constant	{ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);
+					  if (debug) printf("Build subrange of INT from %d to %d\n",$1,$3); }
     ;
 
 new_pointer_type
-	: pointer_char pointer_domain_type	{ $$ = ty_build_ptr($2.id, $2.type); }
+    : pointer_char pointer_domain_type	{ $$ = ty_build_ptr($2.id, $2.type); }
     ;
 
 pointer_char
-	: '^'
+    : '^'
   {}| '@'
   {};
 
 pointer_domain_type
 	: new_identifier	{ $$.id = $1; $$.type = NULL; }
 	| new_procedural_type	{ $$.id = NULL; $$.type = $1; }
-    ;
+    	;
 
 new_procedural_type
-	: LEX_PROCEDURE optional_procedural_type_formal_parameter_list
+    : LEX_PROCEDURE optional_procedural_type_formal_parameter_list
   {}| LEX_FUNCTION optional_procedural_type_formal_parameter_list functiontype
   {};
 
 optional_procedural_type_formal_parameter_list
-	: /* empty */
+    : /* empty */
   {}| '(' procedural_type_formal_parameter_list ')'
   {};
 
 procedural_type_formal_parameter_list
-	: procedural_type_formal_parameter
+    : procedural_type_formal_parameter
   {}| procedural_type_formal_parameter_list semi procedural_type_formal_parameter
   {};
 
 procedural_type_formal_parameter
-	: id_list
+    : id_list
   {}| id_list ':' typename
   {}| LEX_VAR id_list ':' typename
   {}| LEX_VAR id_list
   {};
 
 new_structured_type
-	: LEX_PACKED unpacked_structured_type
-  {}| unpacked_structured_type
-  {};
+    : LEX_PACKED unpacked_structured_type	{ $$ = $2; }
+    | unpacked_structured_type			/*$$ = $1; */
+    ;
 
 unpacked_structured_type
-	: array_type
-  {}| file_type
-  {}| set_type
-  {}| record_type
-  {};
+    : array_type
+    | file_type		{} 	/* not configured yet */
+    | set_type
+    | record_type	{}	/* not configured yet */
+    ;
 
 /* Array */
 
 array_type
-	: LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter
-  {};
+    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ $$ = ty_build_array($6,$3); }
+    ;
 
 array_index_list
-	: ordinal_index_type	{ $$ = create_index($1);}
-    | array_index_list ',' ordinal_index_type	{ $$ = insert_index($1, $3);}
+    : ordinal_index_type			{ $$ = insert_index(NULL,$1); }
+    | array_index_list ',' ordinal_index_type	{ $$ = insert_index($1, $3); }
   ;
 
 ordinal_index_type
-	: new_ordinal_type	/*Passes TYPE*/
-    | typename			{ data_rec = st_lookup($1, &block); $$ = data_rec->u.typename.type; }
+    : new_ordinal_type		/*Passes TYPE*/
+    | typename			{ data_rec = st_lookup($1, &block); 
+				  $$ = data_rec->u.typename.type; 
+				  if (debug) printf("REF NODE TYPE: %d\n", ty_query(data_rec->u.typename.type) ); }
     ;
 
 /* FILE */
 
 file_type
-	: LEX_FILE direct_access_index_type LEX_OF type_denoter
-  {};
+    : LEX_FILE direct_access_index_type LEX_OF type_denoter	{}
+    ;
 
 direct_access_index_type
-	: /* empty */
+    : /* empty */
   {}| '[' ordinal_index_type ']'
   {};
 
 /* sets */
 set_type
-	: LEX_SET LEX_OF type_denoter
-  {};
+	: LEX_SET LEX_OF type_denoter	{ if (debug) printf("Building set of type: %d\n",ty_query($3));
+					  $$ = ty_build_set($3); }
+	;
 
 record_type
-	: LEX_RECORD record_field_list LEX_END
-  {};
+	: LEX_RECORD record_field_list LEX_END {}
+  	;
 
 record_field_list
 	: /* empty */
