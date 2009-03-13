@@ -8,20 +8,6 @@
 #include "tree.h"
 #include "symtab.h"
 
-/*Function that creates an index list*/
-INDEX_LIST create_index(TYPE newtype)
-{
-  /*Creates the index list and allocates memory*/
-  INDEX_LIST list;
-  list = (INDEX_LIST)malloc(sizeof(INDEX));
-
-  /*Sets the list attributes and returns the index list*/
-  list->type = newtype;
-  list->next = NULL;
-  list->prev = NULL;
-  return list;
-}
-
 /*Function that inserts an index into the index list*/
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
 {
