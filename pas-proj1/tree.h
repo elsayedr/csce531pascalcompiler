@@ -71,6 +71,7 @@ typedef struct st_node
 
 
 /*Function definitions*/
+void resolve_ptrs();
 void make_type(ST_ID, TYPE);
 void make_var(MEMBER_LIST, TYPE);
 INDEX_LIST insert_index(INDEX_LIST, TYPE);
