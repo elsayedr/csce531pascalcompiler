@@ -387,7 +387,7 @@ string
 /* type definition part */
 
 type_definition_part
-    : LEX_TYPE type_definition_list semi	{ /*Need to resolve unresolved pointer types here*/ }
+    : LEX_TYPE type_definition_list semi	{ resolve_ptrs(); }
     ;
 
 type_definition_list

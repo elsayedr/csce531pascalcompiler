@@ -9,6 +9,27 @@
 #include "symtab.h"
 #include "message.h"
 
+/* function that resolves pointers */
+void resolve_ptrs()
+{
+	ST_DR data_rec;
+	TYPE list, ptr, next;
+	ST_ID id;
+	int block, resolved;
+
+	list = ty_get_unresolved();		/* gets global unresolved list */
+	if (!list) return;			/* no unresolved ptrs */
+
+	while (list) {
+		ptr = ty_query_ptr(list, &id, &next);	/* returns ID and next */
+		data_rec = st_lookup(id, &block); 	/* lookup type for ID */
+		resolved = ty_resolve_ptr(list, data_rec->u.typename.type); /* assign type to pointer */
+		if (!resolved) warning("Unresolved pointer");
+		list = next;				/* go to next ptr in list */
+	}
+	if (debug) printf("All pointers resolved.\n");
+}
+
 /* Function that inserts an index into the index list */
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
 {
