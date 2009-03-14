@@ -403,13 +403,18 @@ type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/
 
 type_denoter
     : typename		{ data_rec = st_lookup($1, &block); 
-			  if (!data_rec) fatal("Typename undefined");
-			  $$ = data_rec->u.typename.type; 
-			  if (debug) { 
-				printf("Denoter typename: %s\n", st_get_id_str($1) );
-			  	printf("Reference TYPE:\n");
-				ty_print_type(data_rec->u.typename.type); 
-				printf("\n");
+			  if (!data_rec) {
+				error("Undeclared type name: \"%s\"",st_get_id_str($1));
+				$$ = NULL;
+			  }
+			  else {
+				$$ = data_rec->u.typename.type; 
+			  	if (debug) { 
+					printf("Denoter typename: %s\n", st_get_id_str($1) );
+			  		printf("Reference TYPE:\n");
+					ty_print_type(data_rec->u.typename.type); 
+					printf("\n");
+				}
 			  }
 			}
     | type_denoter_1	/* default action */
@@ -599,8 +604,8 @@ one_case_constant
 /* variable declaration part */
 
 variable_declaration_part
-	: LEX_VAR variable_declaration_list
-  {};
+    : LEX_VAR variable_declaration_list		{ resolve_ptrs(); }
+    ;
 
 variable_declaration_list
 	: variable_declaration
