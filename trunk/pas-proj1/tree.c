@@ -9,13 +9,13 @@
 #include "symtab.h"
 #include "message.h"
 
-/* function that resolves pointers */
 void resolve_ptrs()
+/* function that resolves pointers */
 {
 	ST_DR data_rec;
 	TYPE list, ptr, next;
 	ST_ID id;
-	int block, resolved;
+	int block, resolved=0;
 
 	list = ty_get_unresolved();		/* gets global unresolved list */
 	if (!list) return;			/* no unresolved ptrs */
@@ -23,15 +23,23 @@ void resolve_ptrs()
 	while (list) {
 		ptr = ty_query_ptr(list, &id, &next);	/* returns ID and next */
 		data_rec = st_lookup(id, &block); 	/* lookup type for ID */
+
+		if (debug) {
+			printf("Resolving ptr with type: \n");
+			ty_print_type(data_rec->u.typename.type);
+			printf("\n");
+		}
+
 		resolved = ty_resolve_ptr(list, data_rec->u.typename.type); /* assign type to pointer */
-		if (!resolved) warning("Unresolved pointer");
+		if (!resolved) error("Unresolved pointer");
+
 		list = next;				/* go to next ptr in list */
 	}
-	if (debug) printf("All pointers resolved.\n");
+	if ((debug)&&(resolved)) printf("All pointers resolved.\n");
 }
 
-/* Function that inserts an index into the index list */
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
+/* Function that inserts an index into the index list */
 {
   /*Works by using the prev field to link back to the current list*/
   /*Creates the index list and allocates memory*/
@@ -45,8 +53,8 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
   return new;
 }
 
-/* Function that inserts an ST_ID into a member list */
 MEMBER_LIST insert_id(MEMBER_LIST list, ST_ID newid)
+/* Function that inserts an ST_ID into a member list */
 {
   MEMBER_LIST new;
   new = (MEMBER_LIST) malloc(sizeof(MEMBER));
@@ -57,8 +65,8 @@ MEMBER_LIST insert_id(MEMBER_LIST list, ST_ID newid)
   return new;
 }
 
-/* Function that takes a member list and assigns a type to each member */
 MEMBER_LIST type_members(MEMBER_LIST list, TYPE newtype)
+/* Function that takes a member list and assigns a type to each member */
 {
   MEMBER_LIST p = list;
 
@@ -71,8 +79,8 @@ MEMBER_LIST type_members(MEMBER_LIST list, TYPE newtype)
   return list;
 }
 
-/* Function that adds two member lists together */
 MEMBER_LIST combine_members(MEMBER_LIST list1, MEMBER_LIST list2)
+/* Function that adds two member lists together */
 {
   MEMBER_LIST p = list1;
 
@@ -84,13 +92,15 @@ MEMBER_LIST combine_members(MEMBER_LIST list1, MEMBER_LIST list2)
   return list1;
 }
 
-/* Function that makes a variable data record and installs it in the symbol table */
 void make_var(MEMBER_LIST list, TYPE newtype)
+/* Function that makes a variable data record and installs it in the symbol table */
 {
-  /* Creates the data record and allocates memory */
-  ST_DR p;
+  ST_DR p;  /* Creates a data record pointer and allocates memory */
   
-  if (!list) bug("Empty list passed to make_var");
+  if (!list) bug("Empty list passed to make_var"); /* empty list check */
+
+  if (!newtype) error("Undefined type"); /* check for undefined type */
+	
   while (list) {
 	p = stdr_alloc();	  
 	p->tag = GDECL;
@@ -106,8 +116,8 @@ void make_var(MEMBER_LIST list, TYPE newtype)
   }
 }
 
-/* Function that makes a type data record and installs it in the symbol table */
 void make_type(ST_ID iden, TYPE newtype)
+/* Function that makes a type data record and installs it in the symbol table */
 {
   /* Creates the data record and allocates memory */
   ST_DR p;
