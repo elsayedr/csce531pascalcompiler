@@ -1,7 +1,9 @@
-/* Build 11
+/* Build 12
+
 change summary:
 removed structure for ID list and used Member list instead
 added ty_build_struct to create record types
+prevent undefined type defintions
 
 Team Project:
 Jeff Barton
@@ -401,6 +403,7 @@ type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/
 
 type_denoter
     : typename		{ data_rec = st_lookup($1, &block); 
+			  if (!data_rec) fatal("Typename undefined");
 			  $$ = data_rec->u.typename.type; 
 			  if (debug) { 
 				printf("Denoter typename: %s\n", st_get_id_str($1) );
