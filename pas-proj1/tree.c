@@ -17,25 +17,40 @@ void resolve_ptrs()
 	ST_ID id;
 	int block, resolved=0;
 
+while (1) { 	/* repeat until no unresolved ptrs */
+
 	list = ty_get_unresolved();		/* gets global unresolved list */
 	if (!list) return;			/* no unresolved ptrs */
 
 	while (list) {
 		ptr = ty_query_ptr(list, &id, &next);	/* returns ID and next */
+		
 		data_rec = st_lookup(id, &block); 	/* lookup type for ID */
-
-		if (debug) {
-			printf("Resolving ptr with type: \n");
-			ty_print_type(data_rec->u.typename.type);
-			printf("\n");
+		
+		if (!data_rec) {
+				error("Unresolved type name: \"%s\"",st_get_id_str(id));
+				return;
 		}
 
 		resolved = ty_resolve_ptr(list, data_rec->u.typename.type); /* assign type to pointer */
-		if (!resolved) error("Unresolved pointer");
+		
+		if ((debug)&&(resolved)) {
+			printf("Resolved %s ptr with type: \n",st_get_id_str(id));
+			ty_print_type(data_rec->u.typename.type);
+			printf("\n");
+		}	
+	
+		if (!resolved) {
+			error("Unresolved pointer");
+			return;
+		}
 
 		list = next;				/* go to next ptr in list */
-	}
-	if ((debug)&&(resolved)) printf("All pointers resolved.\n");
+
+	} 	/* while loop */
+
+} 	/* endless loop */
+
 }
 
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
