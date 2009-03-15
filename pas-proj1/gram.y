@@ -422,7 +422,7 @@ new_ordinal_type
     ;
 
 enumerated_type
-	: '(' enum_list ')'	{ $$ = $2; if (debug) printf("Enumerated list with %d elements\n",$2); }
+	: '(' enum_list ')'	{ $$ = $2; if (debug) printf("Enumerated list with %d elements\n",(int)$2); }
     	;
 
 enum_list
@@ -436,7 +436,7 @@ enumerator
 
 subrange_type				/*Builds the subrange type*/ 
     : constant LEX_RANGE constant	{ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);
-					  if (debug) printf("Build subrange of INT from %d to %d\n",$1,$3); }
+					  if (debug) printf("Build subrange of INT from %d to %d\n", (int)$1, (int)$3); }
     ;
 
 new_pointer_type
