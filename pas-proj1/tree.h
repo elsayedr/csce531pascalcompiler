@@ -71,13 +71,17 @@ typedef struct st_node
 
 
 /*Function definitions*/
-void resolve_ptrs();
+
+TYPE lookup_type(ST_ID);
+void make_var(MEMBER_LIST, TYPE);
 void make_type(ST_ID, TYPE);
 void make_var(MEMBER_LIST, TYPE);
 INDEX_LIST insert_index(INDEX_LIST, TYPE);
 MEMBER_LIST insert_id(MEMBER_LIST, ST_ID);
 MEMBER_LIST type_members(MEMBER_LIST, TYPE);
 MEMBER_LIST combine_members(MEMBER_LIST, MEMBER_LIST);
+void resolve_ptrs();
+
 ST make_id(ST_ID);
 ST make_int(long);
 ST make_real(double);
