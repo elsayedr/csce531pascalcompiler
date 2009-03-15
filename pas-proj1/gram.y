@@ -1,9 +1,12 @@
-/* Build 12
+/* Build 13
 
 change summary:
 removed structure for ID list and used Member list instead
 added ty_build_struct to create record types
 prevent undefined type defintions
+detect duplicate type and var defs
+added lookup_type and make_array to clean up grammar
+turned off debuging
 
 Team Project:
 Jeff Barton
@@ -487,16 +490,11 @@ unpacked_structured_type
 /* Array */
 
 array_type
-    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ if ($6) $$ = ty_build_array($6,$3); 
-								  else { 
-									$$ = NULL; 
-									error("Data type expected for array elements\n"); 
-								  }
-								}
+    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ $$ = make_array($3, $6); }	
     ;
 
 array_index_list
-    : ordinal_index_type			{ $$ = insert_index(NULL,$1); }
+    : ordinal_index_type			{ $$ = insert_index(NULL, $1); }
     | array_index_list ',' ordinal_index_type	{ $$ = insert_index($1, $3); }
   ;
 
