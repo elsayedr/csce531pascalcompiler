@@ -501,7 +501,8 @@ unpacked_structured_type
 /* Array */
 
 array_type
-    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ $$ = ty_build_array($6,$3); }
+    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ if (!$6) error("Data type expected for array elements\n"); 
+								  else $$ = ty_build_array($6,$3); }
     ;
 
 array_index_list

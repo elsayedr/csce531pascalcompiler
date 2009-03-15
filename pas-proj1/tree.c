@@ -9,49 +9,17 @@
 #include "symtab.h"
 #include "message.h"
 
-void resolve_ptrs()
-/* function that resolves pointers */
+
+MEMBER_LIST insert_id(MEMBER_LIST list, ST_ID newid)
+/* Function that inserts an ST_ID into a member list */
 {
-	ST_DR data_rec;
-	TYPE list, ptr, next;
-	ST_ID id;
-	int block, resolved=0;
-
-	if (debug) printf("Attempting to resolve pointers.\n");
-
-	list = ty_get_unresolved();		/* gets global unresolved list */
-
-	if (!list) {
-		if (debug) printf("All pointers resolved\n");
-		return;		/* no unresolved ptrs */
-
-	}
-	while (list) {
-		ptr = ty_query_ptr(list, &id, &next);	/* returns ID and next */
-		
-		data_rec = st_lookup(id, &block); 	/* lookup type for ID */
-		
-		if (!data_rec) {
-				error("Unresolved type name: \"%s\"",st_get_id_str(id));
-				break;
-		}
-
-		resolved = ty_resolve_ptr(list, data_rec->u.typename.type); /* assign type to pointer */
-		
-		if ((debug)&&(resolved)) {
-			printf("Resolved %s ptr with type: \n",st_get_id_str(id));
-			ty_print_type(data_rec->u.typename.type);
-			printf("\n");
-		}	
-	
-		if (!resolved) {
-			error("Unresolved pointer");	/* not used */
-			return;
-		}
-
-		list = next;				/* go to next ptr in list */
-
-	} 	/* while (list) */
+  MEMBER_LIST new;
+  new = (MEMBER_LIST) malloc(sizeof(MEMBER));
+  
+  /*Inserts the element and returns the list*/
+  new->id = newid;
+  new->next = list;
+  return new;
 }
 
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
@@ -69,16 +37,55 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
   return new;
 }
 
-MEMBER_LIST insert_id(MEMBER_LIST list, ST_ID newid)
-/* Function that inserts an ST_ID into a member list */
+void make_type(ST_ID iden, TYPE newtype)
+/* Function that makes a type data record and installs it in the symbol table */
 {
-  MEMBER_LIST new;
-  new = (MEMBER_LIST) malloc(sizeof(MEMBER));
+  /* Creates the data record and allocates memory */
+  ST_DR p;
+  p = stdr_alloc();
+  BOOLEAN resolved;	
+
+  /* Sets the data record attributes and installs the type in the symbol table */
+  p->tag = TYPENAME;
+  p->u.typename.type = newtype;
+
+  resolved = st_install(iden, p);
+
+  if (!resolved) error("Duplicate definition of \"%s\" in block %d\n", st_get_id_str(iden), st_get_cur_block() );
+  else if(debug) printf("TYPE name %s installed\n", st_get_id_str(iden) );
+
+}
+
+void make_var(MEMBER_LIST list, TYPE newtype)
+/* Function that makes a variable data record and installs it in the symbol table */
+{
+  ST_DR p;  /* Creates a data record pointer and allocates memory */
+  BOOLEAN resolved;
   
-  /*Inserts the element and returns the list*/
-  new->id = newid;
-  new->next = list;
-  return new;
+  if (!list) bug("Empty list passed to make_var"); /* empty list check */
+
+  if (!newtype) {
+	error("Variable(s) must be of data type\n"); /* check for undefined type */
+	return;
+  }
+	
+  while (list) {
+	p = stdr_alloc();	  
+	p->tag = GDECL;
+	p->u.decl.type = newtype;
+
+  	resolved = st_install(list->id, p); /* installs the variable in the symbol table */
+
+	if (!resolved) error("Duplicate variable declaration: \"%s\"\n", st_get_id_str(list->id) );
+	else if(debug)
+  	{
+  	  printf("GDECL created with type:\n");
+	  ty_print_type(newtype);
+	  printf("\n");
+ 	}
+
+	list=list->next;
+  }
 }
 
 MEMBER_LIST type_members(MEMBER_LIST list, TYPE newtype)
@@ -108,46 +115,46 @@ MEMBER_LIST combine_members(MEMBER_LIST list1, MEMBER_LIST list2)
   return list1;
 }
 
-void make_var(MEMBER_LIST list, TYPE newtype)
-/* Function that makes a variable data record and installs it in the symbol table */
+void resolve_ptrs()
+/* function that resolves pointers */
 {
-  ST_DR p;  /* Creates a data record pointer and allocates memory */
-  
-  if (!list) bug("Empty list passed to make_var"); /* empty list check */
+	ST_DR data_rec;
+	TYPE list, ptr, next;
+	ST_ID id;
+	int block;
+	BOOLEAN resolved;
 
-  if (!newtype) error("Undefined type"); /* check for undefined type */
+	if (debug) printf("Attempting to resolve pointers.\n");
+
+	list = ty_get_unresolved();		/* gets global unresolved list */
+
+	if (!list) {
+		if (debug) printf("No unresolved pointers\n");
+		return;
+	}
 	
-  while (list) {
-	p = stdr_alloc();	  
-	p->tag = GDECL;
-	p->u.decl.type = newtype;
-	if(debug)
-  	{
-  	  printf("GDECL created with type:\n");
-	  ty_print_type(newtype);
-	  printf("\n");
- 	}
-  	st_install(list->id, p); /* installs the variable in the symbol table */
-	list=list->next;
-  }
+	while (list) {
+		ptr = ty_query_ptr(list, &id, &next);	/* returns ID and next */
+		
+		data_rec = st_lookup(id, &block); 	/* lookup type for ID */
+		
+		if (!data_rec) error("Unresolved type name: \"%s\"",st_get_id_str(id));
+				
+		else {
+			resolved = ty_resolve_ptr(list, data_rec->u.typename.type); /* assign type to pointer */
+			if (!resolved) error("Unresolved pointer");	/* not used */
+			else if (debug) {
+				printf("Resolved %s ptr with type: \n",st_get_id_str(id));
+				ty_print_type(data_rec->u.typename.type);
+				printf("\n");
+			}
+		}
+
+		list = next;				/* go to next ptr in list */
+
+	} 	/* while (list) */
 }
 
-void make_type(ST_ID iden, TYPE newtype)
-/* Function that makes a type data record and installs it in the symbol table */
-{
-  /* Creates the data record and allocates memory */
-  ST_DR p;
-  p = stdr_alloc();
-
-  /* Sets the data record attributes and installs the type in the symbol table */
-  p->tag = TYPENAME;
-  p->u.typename.type = newtype;
-  if(debug)
-  {
-    printf("TYPE name %s installed\n", st_get_id_str(iden) );
-  }
-  st_install(iden, p);
-}
 
 /* Function that evaluates the value of an identifier */
 long eval_id(ST iden)
