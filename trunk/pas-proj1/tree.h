@@ -73,7 +73,7 @@ typedef struct st_node
 /*Function definitions*/
 
 TYPE lookup_type(ST_ID);
-void make_var(MEMBER_LIST, TYPE);
+TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
 void make_var(MEMBER_LIST, TYPE);
 INDEX_LIST insert_index(INDEX_LIST, TYPE);

@@ -56,6 +56,15 @@ TYPE lookup_type(ST_ID id)
 	return data_rec->u.typename.type; 
 }
 
+TYPE make_array(INDEX_LIST list, TYPE newtype)
+{
+	if (!newtype) {
+		error("Data type expected for array elements\n"); 
+		return NULL;
+	}
+        else return ty_build_array(newtype, list); 
+}
+
 void make_type(ST_ID iden, TYPE newtype)
 /* Function that makes a type data record and installs it in the symbol table */
 {
@@ -79,6 +88,7 @@ void make_type(ST_ID iden, TYPE newtype)
   else if(debug) printf("TYPE name %s installed\n", st_get_id_str(iden) );
 
 }
+
 
 void make_var(MEMBER_LIST list, TYPE newtype)
 /* Function that makes a variable data record and installs it in the symbol table */

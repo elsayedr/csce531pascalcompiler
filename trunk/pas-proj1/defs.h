@@ -18,7 +18,7 @@ typedef int BOOLEAN;
 
 #define TRUE 1
 #define FALSE 0
-#define debug 1
+#define debug 0
 
 #ifndef NULL
 #define NULL 0
