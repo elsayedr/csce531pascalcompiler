@@ -37,6 +37,25 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
   return new;
 }
 
+TYPE lookup_type(ST_ID id)
+{
+	ST_DR data_rec;
+	int block;
+
+	data_rec = st_lookup(id, &block); 
+	if (!data_rec) {
+		error("Undeclared type name: \"%s\"",st_get_id_str(id));
+		return NULL;
+	}
+	else if (debug) { 
+		printf("Denoter typename: %s\n", st_get_id_str(id) );
+		printf("Reference TYPE:\n");
+		ty_print_type(data_rec->u.typename.type); 
+		printf("\n");
+	}
+	return data_rec->u.typename.type; 
+}
+
 void make_type(ST_ID iden, TYPE newtype)
 /* Function that makes a type data record and installs it in the symbol table */
 {
@@ -44,6 +63,11 @@ void make_type(ST_ID iden, TYPE newtype)
   ST_DR p;
   p = stdr_alloc();
   BOOLEAN resolved;	
+
+  if (!newtype) {
+	if (debug) printf("Type does not exist\n");
+	return;
+  }
 
   /* Sets the data record attributes and installs the type in the symbol table */
   p->tag = TYPENAME;

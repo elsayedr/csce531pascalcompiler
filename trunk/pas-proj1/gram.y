@@ -402,21 +402,7 @@ type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/
     ;
 
 type_denoter
-    : typename		{ data_rec = st_lookup($1, &block); 
-			  if (!data_rec) {
-				error("Undeclared type name: \"%s\"",st_get_id_str($1));
-				$$ = NULL;
-			  }
-			  else {
-				$$ = data_rec->u.typename.type; 
-			  	if (debug) { 
-					printf("Denoter typename: %s\n", st_get_id_str($1) );
-			  		printf("Reference TYPE:\n");
-					ty_print_type(data_rec->u.typename.type); 
-					printf("\n");
-				}
-			  }
-			}
+    : typename		{ $$ = lookup_type($1);	}
     | type_denoter_1	/* default action */
     ;
 
@@ -501,8 +487,12 @@ unpacked_structured_type
 /* Array */
 
 array_type
-    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ if (!$6) error("Data type expected for array elements\n"); 
-								  else $$ = ty_build_array($6,$3); }
+    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ if ($6) $$ = ty_build_array($6,$3); 
+								  else { 
+									$$ = NULL; 
+									error("Data type expected for array elements\n"); 
+								  }
+								}
     ;
 
 array_index_list
