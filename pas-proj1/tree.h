@@ -81,6 +81,12 @@ MEMBER_LIST insert_id(MEMBER_LIST, ST_ID);
 MEMBER_LIST type_members(MEMBER_LIST, TYPE);
 MEMBER_LIST combine_members(MEMBER_LIST, MEMBER_LIST);
 void resolve_ptrs();
+PARAM_LIST insert_id_into_param_list(PARAM_LIST, ST_ID, BOOLEAN);
+PARAM_LIST convertMemberListToParams(MEMBER_LIST, BOOLEAN);
+PARAM_LIST type_params(PARAM_LIST, TYPE, BOOLEAN);
+PARAM_LIST combine_params(PARAM_LIST, PARAM_LIST);
+TYPE make_func(PARAM_LIST, TYPE);
+TYPE make_proc(PARAM_LIST);
 
 ST make_id(ST_ID);
 ST make_int(long);

@@ -388,3 +388,158 @@ ST make_binop(ST a1, char c, ST a2)
   return p;
 }
 
+/*Function that inserst an id into the parameter list*/
+PARAM_LIST insert_id_into_param(PARAM_LIST list, ST_ID id, BOOLEAN isRef)
+{
+  /*Creates the list and allocates memory*/
+  PARAM_LIST newList;
+  newList = (PARAM_LIST) malloc(sizeof(PARAM));
+  
+  /*Inserts the element and returns the list*/
+  newList->id = id;
+  newList->next = list;
+  newList->is_ref = isRef;
+  return newList;
+}
+
+/*Converts a member list to a list of parameters*/
+PARAM_LIST convertMemberListToParams(MEMBER_LIST list, BOOLEAN isRef)
+{
+  /*Checks for empty member list*/
+  if(!list)
+  {
+    /*Prints bug and returns*/
+    bug("Empty member list passed to convert to parameter list");
+    return NULL;
+  }
+
+  /*Member list*/
+  MEMBER_LIST mList = list;
+
+  /*Creates parameter lists*/
+  PARAM_LIST newList, retList = NULL;
+
+  /*While there are still elements in the member list*/
+  while(mList)
+  {
+    /*If null allocate membory for parameter list*/
+    if(newList = NULL)
+    {
+      /*Allocate memory*/
+      newList = (PARAM_LIST)malloc(sizeof(PARAM));
+
+      /*Gets the first element of the member list*/
+      newList->id = mList->id;
+      newList->type = mList->type;
+      newList->is_ref = isRef;
+
+      /*Keep return pointer to the first element in the list*/
+      retList = newList;
+    }
+    /*Else act normally*/
+    else
+    {
+      /*Creates a new element for the parameter list and allocates memory*/
+      PARAM_LIST newElement = (PARAM_LIST)malloc(sizeof(PARAM));
+      
+      /*Sets the information for the new element*/
+      newElement->id = mList->id;
+      newElement->type = mList->type;
+      newElement->is_ref = isRef;
+      newElement->prev = newList;
+
+      /*Sets the parameter list pointers*/
+      newList->next = newElement;
+      newList = newElement;
+    }
+
+    /*Moves on to the next element in the members list*/
+    mList = mList->next;
+  }
+
+    /*Returns the parameter list*/
+    return retList;
+}
+
+/*Function that sets the type for all of the elements in the parameter list*/
+PARAM_LIST type_params(PARAM_LIST list, TYPE newtype, BOOLEAN isRef)
+{
+  /*Parameter list*/
+  PARAM_LIST p = list;
+
+  /*If empty list, bug*/
+  if(!p) 
+    bug("Empty list passed to add type parameters");
+
+  /*While there are still elements in the list*/
+  while(p) 
+  {
+    /*Sets the type of the element, moves on to the next element*/
+    p->type = newtype;
+    p->is_ref = isRef;
+    p=p->next;
+  }
+
+  /*Returns the parameter list*/
+  return list;
+}
+
+/*Function that combines two parameter lists*/
+PARAM_LIST combine_params(PARAM_LIST list1, PARAM_LIST list2)
+{
+  /*Parameter list*/
+  PARAM_LIST p = list1;
+
+  /*If no member list, bug*/
+  if(!p) 
+    bug("Empty list passed to combine parameters");
+
+  /*While there are still elements in the first member list, add them to the beginning of the second*/
+  while(p->next) 
+    p=p->next;
+
+  /*Links end of the first list and the beginning of the second*/
+  p->next = list2;	
+  
+  /*Returns the list*/
+  return list1;
+}
+
+/*Function that creates a function type*/
+TYPE make_func(PARAM_LIST list, TYPE newtype)
+{
+   /*Checks to see if the parameter list exists*/
+   if(!list)
+   {
+      /*Error, return NULL*/
+      error("Parameter list expected to create function");
+      return NULL;
+   }
+   /*Else create the function and return it*/
+   else
+   {
+      /*Returns the built function*/
+      return ty_build_func(newtype, list, TRUE);
+   }
+}
+
+/*Function that creates a procedure type*/
+TYPE make_proc(PARAM_LIST list)
+{
+   /*Checks to see if the parameter list exists*/
+   if(!list)
+   {
+      /*Error, return NULL*/
+      error("Parameter list expected to create function");
+      return NULL;
+   }
+   /*Else create the function and return it*/
+   else
+   {
+      /*Creates a type variable*/
+      TYPE newtype = ty_build_basic(TYVOID);
+
+      /*Returns the built function*/
+      return ty_build_func(newtype, list, TRUE);
+   }
+}
