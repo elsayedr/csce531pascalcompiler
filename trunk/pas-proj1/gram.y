@@ -100,8 +100,8 @@ int block;
 
 %type <y_char> sign
 %type <y_int> constant number unsigned_number enumerator enumerated_type enum_list
-%type <y_id> identifier new_identifier new_identifier_1 typename label 
-%type <y_type> type_denoter type_denoter_1 new_ordinal_type new_pointer_type 
+%type <y_id> identifier new_identifier new_identifier_1 label 
+%type <y_type> typename type_denoter type_denoter_1 new_ordinal_type new_pointer_type 
 %type <y_type> new_structured_type subrange_type new_procedural_type
 %type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type  
 %type <y_param> pointer_domain_type
@@ -219,7 +219,7 @@ id_list
     ;
 
 typename
-    : LEX_ID		{ $$ = (ST_ID)st_enter_id($1); if (debug) printf("Type: %s\n",$1); }
+    : LEX_ID		{ $$ = lookup_type(st_enter_id($1)); }
     ;
 
 identifier
@@ -350,18 +350,18 @@ constant_definition
 constant
     : identifier	{ /*Evaluates the value of the identifier*/ $$ = eval_id($1); }
     | sign identifier	{ /*Negative sign so flip the value*/ if ($1=='-') $$ = -eval_id($2); else $$ = eval_id($2); }
-    | number
-  {}| constant_literal
-  {};
+    | number			/* default */
+    | constant_literal	{} 	/* not configured yet */
+    ;
 
 number
-    : sign unsigned_number	{ /*Negates the number if the sign is negative*/ if ($1=='-') $$ = -$2; else $$ = $2; }
-    | unsigned_number
-  {};
+    : sign unsigned_number	{ if ($1=='-') $$ = -$2; else $$ = $2; } /*Negates the number if the sign is negative*/ 
+    | unsigned_number		/* default */
+    ;
 
 unsigned_number
-    : LEX_INTCONST	/* $$ = $1 */
-    | LEX_REALCONST	{ /*Cast as long*/ $$ = (long) $1; }
+    : LEX_INTCONST	{ $$ = $1; if (debug) printf("Unsigned number: %d\n",$1); }
+    | LEX_REALCONST	{ $$ = (long) $1; } 	/*Cast as long*/ 
     ;
 
 sign
@@ -405,7 +405,7 @@ type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/
     ;
 
 type_denoter
-    : typename		{ $$ = lookup_type($1);	}
+    : typename		/* typename already a TYPE paramater */
     | type_denoter_1	/* default action */
     ;
 
@@ -436,7 +436,7 @@ enumerator
 
 subrange_type				/*Builds the subrange type*/ 
     : constant LEX_RANGE constant	{ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);
-					  if (debug) printf("Build subrange of INT from %d to %d\n", (int)$1, (int)$3); }
+					  if (debug) printf("Built subrange of INT from %d to %d\n", (int)$1, (int)$3); }
     ;
 
 new_pointer_type
@@ -499,10 +499,8 @@ array_index_list
   ;
 
 ordinal_index_type
-    : new_ordinal_type		/*Passes TYPE*/
-    | typename			{ data_rec = st_lookup($1, &block); 
-				  $$ = data_rec->u.typename.type; 
-				  if (debug) printf("REF NODE TYPE: %d\n", ty_query(data_rec->u.typename.type) ); }
+    : new_ordinal_type		/* Passes TYPE */
+    | typename			/* now passes TYPE also */
     ;
 
 /* FILE */
