@@ -5,6 +5,7 @@
 
 #include "defs.h"
 #include "types.h"
+#include "list.h"
 
 /*Enumerates the possible node types*/
 typedef enum 
@@ -75,11 +76,11 @@ typedef struct st_node
 TYPE lookup_type(ST_ID);
 TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
-void make_var(MEMBER_LIST, TYPE);
+void make_var(linkedList, TYPE);
 INDEX_LIST insert_index(INDEX_LIST, TYPE);
-MEMBER_LIST insert_id(MEMBER_LIST, ST_ID);
-MEMBER_LIST type_members(MEMBER_LIST, TYPE);
-MEMBER_LIST combine_members(MEMBER_LIST, MEMBER_LIST);
+linkedList insert_id(linkedList, ST_ID);
+linkedList type_members(linkedList, TYPE);
+linkedList combine_members(linkedList, linkedList);
 void resolve_ptrs();
 PARAM_LIST insert_id_into_param_list(PARAM_LIST, ST_ID, BOOLEAN);
 PARAM_LIST convertMemberListToParams(MEMBER_LIST, BOOLEAN);

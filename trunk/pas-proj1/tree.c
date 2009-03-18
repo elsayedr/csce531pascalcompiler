@@ -10,10 +10,10 @@
 #include "message.h"
 
 /* Function that inserts an ST_ID into a member list */
-MEMBER_LIST insert_id(MEMBER_LIST list, ST_ID newid)
+linkedList insert_id(linkedList list, ST_ID newid)
 {
-  MEMBER_LIST new;
-  new = (MEMBER_LIST) malloc(sizeof(MEMBER));
+  linkedList new;
+  new = (linkedList) malloc(sizeof(linkedListNode));
   
   /*Inserts the element and returns the list*/
   new->id = newid;
@@ -117,7 +117,7 @@ void make_type(ST_ID iden, TYPE newtype)
 }
 
 /* Function that makes a variable data record and installs it in the symbol table */
-void make_var(MEMBER_LIST list, TYPE newtype)
+void make_var(linkedList list, TYPE newtype)
 {
   /*Symbol table data record and boolean variable*/
   ST_DR p;  
@@ -163,10 +163,10 @@ void make_var(MEMBER_LIST list, TYPE newtype)
 }
 
 /* Function that takes a member list and assigns a type to each member */
-MEMBER_LIST type_members(MEMBER_LIST list, TYPE newtype)
+linkedList type_members(linkedList list, TYPE newtype)
 {
   /*Member list*/
-  MEMBER_LIST p = list;
+  linkedList p = list;
 
   /*If empty list, bug*/
   if(!p) 
@@ -176,7 +176,7 @@ MEMBER_LIST type_members(MEMBER_LIST list, TYPE newtype)
   while (p) 
   {
     /*Sets the type of the element, moves on to the next element*/
-    p->type = newtype;
+    /*p->id->u->decl->type = newtype;*/
     p=p->next;
   }
 
@@ -185,10 +185,10 @@ MEMBER_LIST type_members(MEMBER_LIST list, TYPE newtype)
 }
 
 /*Function that adds two member lists together*/
-MEMBER_LIST combine_members(MEMBER_LIST list1, MEMBER_LIST list2)
+linkedList combine_members(linkedList list1, linkedList list2)
 {
   /*Member list*/
-  MEMBER_LIST p = list1;
+  linkedList p = list1;
 
   /*If no member list, bug*/
   if(!p) 

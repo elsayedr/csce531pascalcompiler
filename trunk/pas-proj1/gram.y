@@ -63,6 +63,7 @@ Josh Van Buren */
 #include "defs.h"
 #include "tree.h"
 #include "symtab.h"
+#include "list.h"
 
 /* Cause the `yydebug' variable to be defined.  */
 #define YYDEBUG 1
@@ -93,7 +94,8 @@ int block;
     TYPE	y_type;
     PARAM	y_param;
     INDEX_LIST 	y_index;
-    MEMBER_LIST	y_member;
+    MEMBER	y_member;
+    linkedList	y_list;
 }
 
 %type <y_string> string
@@ -105,7 +107,7 @@ int block;
 %type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type  
 %type <y_param> pointer_domain_type
 %type <y_index> array_index_list
-%type <y_member> id_list record_field_list fixed_part record_section variant_part
+%type <y_list> id_list record_field_list fixed_part record_section variant_part
 
 %token <y_string> LEX_ID
 
@@ -359,7 +361,7 @@ number
     ;
 
 unsigned_number
-    : LEX_INTCONST	{ $$ = $1; if (debug) printf("Unsigned number: %d\n",$1); }
+    : LEX_INTCONST	{ $$ = $1; if (debug) printf("Unsigned number: %d\n",(int)$1); }
     | LEX_REALCONST	{ $$ = (long) $1; } 	/*Cast as long*/ 
     ;
 
