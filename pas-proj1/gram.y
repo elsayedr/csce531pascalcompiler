@@ -186,7 +186,7 @@ int block;
 /* Pascal parser starts here */
 
 pascal_program
-    : /* empty */
+    : /*empty*/
   {}| program_component_list
   {};
 
@@ -208,7 +208,7 @@ program_heading
   {};
 
 optional_par_id_list
-    : /* empty */
+    : /*empty*/
   {}| '(' id_list ')'
   {};
 
@@ -288,7 +288,7 @@ import_or_any_declaration_part
   {};
 
 any_declaration_import_part
-    : /* empty */
+    : /*empty*/
   {}| any_declaration_import_part any_or_import_decl
   {};
 
@@ -298,7 +298,7 @@ any_or_import_decl
   {};
 
 any_declaration_part
-    : /* empty */
+    : /*empty*/
   {}| any_declaration_part any_decl
   {};
 
@@ -327,7 +327,7 @@ label_list
 
 /* Labels are returned as identifier nodes for compatibility with gcc */
 label
-	: LEX_INTCONST		{}	/* will not be needed */
+	: LEX_INTCONST		{}	/*will not be needed*/
 	| new_identifier	{}
 	;
 
@@ -349,13 +349,13 @@ constant_definition
 constant
     : identifier	{ $$ = eval_id($1); }	/*Evaluates the value of the identifier*/
     | sign identifier	{ if ($1=='-') $$ = -eval_id($2); else $$ = eval_id($2); }	/*Negative sign so flip the value*/
-    | number					/* default */
-    | constant_literal	{} 			/* not configured yet */
+    | number					/*default*/
+    | constant_literal	{} 		/*not configured yet*/
     ;
 
 number
     : sign unsigned_number	{ if ($1=='-') $$ = -$2; else $$ = $2; } /*Negates the number if the sign is negative*/ 
-    | unsigned_number		/* default */
+    | unsigned_number		/*default*/
     ;
 
 unsigned_number
@@ -395,7 +395,7 @@ type_definition_part
     ;
 
 type_definition_list
-    : type_definition 	{ /* action occurs during assignment below */}
+    : type_definition 	{ /*action occurs during assignment below*/ }
     | type_definition_list semi type_definition	{}
     ;
 
@@ -404,8 +404,8 @@ type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/
     ;
 
 type_denoter
-    : typename		/* typename already a TYPE paramater */
-    | type_denoter_1	/* default action */
+    : typename		/*typename already a TYPE paramater*/
+    | type_denoter_1	/*default*/
     ;
 
 type_denoter_1
@@ -417,23 +417,23 @@ type_denoter_1
 
 new_ordinal_type
     : enumerated_type	{ $$ = ty_build_enum($1); }
-    | subrange_type	/* default */
+    | subrange_type		/*default*/
     ;
 
 enumerated_type
-    : '(' enum_list ')'	{ $$ = $2; if (debug) printf("Enumerated list with %d elements\n",(int)$2); }
+    : '(' enum_list ')'		{ $$ = $2; if (debug) printf("Enumerated list with %d elements\n",(int)$2); }
     ;
 
 enum_list
-    : enumerator		{ $$ = $1; }		
+    : enumerator				/*default*/		
     | enum_list ',' enumerator	{ $$ = $1 + $3; }
     ;
 
 enumerator
-    : new_identifier	{ $$ = 1; }	/* start count of enumerated type entries at 1 */
+    : new_identifier	{ $$ = 1; }	/*start count of enumerated type entries at 1*/
     ;
 
-subrange_type				/*Builds the subrange type*/ 
+subrange_type				 		/*builds the subrange type*/
     : constant LEX_RANGE constant	{ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);
 					  if (debug) printf("Built subrange of INT from %d to %d\n", (int)$1, (int)$3); }
     ;
@@ -458,7 +458,7 @@ new_procedural_type
   {};
 
 optional_procedural_type_formal_parameter_list
-    : /* empty */
+    : /*empty*/
   {}| '(' procedural_type_formal_parameter_list ')'
   {};
 
@@ -476,12 +476,12 @@ procedural_type_formal_parameter
 
 new_structured_type
     : LEX_PACKED unpacked_structured_type	{ $$ = $2; }
-    | unpacked_structured_type			/* $$ = $1; */
+    | unpacked_structured_type			/*default*/
     ;
 
 unpacked_structured_type
     : array_type
-    | file_type		{} 	/* not configured yet */
+    | file_type		{} 	/*not configured yet*/
     | set_type
     | record_type	
     ;
@@ -498,8 +498,8 @@ array_index_list
   ;
 
 ordinal_index_type
-    : new_ordinal_type		/* Passes TYPE */
-    | typename			/* now passes TYPE also */
+    : new_ordinal_type		/*Passes TYPE*/
+    | typename			/*now passes TYPE also*/
     ;
 
 /* FILE */
@@ -509,7 +509,7 @@ file_type
     ;
 
 direct_access_index_type
-    : /* empty */
+    : /*empty*/
   {}| '[' ordinal_index_type ']'
   {};
 
@@ -532,11 +532,12 @@ record_type
 							printf("\n");
 						  }
 						}
-
+	;
+						
 record_field_list
     : /* empty */			{ $$ = NULL; }
-    | fixed_part optional_semicolon	/* $$ = $1; */
-    | fixed_part semi variant_part	/* add combiner later */
+    | fixed_part optional_semicolon	/*default*/
+    | fixed_part semi variant_part	/*add combiner later*/
     | variant_part			{}
     ;
 
@@ -623,14 +624,14 @@ directive
   {};
 
 functiontype
-    : /* empty */
+    : /*empty*/
   {}| ':' typename
   {};
 
 /* parameter specification section */
 
 optional_par_formal_parameter_list
-    : /* empty */
+    : /*empty*/
   {}| '(' formal_parameter_list ')'
   {};
 
@@ -796,7 +797,7 @@ simple_statement
   {};
 
 empty_statement
-    : /* empty */ %prec lower_than_error
+    : /*empty*/ %prec lower_than_error
   {};
 
 goto_statement
@@ -806,7 +807,7 @@ goto_statement
 /* function calls */
 
 optional_par_actual_parameter_list
-    : /* empty */
+    : /*empty*/
   {}| '(' actual_parameter_list ')'
   {};
 
@@ -832,7 +833,7 @@ variable_or_function_access_maybe_assignment
   {};
 
 rest_of_statement
-	: /* Empty */
+	: /*empty*/
   {}| LEX_ASSIGN expression
   {};
 
@@ -850,7 +851,7 @@ standard_procedure_statement
   {};
 
 optional_par_write_parameter_list
-    : /* empty */
+    : /*empty*/
   {}| '(' write_actual_parameter_list ')'
   {};
 
@@ -1041,7 +1042,7 @@ standard_functions
   {};
 
 optional_par_actual_parameter
-    : /* empty */
+    : /*empty*/
   {}| '(' actual_parameter ')'
   {};
 
@@ -1107,12 +1108,12 @@ semi
   {};
 
 optional_semicolon
-    : /* empty */
+    : /*empty*/
   {}| ';'
   {};
 
 optional_rename
-    : /* empty */
+    : /*empty*/
   {}| LEX_RENAME new_identifier
   {};
 
@@ -1136,18 +1137,18 @@ import_specification
   {};
 
 optional_access_qualifier
-    : /* Empty */
+    : /*empty*/
   {}| LEX_QUALIFIED
   {};
 
 optional_import_qualifier
-    : /* Empty */
+    : /*empty*/
   {}| '(' import_clause_list ')'
   {}| LEX_ONLY '(' import_clause_list ')'
   {};
 
 optional_unit_filename
-    : /* Empty */
+    : /*empty*/
   {}| LEX_IN combined_string
   {};
 
