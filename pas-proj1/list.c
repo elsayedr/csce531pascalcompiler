@@ -37,7 +37,6 @@ linkedList insert(linkedList list, ST_ID id)
   {
     /*Create the node and insert it*/
     toReturn = (linkedList)malloc(sizeof(linkedListNode));
-    toReturn->node = (ST)malloc(sizeof(ST_NODE));
     toReturn->id = id;
     toReturn->next = list;
 
@@ -48,7 +47,6 @@ linkedList insert(linkedList list, ST_ID id)
   /*Insert somewhere in the middle of the list*/
   previous->next = (linkedList)malloc(sizeof(linkedListNode));
   previous = previous->next;
-  previous->node = (ST)malloc(sizeof(ST_NODE));
   previous->id = id;
   previous->next = list;
 
