@@ -163,32 +163,34 @@ void make_var(linkedList list, TYPE newtype)
 }
 
 /* Function that takes a member list and assigns a type to each member */
-linkedList type_members(linkedList list, TYPE newtype)
+MEMBER_LIST type_members(linkedList list, TYPE newtype)
 {
   /*Member list*/
-  linkedList p = list;
+  MEMBER_LIST memList, p;
+  memList = createMemberListFromID(list);
+  p = memList;
 
   /*If empty list, bug*/
   if(!p) 
     bug("Empty list passed to add members");
 
   /*While there are still elements in the list*/
-  while (p) 
+  while(p) 
   {
     /*Sets the type of the element, moves on to the next element*/
-    /*p->id->u->decl->type = newtype;*/
+    p->type = newtype;
     p=p->next;
   }
 
   /*Returns the member list*/
-  return list;
+  return memList;
 }
 
 /*Function that adds two member lists together*/
-linkedList combine_members(linkedList list1, linkedList list2)
+MEMBER_LIST combine_members(MEMBER_LIST list1, MEMBER_LIST list2)
 {
   /*Member list*/
-  linkedList p = list1;
+  MEMBER_LIST p = list1;
 
   /*If no member list, bug*/
   if(!p) 
@@ -542,4 +544,65 @@ TYPE make_proc(PARAM_LIST list)
       /*Returns the built function*/
       return ty_build_func(newtype, list, TRUE);
    }
+}
+
+/*Function that creates a member list from the linked list of ST_ID's*/
+MEMBER_LIST createMemberListFromID(linkedList list)
+{
+  /*Linked List*/
+  linkedList copy = list;
+
+  /*Creates the member lists and allocates memory*/
+  MEMBER_LIST memList;
+  memList = malloc(sizeof(MEMBER));
+
+  /*While there are still elements in the list*/
+  while(copy != NULL)
+  {
+    /*Calls the function to insert the ID into the member list*/
+    insertMember(memList, copy->id);
+
+    /*Moves on to the next element*/
+    copy = copy->next;
+  }
+
+  /*Returns the member list*/
+  return memList;
+}
+
+/*Function that inserts an ID into a member list*/
+MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
+{
+  /*Member list pointers*/
+  MEMBER_LIST previous = NULL;
+  MEMBER_LIST toReturn = mList;
+
+  /*While loop to determine where the node should be placed*/
+  while(mList != NULL)
+  {
+    /*Goes to the next node in the list*/
+    previous = mList;
+    mList = mList->next;
+    
+  }
+
+  /*If the previous node is equal to null, insert at front*/
+  if(previous == NULL)
+  {
+    /*Create the node and insert it*/
+    toReturn = (MEMBER_LIST)malloc(sizeof(MEMBER));
+    toReturn->id = id;
+    toReturn->next = mList;
+    toReturn->prev = NULL;
+
+    /*Returns the list*/
+    return toReturn;
+  }
+
+  /*Insert somewhere in the middle of the list*/
+  previous->next = (MEMBER_LIST)malloc(sizeof(MEMBER));
+  previous = previous->next;
+  previous->id = id;
+  previous->next = mList;
+  mList->prev = previous;
 }
