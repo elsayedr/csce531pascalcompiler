@@ -72,9 +72,8 @@ typedef struct st_node
 
 
 /*Function definitions*/
-
-TYPE lookup_type(ST_ID);
 TYPE make_subrange(long, long);
+TYPE lookup_type(ST_ID);
 TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
 void make_var(linkedList, TYPE);
@@ -86,9 +85,10 @@ MEMBER_LIST createMemberListFromID(linkedList);
 MEMBER_LIST insertMember(MEMBER_LIST, ST_ID);
 void resolve_ptrs();
 PARAM_LIST insert_id_into_param_list(PARAM_LIST, ST_ID, BOOLEAN);
-PARAM_LIST convertMemberListToParams(MEMBER_LIST, BOOLEAN);
+PARAM_LIST convertLinkedListToParams(linkedList, BOOLEAN);
 PARAM_LIST type_params(PARAM_LIST, TYPE, BOOLEAN);
 PARAM_LIST combine_params(PARAM_LIST, PARAM_LIST);
+PARAM_LIST insertPARAM(PARAM_LIST, ST_ID, BOOLEAN);
 TYPE make_func(PARAM_LIST, TYPE);
 TYPE make_proc(PARAM_LIST);
 
