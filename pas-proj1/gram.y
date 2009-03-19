@@ -488,7 +488,7 @@ unpacked_structured_type
     | record_type	
     ;
 
-/* Array */
+/* Arrays */
 
 array_type
     : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ $$ = make_array($3, $6); }	
@@ -504,7 +504,7 @@ ordinal_index_type
     | typename			/*now passes TYPE also*/
     ;
 
-/* FILE */
+/* Files */
 
 file_type
     : LEX_FILE direct_access_index_type LEX_OF type_denoter	{}
@@ -515,7 +515,7 @@ direct_access_index_type
   {}| '[' ordinal_index_type ']'
   {};
 
-/* sets */
+/* Sets */
 set_type
     : LEX_SET LEX_OF type_denoter	{ $$ = ty_build_set($3);
 					  if (debug) {
@@ -525,6 +525,8 @@ set_type
 					  }
 					}
     ;
+
+/* Records */
 
 record_type
     : LEX_RECORD record_field_list LEX_END	{ $$ = ty_build_struct($2);
