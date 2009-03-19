@@ -9,7 +9,7 @@
 #include "symtab.h"
 #include "message.h"
 
-/* Function that inserts an ST_ID into a member list */
+/* Function that inserts an ST_ID into a linked list */
 linkedList insert_id(linkedList list, ST_ID newid)
 {
   linkedList new;
@@ -24,16 +24,24 @@ linkedList insert_id(linkedList list, ST_ID newid)
 /* Function that inserts an index into the index list */
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
 {
-  /*Works by using the prev field to link back to the current list*/
+  /*Works by using the next field to link back to the current list*/
   /*Creates the index list and allocates memory*/
   INDEX_LIST new;
-  new = (INDEX_LIST) malloc(sizeof(INDEX));
   
-  /*Inserts the element and returns the list*/
-  new->type = newtype;
-  new->next = list;
-  new->prev = NULL;
-  return new;
+  if (!newtype) {
+	error("Illegal index type (ignored)");
+	return list;
+  }
+  else {
+
+    new = (INDEX_LIST) malloc(sizeof(INDEX));
+  
+    /*Inserts the element and returns the list*/
+    new->type = newtype;
+    new->next = list;
+    new->prev = NULL;
+    return new;
+  }
 }
 
 /*Function that looks up the type given from a symbol table id*/
@@ -67,6 +75,24 @@ TYPE lookup_type(ST_ID id)
   return data_rec->u.typename.type; 
 }
 
+/*Function that creates a subrange */
+TYPE make_subrange(long a, long b)
+{
+  /*If subrange is invalid error*/
+  if (a>b) 
+  {
+    /*Error, return null*/
+    error ("Empty subrange in array index");
+    return NULL;
+  }
+  /*Else return the array*/
+  else {
+    return ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), a, b);
+    if (debug) printf("Built subrange of INT from %d to %d\n", (int)a, (int)b);
+  }
+}
+
+
 /*Function that creates an array*/
 TYPE make_array(INDEX_LIST list, TYPE newtype)
 {
@@ -74,7 +100,7 @@ TYPE make_array(INDEX_LIST list, TYPE newtype)
   if(!newtype)
   {
     /*Error, return null*/
-    error("Data type expected for array elements\n"); 
+    error("Data type expected for array elements"); 
     return NULL;
   }
   /*Else return the array*/
@@ -110,7 +136,7 @@ void make_type(ST_ID iden, TYPE newtype)
 
   /*If the type has not been resolved error*/
   if(!resolved) 
-    error("Duplicate definition of \"%s\" in block %d\n", st_get_id_str(iden), st_get_cur_block());
+    error("Duplicate definition of \"%s\" in block %d", st_get_id_str(iden), st_get_cur_block());
   /*Debugging*/
   else if(debug) 
     printf("TYPE name %s installed\n", st_get_id_str(iden));
@@ -131,7 +157,7 @@ void make_var(linkedList list, TYPE newtype)
   if(!newtype) 
   {
     /*Error, return*/
-    error("Variable(s) must be of data type\n"); 
+    error("Variable(s) must be of data type"); 
     return;
   }
 	
@@ -148,7 +174,7 @@ void make_var(linkedList list, TYPE newtype)
 
     /*If the type is not resolved error*/
     if(!resolved) 
-      error("Duplicate variable declaration: \"%s\"\n", st_get_id_str(list->id));
+      error("Duplicate variable declaration: \"%s\"", st_get_id_str(list->id));
     /*Debugging information*/
     else if(debug)
     {

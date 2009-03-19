@@ -437,8 +437,7 @@ enumerator
     ;
 
 subrange_type				 		/*builds the subrange type*/
-    : constant LEX_RANGE constant	{ $$ = ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), $1, $3);
-					  if (debug) printf("Built subrange of INT from %d to %d\n", (int)$1, (int)$3); }
+    : constant LEX_RANGE constant	{ $$ = make_subrange($1,$3); }
     ;
 
 new_pointer_type

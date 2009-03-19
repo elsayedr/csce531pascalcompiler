@@ -74,6 +74,7 @@ typedef struct st_node
 /*Function definitions*/
 
 TYPE lookup_type(ST_ID);
+TYPE make_subrange(long, long);
 TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
 void make_var(linkedList, TYPE);
