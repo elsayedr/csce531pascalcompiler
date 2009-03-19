@@ -24,18 +24,22 @@ linkedList insert_id(linkedList list, ST_ID newid)
 /* Function that inserts an index into the index list */
 INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
 {
-  /*Works by using the next field to link back to the current list*/
-  /*Creates the index list and allocates memory*/
+  /*Works by using the prev field to link back to the current list*/
+  /*Creates the index list*/
   INDEX_LIST new;
-  
-  if (!newtype) {
-	error("Illegal index type (ignored)");
-	return list;
-  }
-  else {
 
+  /*Checks to see if the new type exists*/
+  if(!newtype)
+  {
+    /*Error and returns*/
+    error("Illegal index type (ignored)");	
+    return list;
+  }
+  else
+  {
+    /*Allocates memory*/
     new = (INDEX_LIST) malloc(sizeof(INDEX));
-  
+    
     /*Inserts the element and returns the list*/
     new->type = newtype;
     new->next = list;
@@ -75,23 +79,24 @@ TYPE lookup_type(ST_ID id)
   return data_rec->u.typename.type; 
 }
 
-/*Function that creates a subrange */
+/*Function that creates a subrange*/
 TYPE make_subrange(long a, long b)
 {
-  /*If subrange is invalid error*/
-  if (a>b) 
+  /*If subrange is invalid, error*/
+  if(a>b)
   {
     /*Error, return null*/
-    error ("Empty subrange in array index");
+    error("Empty subrange in array index");
     return NULL;
   }
   /*Else return the array*/
-  else {
-    return ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), a, b);
-    if (debug) printf("Built subrange of INT from %d to %d\n", (int)a, (int)b);
+  else
+  {
+    /*Debugging information*/
+    if(debug) 
+      printf("Build subrange of INT from %d to %d\n", (int)a, (int)b);
   }
-}
-
+} 
 
 /*Function that creates an array*/
 TYPE make_array(INDEX_LIST list, TYPE newtype)
@@ -431,58 +436,28 @@ PARAM_LIST insert_id_into_param(PARAM_LIST list, ST_ID id, BOOLEAN isRef)
 }
 
 /*Converts a member list to a list of parameters*/
-PARAM_LIST convertMemberListToParams(MEMBER_LIST list, BOOLEAN isRef)
+PARAM_LIST convertLinkedListToParams(linkedList list, BOOLEAN isRef)
 {
   /*Checks for empty member list*/
   if(!list)
   {
     /*Prints bug and returns*/
-    bug("Empty member list passed to convert to parameter list");
+    bug("Empty linked list passed to convert to parameter list");
     return NULL;
   }
 
   /*Member list*/
-  MEMBER_LIST mList = list;
+  linkedList cList = list;
 
   /*Creates parameter lists*/
-  PARAM_LIST newList, retList = NULL;
+  PARAM_LIST retList = NULL;
 
   /*While there are still elements in the member list*/
-  while(mList)
+  while(cList)
   {
-    /*If null allocate membory for parameter list*/
-    if(newList = NULL)
-    {
-      /*Allocate memory*/
-      newList = (PARAM_LIST)malloc(sizeof(PARAM));
-
-      /*Gets the first element of the member list*/
-      newList->id = mList->id;
-      newList->type = mList->type;
-      newList->is_ref = isRef;
-
-      /*Keep return pointer to the first element in the list*/
-      retList = newList;
-    }
-    /*Else act normally*/
-    else
-    {
-      /*Creates a new element for the parameter list and allocates memory*/
-      PARAM_LIST newElement = (PARAM_LIST)malloc(sizeof(PARAM));
-      
-      /*Sets the information for the new element*/
-      newElement->id = mList->id;
-      newElement->type = mList->type;
-      newElement->is_ref = isRef;
-      newElement->prev = newList;
-
-      /*Sets the parameter list pointers*/
-      newList->next = newElement;
-      newList = newElement;
-    }
-
-    /*Moves on to the next element in the members list*/
-    mList = mList->next;
+    /*Inserts the element into the parameter list and moves on to the next element*/
+    retList = insertParam(retList, clist->id, isRef);
+    clist = clist->next;
   }
 
     /*Returns the parameter list*/
@@ -631,4 +606,49 @@ MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
   previous->id = id;
   previous->next = mList;
   mList->prev = previous;
+
+  /*Returns the list*/
+  return toReturn;
+}
+
+/*Function that inserts an ID into a parameter list*/
+PARAM_LIST insertPARAM(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
+{
+  /*Parameter list pointers*/
+  PARAM_LIST previous = NULL;
+  PARAM_LIST toReturn = pList;
+
+  /*While loop to determine where the node should be placed*/
+  while(pList != NULL)
+  {
+    /*Goes to the next node in the list*/
+    previous = pList;
+    mList = pList->next;
+    
+  }
+
+  /*If the previous node is equal to null, insert at front*/
+  if(previous == NULL)
+  {
+    /*Create the node and insert it*/
+    toReturn = (PARAM_LIST)malloc(sizeof(PARAM));
+    toReturn->id = id;
+    toReturn->is_ref = isRef;
+    toReturn->next = pList;
+    toReturn->prev = NULL;
+
+    /*Returns the list*/
+    return toReturn;
+  }
+
+  /*Insert somewhere in the middle of the list*/
+  previous->next = (PARAM_LIST)malloc(sizeof(PARAM));
+  previous = previous->next;
+  previous->id = id;
+  previous->is_ref = isRef;
+  previous->next = pList;
+  pList->prev = previous;
+
+  /*Returns the list*/
+  return toReturn;
 }

@@ -92,7 +92,7 @@ int block;
     ST_ID 	y_id;
     ST		y_tree;
     TYPE	y_type;
-    PARAM	y_param;
+    PARAM_LIST	y_param;
     INDEX_LIST 	y_index;
     MEMBER_LIST	y_member;
     linkedList	y_list;
@@ -104,8 +104,9 @@ int block;
 %type <y_id> identifier new_identifier new_identifier_1 label 
 %type <y_type> typename type_denoter type_denoter_1 new_ordinal_type new_pointer_type 
 %type <y_type> new_structured_type subrange_type new_procedural_type
-%type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type  
-%type <y_param> pointer_domain_type
+%type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type functiontype
+%type <y_type> pointer_domain_type
+%type <y_param> optional_procedural_type_formal_parameter_list procedural_type_formal_parameter_list procedural_type_formal_parameter
 %type <y_index> array_index_list
 %type <y_list> id_list 
 %type <y_member> record_field_list fixed_part record_section variant_part
@@ -437,7 +438,7 @@ enumerator
     ;
 
 subrange_type				 		/*builds the subrange type*/
-    : constant LEX_RANGE constant	{ $$ = make_subrange($1,$3); }
+    : constant LEX_RANGE constant	{ $$ = make_subrange($1, $3); }
     ;
 
 new_pointer_type
@@ -455,26 +456,26 @@ pointer_domain_type
     ;
 
 new_procedural_type
-    : LEX_PROCEDURE optional_procedural_type_formal_parameter_list
-  {}| LEX_FUNCTION optional_procedural_type_formal_parameter_list functiontype
-  {};
+    : LEX_PROCEDURE optional_procedural_type_formal_parameter_list	{ $$ = make_proc($2); }
+    | LEX_FUNCTION optional_procedural_type_formal_parameter_list functiontype	{ $$ = make_func($2, $3); }
+    ;
 
 optional_procedural_type_formal_parameter_list
-    : /*empty*/
-  {}| '(' procedural_type_formal_parameter_list ')'
-  {};
+    : /*empty*/	{ $$ = NULL; }
+    | '(' procedural_type_formal_parameter_list ')'	{ $$ = $2; }
+    ;
 
 procedural_type_formal_parameter_list
-    : procedural_type_formal_parameter
-  {}| procedural_type_formal_parameter_list semi procedural_type_formal_parameter
-  {};
+    : procedural_type_formal_parameter	{ $$ = $1; }
+    | procedural_type_formal_parameter_list semi procedural_type_formal_parameter	{ $$ = combine_params($1, $3); }
+    ;
 
 procedural_type_formal_parameter
-    : id_list
-  {}| id_list ':' typename
-  {}| LEX_VAR id_list ':' typename
-  {}| LEX_VAR id_list
-  {};
+    : id_list	{ $$ = NULL; }
+    | id_list ':' typename	{}
+    | LEX_VAR id_list ':' typename	{}
+    | LEX_VAR id_list	{}
+    ;
 
 new_structured_type
     : LEX_PACKED unpacked_structured_type	{ $$ = $2; }
@@ -488,7 +489,7 @@ unpacked_structured_type
     | record_type	
     ;
 
-/* Arrays */
+/* Array */
 
 array_type
     : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ $$ = make_array($3, $6); }	
@@ -504,7 +505,7 @@ ordinal_index_type
     | typename			/*now passes TYPE also*/
     ;
 
-/* Files */
+/* FILE */
 
 file_type
     : LEX_FILE direct_access_index_type LEX_OF type_denoter	{}
@@ -515,7 +516,7 @@ direct_access_index_type
   {}| '[' ordinal_index_type ']'
   {};
 
-/* Sets */
+/* sets */
 set_type
     : LEX_SET LEX_OF type_denoter	{ $$ = ty_build_set($3);
 					  if (debug) {
@@ -525,8 +526,6 @@ set_type
 					  }
 					}
     ;
-
-/* Records */
 
 record_type
     : LEX_RECORD record_field_list LEX_END	{ $$ = ty_build_struct($2);
