@@ -45,7 +45,8 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
     new->prev = NULL;
 
     p=list;
-    if (p) {				/* if list exists */
+    if (p) {	
+	if (debug) printf("List not empty\n");	/* if list exists */
 	while(p->next) p=p->next; 	/* go to end of list */
     	p->next=new;			/* append new */
 	return list;			/* return current list */
@@ -95,12 +96,13 @@ TYPE make_subrange(long a, long b)
     error("Empty subrange in array index");
     return NULL;
   }
-  /*Else return the array*/
+  /*Else build the subrange*/
   else
   {
     /*Debugging information*/
-    if(debug) 
-      printf("Build subrange of INT from %d to %d\n", (int)a, (int)b);
+    if(debug) printf("Building subrange of INT from %d to %d\n", (int)a, (int)b);
+
+    return ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), a, b);
   }
 } 
 
@@ -115,8 +117,14 @@ TYPE make_array(INDEX_LIST list, TYPE newtype)
     return NULL;
   }
   /*Else return the array*/
-  else 
-    return ty_build_array(newtype, list); 
+  else {
+    return ty_build_array(newtype, list);
+    if (debug) {
+    	printf("Build array of TYPE:\n");
+    	ty_print_type(newtype); 
+    	printf("\n");
+    }
+  }
 }
 
 /* Function that makes a type data record and installs it in the symbol table */
@@ -210,6 +218,12 @@ MEMBER_LIST type_members(linkedList list, TYPE newtype)
   /*If empty list, bug*/
   if(!p) 
     bug("Empty list passed to add members");
+
+  if (debug) {
+    printf("Typing members with TYPE:\n");
+    ty_print_type(newtype);
+    printf("\n");
+  }
 
   /*While there are still elements in the list*/
   while(p) 
