@@ -26,7 +26,7 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
 {
   /*Works by using the prev field to link back to the current list*/
   /*Creates the index list*/
-  INDEX_LIST new;
+  INDEX_LIST new, p;
 
   /*Checks to see if the new type exists*/
   if(!newtype)
@@ -37,14 +37,20 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
   }
   else
   {
-    /*Allocates memory*/
     new = (INDEX_LIST) malloc(sizeof(INDEX));
-    
-    /*Inserts the element and returns the list*/
+  
+    /* initialize new */	
     new->type = newtype;
-    new->next = list;
+    new->next = NULL;
     new->prev = NULL;
-    return new;
+
+    p=list;
+    if (p) {				/* if list exists */
+	while(p->next) p=p->next; 	/* go to end of list */
+    	p->next=new;			/* append new */
+	return list;			/* return current list */
+    }
+    else return new;			/* otherwise just return new */
   }
 }
 
@@ -435,6 +441,48 @@ PARAM_LIST insert_id_into_param(PARAM_LIST list, ST_ID id, BOOLEAN isRef)
   return newList;
 }
 
+/*Function that inserts an ID into a parameter list*/
+PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
+{
+  /*Parameter list pointers*/
+  PARAM_LIST previous = NULL;
+  PARAM_LIST toReturn = pList;
+
+  /*While loop to determine where the node should be placed*/
+  while(pList != NULL)
+  {
+    /*Goes to the next node in the list*/
+    previous = pList;
+    pList = pList->next;
+    
+  }
+
+  /*If the previous node is equal to null, insert at front*/
+  if(previous == NULL)
+  {
+    /*Create the node and insert it*/
+    toReturn = (PARAM_LIST)malloc(sizeof(PARAM));
+    toReturn->id = id;
+    toReturn->is_ref = isRef;
+    toReturn->next = pList;
+    toReturn->prev = NULL;
+
+    /*Returns the list*/
+    return toReturn;
+  }
+
+  /*Insert somewhere in the middle of the list*/
+  previous->next = (PARAM_LIST)malloc(sizeof(PARAM));
+  previous = previous->next;
+  previous->id = id;
+  previous->is_ref = isRef;
+  previous->next = pList;
+  pList->prev = previous;
+
+  /*Returns the list*/
+  return toReturn;
+}
+
 /*Converts a member list to a list of parameters*/
 PARAM_LIST convertLinkedListToParams(linkedList list, BOOLEAN isRef)
 {
@@ -456,8 +504,8 @@ PARAM_LIST convertLinkedListToParams(linkedList list, BOOLEAN isRef)
   while(cList)
   {
     /*Inserts the element into the parameter list and moves on to the next element*/
-    retList = insertParam(retList, clist->id, isRef);
-    clist = clist->next;
+    retList = insertParam(retList, cList->id, isRef);
+    cList = cList->next;
   }
 
     /*Returns the parameter list*/
@@ -611,44 +659,3 @@ MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
   return toReturn;
 }
 
-/*Function that inserts an ID into a parameter list*/
-PARAM_LIST insertPARAM(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
-{
-  /*Parameter list pointers*/
-  PARAM_LIST previous = NULL;
-  PARAM_LIST toReturn = pList;
-
-  /*While loop to determine where the node should be placed*/
-  while(pList != NULL)
-  {
-    /*Goes to the next node in the list*/
-    previous = pList;
-    mList = pList->next;
-    
-  }
-
-  /*If the previous node is equal to null, insert at front*/
-  if(previous == NULL)
-  {
-    /*Create the node and insert it*/
-    toReturn = (PARAM_LIST)malloc(sizeof(PARAM));
-    toReturn->id = id;
-    toReturn->is_ref = isRef;
-    toReturn->next = pList;
-    toReturn->prev = NULL;
-
-    /*Returns the list*/
-    return toReturn;
-  }
-
-  /*Insert somewhere in the middle of the list*/
-  previous->next = (PARAM_LIST)malloc(sizeof(PARAM));
-  previous = previous->next;
-  previous->id = id;
-  previous->is_ref = isRef;
-  previous->next = pList;
-  pList->prev = previous;
-
-  /*Returns the list*/
-  return toReturn;
-}
