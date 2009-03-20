@@ -92,6 +92,7 @@ int block;
     ST_ID 	y_id;
     ST		y_tree;
     TYPE	y_type;
+    PARAM	y_p;
     PARAM_LIST	y_param;
     INDEX_LIST 	y_index;
     MEMBER_LIST	y_member;
@@ -105,7 +106,7 @@ int block;
 %type <y_type> typename type_denoter type_denoter_1 new_ordinal_type new_pointer_type 
 %type <y_type> new_structured_type subrange_type new_procedural_type
 %type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type functiontype
-%type <y_type> pointer_domain_type
+%type <y_p> pointer_domain_type
 %type <y_param> optional_procedural_type_formal_parameter_list procedural_type_formal_parameter_list procedural_type_formal_parameter
 %type <y_index> array_index_list
 %type <y_list> id_list 
@@ -415,7 +416,7 @@ type_denoter
 type_denoter_1
     : new_ordinal_type
     | new_pointer_type
-    | new_procedural_type	{}
+    | new_procedural_type	
     | new_structured_type	
     ;
 
