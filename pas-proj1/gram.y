@@ -219,7 +219,7 @@ optional_par_id_list
 
 id_list
     : new_identifier			{ $$ = insert_id(NULL,$1); }
-    | id_list ',' new_identifier 	{ $1 = insert_id($1,$3); $$ = combineLists($$, $1); }
+    | id_list ',' new_identifier 	{ $$ = insert_id($1,$3); }
     ;
 
 typename
