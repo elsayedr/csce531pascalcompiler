@@ -19,6 +19,31 @@ linkedList insert_id(linkedList list, ST_ID newid)
   new->id = newid;
   new->next = list;
   return new;
+  
+}
+
+/*Function that combines two linked lists*/
+linkedList combineLists(linkedList list1, linkedList list2)
+{
+  /*Checks for null lists*/
+  if(list1 == NULL || list2 == NULL)
+    bug("Empty list passed to combine linked lists");
+
+  /*Copy pointer to list1*/
+  linkedList copy = list1;
+
+  /*While there are elements in the list*/
+  while(copy->next != NULL)
+  {
+    /*Cycles through the list*/
+    copy = copy->next;
+  }
+
+  /*Sets next of last element in first list to first of second*/
+  copy->next = list2;
+
+  /*Returns the list*/
+  return list1;
 }
 
 /* Function that inserts an index into the index list */
@@ -463,7 +488,7 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
   PARAM_LIST toReturn = pList;
 
   /*While loop to determine where the node should be placed*/
-  while(pList != NULL)
+  while(pList->next != NULL)
   {
     /*Goes to the next node in the list*/
     previous = pList;
@@ -498,7 +523,7 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
 }
 
 /*Converts a member list to a list of parameters*/
-PARAM_LIST convertLinkedListToParams(linkedList list, BOOLEAN isRef)
+PARAM_LIST createParamListFromID(linkedList list, BOOLEAN isRef)
 {
   /*Checks for empty member list*/
   if(!list)
@@ -623,12 +648,12 @@ MEMBER_LIST createMemberListFromID(linkedList list)
   while(copy != NULL)
   {
     /*Calls the function to insert the ID into the member list*/
-    insertMember(memList, copy->id);
+    memList = insertMember(memList, copy->id);
 
     /*Moves on to the next element*/
     copy = copy->next;
   }
-
+ 
   /*Returns the member list*/
   return memList;
 }
@@ -641,7 +666,7 @@ MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
   MEMBER_LIST toReturn = mList;
 
   /*While loop to determine where the node should be placed*/
-  while(mList != NULL)
+  while(mList->next != NULL)
   {
     /*Goes to the next node in the list*/
     previous = mList;

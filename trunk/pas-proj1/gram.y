@@ -219,7 +219,7 @@ optional_par_id_list
 
 id_list
     : new_identifier			{ $$ = insert_id(NULL,$1); }
-    | id_list ',' new_identifier 	{ $$ = insert_id($1,$3); }
+    | id_list ',' new_identifier 	{ $1 = insert_id($1,$3); $$ = combineLists($$, $1); }
     ;
 
 typename
@@ -473,9 +473,9 @@ procedural_type_formal_parameter_list
 
 procedural_type_formal_parameter
     : id_list	{ $$ = NULL; }
-    | id_list ':' typename	{}
-    | LEX_VAR id_list ':' typename	{}
-    | LEX_VAR id_list	{}
+    | id_list ':' typename	{ $$ = type_params(createParamListFromID($1, FALSE), $3, FALSE); }
+    | LEX_VAR id_list ':' typename	{ $$ = type_params(createParamListFromID($2, TRUE), $4, TRUE); }
+    | LEX_VAR id_list	{ $$ = createParamListFromID($2, TRUE); }
     ;
 
 new_structured_type
