@@ -67,7 +67,7 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
     /* initialize new */	
     new->type = newtype;
     new->next = NULL;
-    new->prev = NULL;
+    new = NULL;
 
     p=list;
     if (p) {	
@@ -488,7 +488,7 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
   PARAM_LIST toReturn = pList;
 
   /*While loop to determine where the node should be placed*/
-  while(pList->next != NULL)
+  while(pList != NULL)
   {
     /*Goes to the next node in the list*/
     previous = pList;
@@ -504,7 +504,6 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
     toReturn->id = id;
     toReturn->is_ref = isRef;
     toReturn->next = pList;
-    toReturn->prev = NULL;
 
     /*Returns the list*/
     return toReturn;
@@ -516,7 +515,6 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
   previous->id = id;
   previous->is_ref = isRef;
   previous->next = pList;
-  pList->prev = previous;
 
   /*Returns the list*/
   return toReturn;
@@ -641,8 +639,7 @@ MEMBER_LIST createMemberListFromID(linkedList list)
   linkedList copy = list;
 
   /*Creates the member lists and allocates memory*/
-  MEMBER_LIST memList;
-  memList = malloc(sizeof(MEMBER));
+  MEMBER_LIST memList = NULL;
 
   /*While there are still elements in the list*/
   while(copy != NULL)
@@ -652,8 +649,9 @@ MEMBER_LIST createMemberListFromID(linkedList list)
 
     /*Moves on to the next element*/
     copy = copy->next;
+
   }
- 
+
   /*Returns the member list*/
   return memList;
 }
@@ -666,7 +664,7 @@ MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
   MEMBER_LIST toReturn = mList;
 
   /*While loop to determine where the node should be placed*/
-  while(mList->next != NULL)
+  while(mList != NULL)
   {
     /*Goes to the next node in the list*/
     previous = mList;
@@ -681,7 +679,6 @@ MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
     toReturn = (MEMBER_LIST)malloc(sizeof(MEMBER));
     toReturn->id = id;
     toReturn->next = mList;
-    toReturn->prev = NULL;
 
     /*Returns the list*/
     return toReturn;
@@ -692,9 +689,8 @@ MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
   previous = previous->next;
   previous->id = id;
   previous->next = mList;
-  mList->prev = previous;
 
   /*Returns the list*/
-  return toReturn;
+  return toReturn; 
 }
 
