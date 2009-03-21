@@ -598,9 +598,8 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
    /*Checks to see if the parameter list exists*/
    if(!list)
    {
-      /*Error, return NULL*/
-      error("Parameter list expected to create function");
-      return NULL;
+      /* Not an error: function with no params */
+      if (debug) printf("Empty parameter list for function\n");
    }
    /*Else create the function and return it*/
    else
@@ -616,9 +615,8 @@ TYPE make_proc(PARAM_LIST list)
    /*Checks to see if the parameter list exists*/
    if(!list)
    {
-      /*Error, return NULL*/
-      error("Parameter list expected to create function");
-      return NULL;
+      /* Not an error: procedure with no params */
+      if (debug) printf("Empty parameter list for function\n");
    }
    /*Else create the function and return it*/
    else
