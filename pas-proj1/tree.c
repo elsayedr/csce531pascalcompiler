@@ -67,7 +67,6 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
     /* initialize new */	
     new->type = newtype;
     new->next = NULL;
-    new = NULL;
 
     p=list;
     if (p) {	
