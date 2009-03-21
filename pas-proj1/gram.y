@@ -462,7 +462,7 @@ new_procedural_type
     ;
 
 optional_procedural_type_formal_parameter_list
-    : /*empty*/	{ $$ = NULL; }
+    : /* empty */					{ $$ = NULL; }
     | '(' procedural_type_formal_parameter_list ')'	{ $$ = $2; }
     ;
 
@@ -472,10 +472,10 @@ procedural_type_formal_parameter_list
     ;
 
 procedural_type_formal_parameter
-    : id_list	{ $$ = NULL; }
-    | id_list ':' typename	{ $$ = type_params(createParamListFromID($1, FALSE), $3, FALSE); }
+    : id_list				{ $$ = createParamListFromID($1, FALSE); }
+    | id_list ':' typename		{ $$ = type_params(createParamListFromID($1, FALSE), $3, FALSE); }
     | LEX_VAR id_list ':' typename	{ $$ = type_params(createParamListFromID($2, TRUE), $4, TRUE); }
-    | LEX_VAR id_list	{ $$ = createParamListFromID($2, TRUE); }
+    | LEX_VAR id_list			{ $$ = createParamListFromID($2, TRUE); }
     ;
 
 new_structured_type
@@ -628,9 +628,9 @@ directive
   {};
 
 functiontype
-    : /*empty*/
-  {}| ':' typename
-  {};
+    : /*empty*/ 	{ $$ = NULL; }	/* empty function type */
+    | ':' typename  	{ $$ = $2; }
+    ;
 
 /* parameter specification section */
 
