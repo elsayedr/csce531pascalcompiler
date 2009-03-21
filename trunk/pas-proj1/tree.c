@@ -601,32 +601,9 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
       /* Not an error: function with no params */
       if (debug) printf("Empty parameter list for function\n");
    }
-   /*Else create the function and return it*/
-   else
-   {
-      /*Returns the built function*/
-      return ty_build_func(newtype, list, TRUE);
-   }
-}
-
-/*Function that creates a procedure type*/
-TYPE make_proc(PARAM_LIST list)
-{
-   /*Checks to see if the parameter list exists*/
-   if(!list)
-   {
-      /* Not an error: procedure with no params */
-      if (debug) printf("Empty parameter list for function\n");
-   }
-   /*Else create the function and return it*/
-   else
-   {
-      /*Creates a type variable*/
-      TYPE newtype = ty_build_basic(TYVOID);
-
-      /*Returns the built function*/
-      return ty_build_func(newtype, list, TRUE);
-   }
+   /*Create the function and return it*/
+   
+   return ty_build_func(newtype, list, TRUE);
 }
 
 /*Function that creates a member list from the linked list of ST_ID's*/
