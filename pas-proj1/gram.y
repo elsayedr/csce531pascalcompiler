@@ -457,7 +457,7 @@ pointer_domain_type
     ;
 
 new_procedural_type
-    : LEX_PROCEDURE optional_procedural_type_formal_parameter_list		{ $$ = make_proc($2); }
+    : LEX_PROCEDURE optional_procedural_type_formal_parameter_list		{ $$ = make_func($2, ty_build_basic(TYVOID)); }
     | LEX_FUNCTION optional_procedural_type_formal_parameter_list functiontype	{ $$ = make_func($2, $3); }
     ;
 
