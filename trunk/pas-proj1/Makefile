@@ -37,7 +37,7 @@ CFLAGS = -g
 
 PPC3H	= defs.h types.h symtab.h backend.h list.h
 
-PPC3OBJ = main.o message.o symtab.o types.o utils.o gram.o scan.o backend.o tree.o list.o
+PPC3OBJ = main.o message.o symtab.o types.o utils.o gram.o scan.o backend.o tree.o list.o encode.o
 
 # ppc3 rules
 #
@@ -58,9 +58,11 @@ message.o: message.c message.h defs.h
 
 utils.o: utils.c types.h message.h
 
-tree.o: tree.c tree.h types.h defs.h list.h
+tree.o: tree.c tree.h types.h defs.h list.h encode.h
 
-list.o: list.c list.h 
+list.o: list.c list.h
+
+encode.o: encode.c encode.h 
 
 gram.o : gram.y $(PPC3H)
 	$(YACC) $(YFLAGS) gram.y

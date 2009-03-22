@@ -8,6 +8,7 @@
 #include "tree.h"
 #include "symtab.h"
 #include "message.h"
+#include "encode.h"
 
 /* Function that inserts an ST_ID into a linked list */
 linkedList insert_id(linkedList list, ST_ID newid)
@@ -226,6 +227,10 @@ void make_var(linkedList list, TYPE newtype)
       ty_print_type(newtype);
       printf("\n");
     }
+
+    /*Calls the encoding function
+    declareVariable(list->id, newtype);*/
+
     /*Move on to the next item in the member list*/
     list=list->next;
   }
