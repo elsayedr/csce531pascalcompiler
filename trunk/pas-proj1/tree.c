@@ -228,8 +228,8 @@ void make_var(linkedList list, TYPE newtype)
       printf("\n");
     }
 
-    /*Calls the encoding function
-    declareVariable(list->id, newtype);*/
+    /*Calls the encoding function*/
+    declareVariable(list->id, newtype);
 
     /*Move on to the next item in the member list*/
     list=list->next;
