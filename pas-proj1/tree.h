@@ -5,7 +5,6 @@
 
 #include "defs.h"
 #include "types.h"
-#include "list.h"
 
 /*Enumerates the possible node types*/
 typedef enum 
@@ -13,6 +12,17 @@ typedef enum
   /*Possible node types*/
   INTCONST,REALCONST,ID_NODE,TYPE_NODE,UNOP,BINOP
 } st_tagtype;
+
+/*Defines a structure that represents a node in a linked list*/
+typedef struct listNode
+{
+  /*Symbol table data record*/
+  ST_ID id;
+  
+  /*Link to next element in the list*/
+  struct listNode *next;
+
+}linkedListNode, *linkedList;
 
 /*Structure for the syntax tree node*/
 typedef struct st_node 
@@ -72,6 +82,8 @@ typedef struct st_node
 
 
 /*Function definitions*/
+linkedList insert(linkedList list, ST_ID id);
+void initialize();
 TYPE make_subrange(long, long);
 TYPE lookup_type(ST_ID);
 TYPE make_array(INDEX_LIST, TYPE);

@@ -10,6 +10,30 @@
 #include "message.h"
 #include "encode.h"
 
+/*Initialization function*/
+void initialize(linkedList list)
+{
+    /*Sets the list initially to be null*/
+    list = NULL;
+}
+
+/*Inserts the word into the list*/
+linkedList insert(linkedList list, ST_ID id)
+{
+  /*Pointers for the linked list*/
+  linkedList previous = NULL;
+  linkedList toReturn = list;
+
+  /*While loop to determine where the node should be placed*/
+  while(list != NULL)
+  {
+    /*Goes to the next node in the list*/
+    previous = list;
+    list = list->next;
+    
+  }
+}
+
 /* Function that inserts an ST_ID into a linked list */
 linkedList insert_id(linkedList list, ST_ID newid)
 {
