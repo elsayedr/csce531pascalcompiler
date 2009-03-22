@@ -7,6 +7,6 @@
 /*Function declarations*/
 void declareVariable(ST_ID, TYPE);
 int getAlignSize(TYPE);
-int getSkipSize(TYPE, int);
+int getSkipSize(TYPE);
 
 #endif
