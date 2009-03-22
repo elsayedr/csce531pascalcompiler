@@ -63,7 +63,6 @@ Josh Van Buren */
 #include "defs.h"
 #include "tree.h"
 #include "symtab.h"
-#include "list.h"
 
 /* Cause the `yydebug' variable to be defined.  */
 #define YYDEBUG 1
