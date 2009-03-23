@@ -241,19 +241,20 @@ void make_var(linkedList list, TYPE newtype)
     resolved = st_install(list->id, p); 
 
     /*If the type is not resolved error*/
-    if(!resolved) 
-      error("Duplicate variable declaration: \"%s\"", st_get_id_str(list->id));
-    /*Debugging information*/
-    else if(debug)
-    {
-      /*Print debugging statements*/
-      printf("GDECL created with type:\n");
-      ty_print_type(newtype);
-      printf("\n");
-    }
+    if(!resolved) error("Duplicate variable declaration: \"%s\"", st_get_id_str(list->id));
+    else {
 
-    /*Calls the encoding function*/
-    declareVariable(list->id, newtype);
+    	/*Calls the encoding function*/
+    	declareVariable(list->id, newtype);
+	
+	if(debug)
+    	{
+      	  /*Print debugging statements*/
+      	  printf("GDECL created with type:\n");
+	  ty_print_type(newtype);
+      	  printf("\n");
+	}
+    }	/* end else */
 
     /*Move on to the next item in the member list*/
     list=list->next;
