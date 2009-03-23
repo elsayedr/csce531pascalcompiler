@@ -404,7 +404,7 @@ type_definition_list
     ;
 
 type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/ 
-    : new_identifier '=' type_denoter 	{ make_type($1,$3); }
+    : new_identifier '=' type_denoter 	{ resolve_ptrs(); make_type($1,$3); }
     ;
 
 type_denoter
