@@ -525,7 +525,7 @@ ST make_binop(ST a1, char c, ST a2)
   return p;
 }
 
-/*Function that inserst an id into the parameter list*/
+/*Function that inserts an id into the parameter list*/
 PARAM_LIST insert_id_into_param(PARAM_LIST list, ST_ID id, BOOLEAN isRef)
 {
   /*Creates the list and allocates memory*/
@@ -579,7 +579,7 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
   return toReturn;
 }
 
-/*Converts a member list to a list of parameters*/
+/*Converts a linked list to a list of parameters*/
 PARAM_LIST createParamListFromID(linkedList list, BOOLEAN isRef)
 {
   /*Checks for empty member list*/
@@ -652,6 +652,23 @@ PARAM_LIST combine_params(PARAM_LIST list1, PARAM_LIST list2)
   return list1;
 }
 
+/* Function that checks for duplicate params */
+void check_params(PARAM_LIST copy)
+{
+   PARAM_LIST p = copy;
+   char* a;
+   char* b;
+   a = st_get_id_str(p->id);
+   if(debug) printf("String ID: %s\n",a);
+
+   while (p->next) {
+	p = p->next;
+	b = st_get_id_str(p->id);
+	if(debug) printf("Compare with string ID: %s\n",b);
+	if (!strcmp(a,b)) error ("Duplicate parameter name: \"%s\"",b);
+   }
+}
+
 /*Function that creates a function type*/
 TYPE make_func(PARAM_LIST list, TYPE newtype)
 {
@@ -692,6 +709,9 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
 	/*Parameter not simple type error, returns NULL*/
 	error("Parameter type must be a simple type");
       }
+
+      /* check for duplicate params */
+      check_params(copy);
 
       /*Gets the next parameter*/
       copy = copy->next;
