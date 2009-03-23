@@ -662,21 +662,44 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
       if (debug) printf("Empty parameter list for function\n");
    }
 
-    /*Gets the type tag of the return type*/
-    TYPETAG tag = ty_query(newtype);
+  /*Gets the type tag of the return type*/
+  TYPETAG tag = ty_query(newtype);
 
-    /*Checks the return type*/
-    if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
+  /*Checks the return type*/
+  if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
+  {
+    /*Error, function must reutrn simple type*/
+    error("Function return type must be simple type");
+  }
+  /*Else check the parameters*/
+  else
+  {
+    /*Copy of the parameter list*/
+    PARAM_LIST copy = list;
+
+    /*TYPETAG of the current parameter*/
+    TYPETAG ptag;
+
+    /*While loop to check the parameters*/
+    while(copy != NULL)
     {
-      /*Error, function must reutrn simple type*/
-      error("Function return type must be simple type");
+      /*Gets the type tag of the current parameter*/
+      ptag = ty_query(copy->type);
+
+      /*Checks the type of the parameter*/
+      if(ptag == TYUNION || ptag == TYENUM || ptag == TYSTRUCT || ptag == TYARRAY || ptag == TYSET || ptag == TYFUNC || ptag == TYBITFIELD || ptag == TYSUBRANGE || ptag == TYERROR)
+      {
+	/*Parameter not simple type error, returns NULL*/
+	error("Parameter type must be a simple type");
+      }
+
+      /*Gets the next parameter*/
+      copy = copy->next;
     }
-    /*Else create function type*/
-    else
-    {
-      /*Create the function and return it*/
-      return ty_build_func(newtype, list, TRUE);
-    }
+
+    /*Create the function and return it*/
+    return ty_build_func(newtype, list, TRUE);
+  }
 }
 
 /*Function that creates a member list from the linked list of ST_ID's*/
