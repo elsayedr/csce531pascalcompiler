@@ -247,6 +247,17 @@ void make_var(linkedList list, TYPE newtype)
     error("Variable(s) must be of data type"); 
     return;
   }
+
+    /*Gets the type tag of the type of the elements of the array*/
+    TYPETAG tag = ty_query(newtype);
+
+    /*Checks the type*/
+    if(tag == TYFUNC || tag == TYERROR)
+    {
+      /*Data type expected for array elements, returns null*/
+      error("Variable(s) must be of data type");
+      return;
+    }
 	
   /*While the list is not null*/
   while(list) 
