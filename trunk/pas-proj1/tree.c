@@ -631,9 +631,22 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
       /* Not an error: function with no params */
       if (debug) printf("Empty parameter list for function\n");
    }
-   /*Create the function and return it*/
-   
-   return ty_build_func(newtype, list, TRUE);
+
+    /*Gets the type tag of the return type*/
+    TYPETAG tag = ty_query(newtype);
+
+    /*Checks the return type*/
+    if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYPTR || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
+    {
+      /*Error, function must reutrn simple type*/
+      error("Function return type must be simple type");
+    }
+    /*Else create function type*/
+    else
+    {
+      /*Create the function and return it*/
+      return ty_build_func(newtype, list, TRUE);
+    }
 }
 
 /*Function that creates a member list from the linked list of ST_ID's*/
