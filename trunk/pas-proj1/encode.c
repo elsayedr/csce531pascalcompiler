@@ -115,8 +115,7 @@ int getSkipSize(TYPE type)
   INDEX_LIST list;
 
   /*Low and high for subrange type*/
-  long low;
-  long high;
+  long low, high, size;
 
   /*Switch based on typetag*/
   switch(tag)
@@ -124,7 +123,13 @@ int getSkipSize(TYPE type)
     /*Array case*/
     case TYARRAY:
       /*Recursive call to handle array*/
-      return (high - low) * getSkipSize(ty_query_array(type, &list));
+      size = getSkipSize(ty_query_array(type, &list));
+      while (list) {
+	ty_query_subrange(list->type, &low, &high); 
+	size *= high - low + 1;           
+	list = list->next;
+      }
+      return size;
       break;
     /*Pointer case*/
     case TYPTR:
