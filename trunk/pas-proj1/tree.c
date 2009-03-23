@@ -166,12 +166,31 @@ TYPE make_array(INDEX_LIST list, TYPE newtype)
     return NULL;
   }
   /*Else return the array*/
-  else {
-    return ty_build_array(newtype, list);
-    if (debug) {
-    	printf("Build array of TYPE:\n");
-    	ty_print_type(newtype); 
-    	printf("\n");
+  else 
+  {
+    /*Debugging information*/
+    if(debug) 
+    {
+      /*Prints debugging information*/
+      printf("Build array of TYPE:\n");
+      ty_print_type(newtype); 
+      printf("\n");
+    }
+
+    /*Gets the type tag of the type of the elements of the array*/
+    TYPETAG tag = ty_query(newtype);
+
+    /*Checks the type*/
+    if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
+    {
+      /*Data type expected for array elements, returns null*/
+      error("Data type expected for array elements");
+      return NULL;
+    }
+    else
+    {
+      /*Returns the array TYPE*/
+      return ty_build_array(newtype, list);
     }
   }
 }
@@ -636,7 +655,7 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
     TYPETAG tag = ty_query(newtype);
 
     /*Checks the return type*/
-    if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYPTR || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
+    if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
     {
       /*Error, function must reutrn simple type*/
       error("Function return type must be simple type");
