@@ -103,6 +103,7 @@ PARAM_LIST type_params(PARAM_LIST, TYPE, BOOLEAN);
 PARAM_LIST combine_params(PARAM_LIST, PARAM_LIST);
 PARAM_LIST insertParam(PARAM_LIST, ST_ID, BOOLEAN);
 TYPE make_func(PARAM_LIST, TYPE);
+void check_params(PARAM_LIST);
 
 ST make_id(ST_ID);
 ST make_int(long);
