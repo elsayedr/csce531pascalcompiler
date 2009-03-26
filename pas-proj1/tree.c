@@ -407,124 +407,6 @@ void resolve_ptrs()
   } 	
 }
 
-/* Function that evaluates the value of an identifier */
-long eval_id(ST iden)
-{
-}
-
-/*Function that makes an integer node*/
-ST make_int(long n)
-{
-  /*Creates the node and allocates memory*/
-  ST p;
-  p = (ST)malloc(sizeof(ST_NODE));
-
-  /*Sets the value of the node attributes and returns it*/
-  p->tag = INTCONST;
-  p->u.intconst = n;
-
-  /*Debugging information*/
-  if(debug)
-  {
-    /*Prints Debugging information*/
-    printf("INTCONST %d created\n",(int)n);
-  }
-
-  /*Returns the node*/
-  return p;
-}
-
-/*Function that makes a real node*/
-ST make_real(double n)
-{
-  /*Creates the node and allocates memory*/
-  ST p;
-  p = (ST)malloc(sizeof(ST_NODE));
-	
-  /*Sets the value of the node attributes*/
-  p->tag = REALCONST;
-  p->u.realconst = n;
-
-  /*Debugging information*/
-  if(debug) 
-  {
-    /*Print debugging information*/
-    printf("REALCONST %f created\n",n);
-  }
-
-  /*Returns the real node*/
-  return p;
-}
-
-/*Function that makes an identifier node*/
-ST make_id(ST_ID iden)
-{
-  /*Creates the node and allocates memory*/
-  ST p;
-  p = (ST)malloc(sizeof(ST_NODE));
-
-  /*Sets the value of the node attributes*/
-  p->tag = ID_NODE;
-  p->u.id_node.id = iden;
-
-  /*Debugging information*/
-  if(debug) 
-  {
-    /*Print debugging information*/
-    printf("ID NODE %s created\n", st_get_id_str(iden) );
-  }
-
-  /*Returns the node*/
-  return p;
-}
-
-/*Function that makes a unary operator node*/
-ST make_unop(char c, ST a)
-{
-  /*Creates the node and allocates memory*/
-  ST p;
-  p = (ST)malloc(sizeof(ST_NODE));
-  
-  /*Sets the value of the node attributes*/
-  p->tag = UNOP;
-  p->u.unop.op = c;
-  p->u.unop.arg = a;
-
-  /*Debugging information*/
-  if(debug) 
-  {
-    /*Prints Debugging information*/
-    printf("UNOP %c created\n",c);
-  }
-
-  /*Returns the node*/
-  return p;
-}
-
-/*Function that makes a binary operator node*/
-ST make_binop(ST a1, char c, ST a2)
-{
-  /*Creates the node and allocates memory*/
-  ST p;
-  p = (ST)malloc(sizeof(ST_NODE));
-
-  /*Sets the value of the node attributes*/
-  p->tag = BINOP;
-  p->u.binop.op = c;
-  p->u.binop.arg1 = a1;
-  p->u.binop.arg2 = a2;
-
-  /*Debugging information*/
-  if(debug) 
-  {
-    /*Prints Debugging information*/
-    printf("BINOP %c created\n",c);
-  }
-
-  /*Returns the node*/
-  return p;
-}
-
 /*Function that inserts an id into the parameter list*/
 PARAM_LIST insert_id_into_param(PARAM_LIST list, ST_ID id, BOOLEAN isRef)
 {
@@ -784,3 +666,34 @@ MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
   return toReturn; 
 }
 
+/*Function that creates an integer constant expression node*/
+EXPR make_intconst_expr(long val, TYPE type)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the values of the node*/
+  eNode->tag = INTCONST;
+  eNode->u.intval = val;
+  eNode->type = type;
+  
+  /*Returns the node*/
+  return eNode;
+}
+
+/*Function thata creates an real constant expression node*/
+EXPR make_realconst_expr(double val)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the values of the node*/
+  eNode->tag = REALCONST;
+  eNode->u.realval = val;
+  eNode->type = ty_build_basic(TYDOUBLE);
+
+  /*Returns the node*/
+  return eNode;
+}
