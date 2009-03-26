@@ -1,12 +1,8 @@
-/* Build 13
+/* Build 14
 
 change summary:
-removed structure for ID list and used Member list instead
-added ty_build_struct to create record types
-prevent undefined type defintions
-detect duplicate type and var defs
-added lookup_type and make_array to clean up grammar
-turned off debuging
+standardize naming convention like Fenner's
+streamlined the exported headers in tree.h to only function called by other modules
 
 Team Project:
 Jeff Barton
@@ -242,12 +238,12 @@ optional_par_id_list
   {};
 
 id_list
-    : new_identifier			{ $$ = insert_id(NULL,$1); }
-    | id_list ',' new_identifier 	{ $$ = insert_id($1,$3); }
+    : new_identifier			{ $$ = id_prepend(NULL,$1); }
+    | id_list ',' new_identifier 	{ $$ = id_prepend($1,$3); }
     ;
 
 typename
-    : LEX_ID		{ $$ = lookup_type(st_enter_id($1)); }
+    : LEX_ID		{ $$ = check_typename(st_enter_id($1)); }
     ;
 
 identifier
@@ -429,7 +425,7 @@ type_definition_list
     ;
 
 type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/ 
-    : new_identifier '=' type_denoter 	{ resolve_ptrs(); make_type($1,$3); }
+    : new_identifier '=' type_denoter 	{ make_type($1,$3); }
     ;
 
 type_denoter
@@ -492,14 +488,14 @@ optional_procedural_type_formal_parameter_list
 
 procedural_type_formal_parameter_list
     : procedural_type_formal_parameter	{ $$ = $1; }
-    | procedural_type_formal_parameter_list semi procedural_type_formal_parameter	{ $$ = combine_params($1, $3); }
+    | procedural_type_formal_parameter_list semi procedural_type_formal_parameter	{ $$ = param_concat($1, $3); }
     ;
 
 procedural_type_formal_parameter
-    : id_list				{ $$ = createParamListFromID($1, FALSE); }
-    | id_list ':' typename		{ $$ = type_params(createParamListFromID($1, FALSE), $3, FALSE); }
-    | LEX_VAR id_list ':' typename	{ $$ = type_params(createParamListFromID($2, TRUE), $4, TRUE); }
-    | LEX_VAR id_list			{ $$ = createParamListFromID($2, TRUE); }
+    : id_list				{ $$ = make_params($1, ty_build_basic(TYVOID), FALSE); }
+    | id_list ':' typename		{ $$ = make_params($1, $3, FALSE); }
+    | LEX_VAR id_list ':' typename	{ $$ = make_params($2, $4, TRUE); }
+    | LEX_VAR id_list			{ $$ = make_params($2, ty_build_basic(TYVOID), TRUE); }
     ;
 
 new_structured_type
@@ -521,8 +517,8 @@ array_type
     ;
 
 array_index_list
-    : ordinal_index_type			{ $$ = insert_index(NULL, $1); }
-    | array_index_list ',' ordinal_index_type	{ $$ = insert_index($1, $3); }
+    : ordinal_index_type			{ $$ = index_append(NULL, $1); }
+    | array_index_list ',' ordinal_index_type	{ $$ = index_append($1, $3); }
   ;
 
 ordinal_index_type
@@ -571,11 +567,11 @@ record_field_list
 
 fixed_part
     : record_section			{ $$ = $1; }
-    | fixed_part semi record_section	{ $$ = combine_members($1,$3); }
+    | fixed_part semi record_section	{ $$ = member_concat($1,$3); }
     ;
 
 record_section
-    : id_list ':' type_denoter  	{ $$ = type_members($1,$3); }
+    : id_list ':' type_denoter  	{ $$ = make_members($1,$3); }
     ;
 
 variant_part
@@ -628,7 +624,7 @@ variable_declaration_list
   {};
 
 variable_declaration
-    : id_list ':' type_denoter semi		{ make_var($1,$3); }
+    : id_list ':' type_denoter semi		{ resolve_ptrs(); make_var($1,$3); }
     ;
 
 function_declaration

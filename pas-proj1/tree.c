@@ -10,32 +10,8 @@
 #include "message.h"
 #include "encode.h"
 
-/*Initialization function*/
-void initialize(ID_LIST list)
-{
-    /*Sets the list initially to be null*/
-    list = NULL;
-}
-
-/*Inserts the word into the list*/
-ID_LIST insert(ID_LIST list, ST_ID id)
-{
-  /*Pointers for the linked list*/
-  ID_LIST previous = NULL;
-  ID_LIST toReturn = list;
-
-  /*While loop to determine where the node should be placed*/
-  while(list != NULL)
-  {
-    /*Goes to the next node in the list*/
-    previous = list;
-    list = list->next;
-    
-  }
-}
-
 /* Function that inserts an ST_ID into a linked list */
-ID_LIST insert_id(ID_LIST list, ST_ID newid)
+ID_LIST id_prepend(ID_LIST list, ST_ID newid)
 {
   ID_LIST new;
   new = (ID_LIST) malloc(sizeof(ID_NODE));
@@ -45,34 +21,10 @@ ID_LIST insert_id(ID_LIST list, ST_ID newid)
   new->next = list;
   return new;
   
-}
-
-/*Function that combines two linked lists*/
-ID_LIST combineLists(ID_LIST list1, ID_LIST list2)
-{
-  /*Checks for null lists*/
-  if(list1 == NULL || list2 == NULL)
-    bug("Empty list passed to combine linked lists");
-
-  /*Copy pointer to list1*/
-  ID_LIST copy = list1;
-
-  /*While there are elements in the list*/
-  while(copy->next != NULL)
-  {
-    /*Cycles through the list*/
-    copy = copy->next;
-  }
-
-  /*Sets next of last element in first list to first of second*/
-  copy->next = list2;
-
-  /*Returns the list*/
-  return list1;
-}
+} // end id-prepend
 
 /* Function that inserts an index into the index list */
-INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
+INDEX_LIST index_append(INDEX_LIST list, TYPE newtype)
 {
   /*Works by using the prev field to link back to the current list*/
   /*Creates the index list*/
@@ -102,10 +54,10 @@ INDEX_LIST insert_index(INDEX_LIST list, TYPE newtype)
     }
     else return new;			/* otherwise just return new */
   }
-}
+} // end index_append
 
 /*Function that looks up the type given from a symbol table id*/
-TYPE lookup_type(ST_ID id)
+TYPE check_typename(ST_ID id)
 {
   /*Data record from the symbol table and block number*/
   ST_DR data_rec;
@@ -133,6 +85,38 @@ TYPE lookup_type(ST_ID id)
   }
   /*Returns the type of the data record*/
   return data_rec->u.typename.type; 
+} // end check_typename 
+
+/*Function that creates an integer constant expression node*/
+EXPR make_intconst_expr(long val, TYPE type)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the values of the node*/
+  eNode->tag = INTCONST;
+  eNode->u.intval = val;
+  eNode->type = type;
+ 
+  /*Returns the node*/
+  return eNode;
+}
+
+/*Function thata creates an real constant expression node*/
+EXPR make_realconst_expr(double val)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the values of the node*/
+  eNode->tag = REALCONST;
+  eNode->u.realval = val;
+  eNode->type = ty_build_basic(TYDOUBLE);
+
+  /*Returns the node*/
+  return eNode;
 }
 
 /*Function that creates a subrange*/
@@ -153,7 +137,7 @@ TYPE make_subrange(long a, long b)
 
     return ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), a, b);
   }
-} 
+} // end make_subrange
 
 /*Function that creates an array*/
 TYPE make_array(INDEX_LIST list, TYPE newtype)
@@ -193,7 +177,7 @@ TYPE make_array(INDEX_LIST list, TYPE newtype)
       return ty_build_array(newtype, list);
     }
   }
-}
+} // end make_array
 
 /* Function that makes a type data record and installs it in the symbol table */
 void make_type(ST_ID iden, TYPE newtype)
@@ -227,7 +211,7 @@ void make_type(ST_ID iden, TYPE newtype)
   /*Debugging*/
   else if(debug) 
     printf("TYPE name %s installed\n", st_get_id_str(iden));
-}
+} // end make_type
 
 /* Function that makes a variable data record and installs it in the symbol table */
 void make_var(ID_LIST list, TYPE newtype)
@@ -289,10 +273,72 @@ void make_var(ID_LIST list, TYPE newtype)
     /*Move on to the next item in the member list*/
     list=list->next;
   }
-}
+} // end make_var
+
+/*Function that inserts an ID into a member list*/
+MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
+{
+  /*Member list pointers*/
+  MEMBER_LIST previous = NULL;
+  MEMBER_LIST toReturn = mList;
+
+  /*While loop to determine where the node should be placed*/
+  while(mList != NULL)
+  {
+    /*Goes to the next node in the list*/
+    previous = mList;
+    mList = mList->next;
+    
+  }
+
+  /*If the previous node is equal to null, insert at front*/
+  if(previous == NULL)
+  {
+    /*Create the node and insert it*/
+    toReturn = (MEMBER_LIST)malloc(sizeof(MEMBER));
+    toReturn->id = id;
+    toReturn->next = mList;
+
+    /*Returns the list*/
+    return toReturn;
+  }
+
+  /*Insert somewhere in the middle of the list*/
+  previous->next = (MEMBER_LIST)malloc(sizeof(MEMBER));
+  previous = previous->next;
+  previous->id = id;
+  previous->next = mList;
+
+  /*Returns the list*/
+  return toReturn; 
+} // end insertMember
+
+/*Function that creates a member list from the linked list of ST_ID's*/
+MEMBER_LIST createMemberListFromID(ID_LIST list)
+{
+  /*Linked List*/
+  ID_LIST copy = list;
+
+  /*Creates the member lists and allocates memory*/
+  MEMBER_LIST memList = NULL;
+
+  /*While there are still elements in the list*/
+  while(copy != NULL)
+  {
+    /*Calls the function to insert the ID into the member list*/
+    memList = insertMember(memList, copy->id);
+
+    /*Moves on to the next element*/
+    copy = copy->next;
+
+  }
+
+  /*Returns the member list*/
+  return memList;
+} // end 
 
 /* Function that takes a member list and assigns a type to each member */
-MEMBER_LIST type_members(ID_LIST list, TYPE newtype)
+MEMBER_LIST make_members(ID_LIST list, TYPE newtype)
 {
   /*Member list*/
   MEMBER_LIST memList, p;
@@ -319,10 +365,10 @@ MEMBER_LIST type_members(ID_LIST list, TYPE newtype)
 
   /*Returns the member list*/
   return memList;
-}
+} // end make_members
 
 /*Function that adds two member lists together*/
-MEMBER_LIST combine_members(MEMBER_LIST list1, MEMBER_LIST list2)
+MEMBER_LIST member_concat(MEMBER_LIST list1, MEMBER_LIST list2)
 {
   /*Member list*/
   MEMBER_LIST p = list1;
@@ -340,7 +386,7 @@ MEMBER_LIST combine_members(MEMBER_LIST list1, MEMBER_LIST list2)
   
   /*Returns the list*/
   return list1;
-}
+} // end member_concat
 
 /*Function that resolves pointers*/
 void resolve_ptrs()
@@ -405,21 +451,7 @@ void resolve_ptrs()
     /*Move on to the next item in the list*/
     list = next;
   } 	
-}
-
-/*Function that inserts an id into the parameter list*/
-PARAM_LIST insert_id_into_param(PARAM_LIST list, ST_ID id, BOOLEAN isRef)
-{
-  /*Creates the list and allocates memory*/
-  PARAM_LIST newList;
-  newList = (PARAM_LIST) malloc(sizeof(PARAM));
-  
-  /*Inserts the element and returns the list*/
-  newList->id = id;
-  newList->next = list;
-  newList->is_ref = isRef;
-  return newList;
-}
+} // end resolve_ptrs
 
 /*Function that inserts an ID into a parameter list*/
 PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
@@ -459,7 +491,7 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
 
   /*Returns the list*/
   return toReturn;
-}
+} // end insertParam
 
 /*Converts a linked list to a list of parameters*/
 PARAM_LIST createParamListFromID(ID_LIST list, BOOLEAN isRef)
@@ -488,13 +520,14 @@ PARAM_LIST createParamListFromID(ID_LIST list, BOOLEAN isRef)
 
     /*Returns the parameter list*/
     return retList;
-}
+} // end
 
 /*Function that sets the type for all of the elements in the parameter list*/
-PARAM_LIST type_params(PARAM_LIST list, TYPE newtype, BOOLEAN isRef)
+PARAM_LIST make_params(ID_LIST list, TYPE newtype, BOOLEAN isRef)
 {
   /*Parameter list*/
-  PARAM_LIST p = list;
+  PARAM_LIST p, paramList = createParamListFromID(list, isRef);
+  p = paramList;
 
   /*If empty list, bug*/
   if(!p) 
@@ -510,11 +543,11 @@ PARAM_LIST type_params(PARAM_LIST list, TYPE newtype, BOOLEAN isRef)
   }
 
   /*Returns the parameter list*/
-  return list;
-}
+  return paramList;
+} // end make_params
 
 /*Function that combines two parameter lists*/
-PARAM_LIST combine_params(PARAM_LIST list1, PARAM_LIST list2)
+PARAM_LIST param_concat(PARAM_LIST list1, PARAM_LIST list2)
 {
   /*Parameter list*/
   PARAM_LIST p = list1;
@@ -532,24 +565,23 @@ PARAM_LIST combine_params(PARAM_LIST list1, PARAM_LIST list2)
   
   /*Returns the list*/
   return list1;
-}
+} // end param_concat
 
 /* Function that checks for duplicate params */
-void check_params(PARAM_LIST copy)
+void check_params(PARAM_LIST list)
 {
-   PARAM_LIST p = copy;
-   char* a;
-   char* b;
-   a = st_get_id_str(p->id);
-   if(debug) printf("String ID: %s\n",a);
+   PARAM_LIST p = list;
+   ST_ID a,b;
+   a = p->id;
+   if(debug) printf("String ID: %s\n", st_get_id_str(a) );
 
    while (p->next) {
 	p = p->next;
-	b = st_get_id_str(p->id);
-	if(debug) printf("Compare with string ID: %s\n",b);
-	if (!strcmp(a,b)) error ("Duplicate parameter name: \"%s\"",b);
+	b = p->id;
+	if(debug) printf("Compare with string ID: %s\n", st_get_id_str(b) );
+	if (a==b) error ("Duplicate parameter name: \"%s\"", st_get_id_str(a) );
    }
-}
+} // end check_params
 
 /*Function that creates a function type*/
 TYPE make_func(PARAM_LIST list, TYPE newtype)
@@ -602,98 +634,5 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
     /*Create the function and return it*/
     return ty_build_func(newtype, list, TRUE);
   }
-}
+} // end make_function
 
-/*Function that creates a member list from the linked list of ST_ID's*/
-MEMBER_LIST createMemberListFromID(ID_LIST list)
-{
-  /*Linked List*/
-  ID_LIST copy = list;
-
-  /*Creates the member lists and allocates memory*/
-  MEMBER_LIST memList = NULL;
-
-  /*While there are still elements in the list*/
-  while(copy != NULL)
-  {
-    /*Calls the function to insert the ID into the member list*/
-    memList = insertMember(memList, copy->id);
-
-    /*Moves on to the next element*/
-    copy = copy->next;
-
-  }
-
-  /*Returns the member list*/
-  return memList;
-}
-
-/*Function that inserts an ID into a member list*/
-MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
-{
-  /*Member list pointers*/
-  MEMBER_LIST previous = NULL;
-  MEMBER_LIST toReturn = mList;
-
-  /*While loop to determine where the node should be placed*/
-  while(mList != NULL)
-  {
-    /*Goes to the next node in the list*/
-    previous = mList;
-    mList = mList->next;
-    
-  }
-
-  /*If the previous node is equal to null, insert at front*/
-  if(previous == NULL)
-  {
-    /*Create the node and insert it*/
-    toReturn = (MEMBER_LIST)malloc(sizeof(MEMBER));
-    toReturn->id = id;
-    toReturn->next = mList;
-
-    /*Returns the list*/
-    return toReturn;
-  }
-
-  /*Insert somewhere in the middle of the list*/
-  previous->next = (MEMBER_LIST)malloc(sizeof(MEMBER));
-  previous = previous->next;
-  previous->id = id;
-  previous->next = mList;
-
-  /*Returns the list*/
-  return toReturn; 
-}
-
-/*Function that creates an integer constant expression node*/
-EXPR make_intconst_expr(long val, TYPE type)
-{
-  /*Creates the node and allocates memory*/
-  EXPR eNode;
-  eNode = malloc(sizeof(EXPR_NODE));
-
-  /*Sets the values of the node*/
-  eNode->tag = INTCONST;
-  eNode->u.intval = val;
-  eNode->type = type;
-  
-  /*Returns the node*/
-  return eNode;
-}
-
-/*Function thata creates an real constant expression node*/
-EXPR make_realconst_expr(double val)
-{
-  /*Creates the node and allocates memory*/
-  EXPR eNode;
-  eNode = malloc(sizeof(EXPR_NODE));
-
-  /*Sets the values of the node*/
-  eNode->tag = REALCONST;
-  eNode->u.realval = val;
-  eNode->type = ty_build_basic(TYDOUBLE);
-
-  /*Returns the node*/
-  return eNode;
-}
