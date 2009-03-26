@@ -85,31 +85,26 @@ int block;
 /* The union representing a semantic stack entry */
 %union {
     char * 	y_string;
-    char	y_char;
+    int		y_cint;
     long 	y_int;
     double 	y_real;
     ST_ID 	y_id;
-    ST		y_tree;
     TYPE	y_type;
-    PARAM	y_p;
+    PTR_OBJ	y_ptrobj;
     PARAM_LIST	y_param;
     INDEX_LIST 	y_index;
     MEMBER_LIST	y_member;
     linkedList	y_list;
+    EXPR	y_expr;
+    EXPR_LIST	y_exprlist;
+    EXPR_NULLOP	y_nullop;
+    EXPR_UNOP	y_unop;
+    EXPR_BINOP	y_binop;
+    EXPR_ID	y_exprid;
+    FUNC_HEAD	y_funchead;
+    DIRECTIVE	y_dir;
+    NAME_OFFSET	y_nameoffset;
 }
-
-%type <y_string> string
-%type <y_char> sign
-%type <y_int> constant number unsigned_number enumerator enumerated_type enum_list
-%type <y_id> identifier new_identifier new_identifier_1 label 
-%type <y_type> typename type_denoter type_denoter_1 new_ordinal_type new_pointer_type 
-%type <y_type> new_structured_type subrange_type new_procedural_type
-%type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type functiontype
-%type <y_p> pointer_domain_type
-%type <y_param> optional_procedural_type_formal_parameter_list procedural_type_formal_parameter_list procedural_type_formal_parameter
-%type <y_index> array_index_list
-%type <y_list> id_list 
-%type <y_member> record_field_list fixed_part record_section variant_part
 
 %token <y_string> LEX_ID
 
@@ -137,11 +132,11 @@ int block;
 /* Redefinable identifiers. */
 
 /* Redefinable identifiers in Standard Pascal */
-%token p_INPUT p_OUTPUT p_REWRITE p_RESET p_PUT p_GET p_WRITE p_READ
-%token p_WRITELN p_READLN p_PAGE p_NEW p_DISPOSE
-%token p_ABS p_SQR p_SIN p_COS p_EXP p_LN p_SQRT p_ARCTAN
-%token p_TRUNC p_ROUND p_PACK p_UNPACK p_ORD p_CHR p_SUCC p_PRED
-%token p_ODD p_EOF p_EOLN p_MAXINT p_TRUE p_FALSE
+%token <y_string> p_INPUT p_OUTPUT p_REWRITE p_RESET p_PUT p_GET p_WRITE p_READ
+%token <y_string> p_WRITELN p_READLN p_PAGE p_NEW p_DISPOSE
+%token <y_string> p_ABS p_SQR p_SIN p_COS p_EXP p_LN p_SQRT p_ARCTAN
+%token <y_string> p_TRUNC p_ROUND p_PACK p_UNPACK p_ORD p_CHR p_SUCC p_PRED
+%token <y_string> p_ODD p_EOF p_EOLN p_MAXINT p_TRUE p_FALSE
 
 /* Additional redefinable identifiers for Borland Pascal */
 %token bp_RANDOM bp_RANDOMIZE BREAK CONTINUE
@@ -184,6 +179,36 @@ int block;
 /* These tokens help avoid S/R conflicts from error recovery rules. */
 %nonassoc lower_than_error
 %nonassoc error
+
+%type <y_expr> unsigned_number number constant constant_literal
+%type <y_expr> expression actual_parameter static_expression
+%type <y_expr> simple_expression term signed_primary primary factor
+%type <y_expr> signed_factor variable_or_function_access predefined_literal
+%type <y_expr> variable_or_function_access_no_as standard_functions
+%type <y_expr> variable_or_function_access_no_standard_function
+%type <y_expr> variable_or_function_access_no_id rest_of_statement
+%type <y_expr> assignment_or_call_statement standard_procedure_statement
+%type <y_expr> variable_access_or_typename optional_par_actual_parameter
+%type <y_exprlist> actual_parameter_list optional_par_actual_parameter_list
+%type <y_nullop> rts_fun_optpar
+%type <y_unop> sign rts_fun_onepar rts_fun_parlist
+%type <y_binop> relational_operator multiplying_operator adding_operator
+%type <y_exprid> variable_or_function_access_maybe_assignment
+%type <y_int> enumerator enumerated_type enum_list
+%type <y_id> identifier new_identifier label
+%type <y_string> new_identifier_1 string combined_string 
+%type <y_type> typename type_denoter type_denoter_1 new_ordinal_type new_pointer_type parameter_form
+%type <y_type> new_structured_type subrange_type new_procedural_type
+%type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type functiontype
+%type <y_ptrobj> pointer_domain_type
+%type <y_param> optional_procedural_type_formal_parameter_list procedural_type_formal_parameter_list procedural_type_formal_parameter
+%type <y_index> array_index_list
+%type <y_list> id_list optional_par_id_list
+%type <y_member> record_field_list fixed_part record_section variant_part
+%type <y_funchead> function_heading
+%type <y_dir> directive_list directive
+%type <y_cint> variable_declaration_part variable_declaration_list
+%type <y_cint> variable_declaration simple_decl any_decl any_declaration_part
 
 %%
 
@@ -230,11 +255,11 @@ identifier
     ;
 
 new_identifier
-    : new_identifier_1	
+    : new_identifier_1	{ $$ = (ST_ID) st_enter_id($1); if (debug) printf("NEW ID: %s\n",$1); }
     ;
 
 new_identifier_1
-    : LEX_ID		{ $$ = (ST_ID) st_enter_id($1); if (debug) printf("NEW ID: %s\n",$1); }
+    : LEX_ID		
 /* Standard Pascal constants */
     | p_MAXINT
   {}| p_FALSE
@@ -351,20 +376,20 @@ constant_definition
   {};
 
 constant
-    : identifier	{ $$ = eval_id($1); }	/*Evaluates the value of the identifier*/
-    | sign identifier	{ if ($1=='-') $$ = -eval_id($2); else $$ = eval_id($2); }	/*Negative sign so flip the value*/
+    : identifier		/*Evaluates the value of the identifier*/
+    | sign identifier		/*Negative sign so flip the value*/
     | number					/*default*/
-    | constant_literal	{} 		/*not configured yet*/
+    | constant_literal	 		/*not configured yet*/
     ;
 
 number
-    : sign unsigned_number	{ if ($1=='-') $$ = -$2; else $$ = $2; } /*Negates the number if the sign is negative*/ 
+    : sign unsigned_number	 /*Negates the number if the sign is negative*/ 
     | unsigned_number		/*default*/
     ;
 
 unsigned_number
-    : LEX_INTCONST	{ $$ = $1; if (debug) printf("Unsigned number: %d\n",(int)$1); }
-    | LEX_REALCONST	{ $$ = (long) $1; } 	/*Cast as long*/ 
+    : LEX_INTCONST	{ $$ = make_intconst_expr($1, ty_build_basic(TYUNSIGNEDINT)); }
+    | LEX_REALCONST	{ $$ = make_realconst_expr($1); }
     ;
 
 sign
@@ -438,7 +463,7 @@ enumerator
     ;
 
 subrange_type				 		/*builds the subrange type*/
-    : constant LEX_RANGE constant	{ $$ = make_subrange($1, $3); }
+    : constant LEX_RANGE constant	{ $$ = make_subrange($1->u.intval, $3->u.intval); }
     ;
 
 new_pointer_type
