@@ -94,7 +94,7 @@ int block;
     PARAM_LIST	y_param;
     INDEX_LIST 	y_index;
     MEMBER_LIST	y_member;
-    linkedList	y_list;
+    ID_LIST	y_idlist;
     EXPR	y_expr;
     EXPR_LIST	y_exprlist;
     EXPR_NULLOP	y_nullop;
@@ -203,7 +203,7 @@ int block;
 %type <y_ptrobj> pointer_domain_type
 %type <y_param> optional_procedural_type_formal_parameter_list procedural_type_formal_parameter_list procedural_type_formal_parameter
 %type <y_index> array_index_list
-%type <y_list> id_list optional_par_id_list
+%type <y_idlist> id_list optional_par_id_list
 %type <y_member> record_field_list fixed_part record_section variant_part
 %type <y_funchead> function_heading
 %type <y_dir> directive_list directive
@@ -376,14 +376,14 @@ constant_definition
   {};
 
 constant
-    : identifier		/*Evaluates the value of the identifier*/
-    | sign identifier		/*Negative sign so flip the value*/
-    | number					/*default*/
-    | constant_literal	 		/*not configured yet*/
+    : identifier		{}/*Evaluates the value of the identifier*/
+    | sign identifier		{}/*Negative sign so flip the value*/
+    | number			/*default*/
+    | constant_literal	 	/*not configured yet*/
     ;
 
 number
-    : sign unsigned_number	 /*Negates the number if the sign is negative*/ 
+    : sign unsigned_number	{} /*Negates the number if the sign is negative*/ 
     | unsigned_number		/*default*/
     ;
 

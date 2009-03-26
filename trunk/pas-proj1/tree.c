@@ -11,18 +11,18 @@
 #include "encode.h"
 
 /*Initialization function*/
-void initialize(linkedList list)
+void initialize(ID_LIST list)
 {
     /*Sets the list initially to be null*/
     list = NULL;
 }
 
 /*Inserts the word into the list*/
-linkedList insert(linkedList list, ST_ID id)
+ID_LIST insert(ID_LIST list, ST_ID id)
 {
   /*Pointers for the linked list*/
-  linkedList previous = NULL;
-  linkedList toReturn = list;
+  ID_LIST previous = NULL;
+  ID_LIST toReturn = list;
 
   /*While loop to determine where the node should be placed*/
   while(list != NULL)
@@ -35,10 +35,10 @@ linkedList insert(linkedList list, ST_ID id)
 }
 
 /* Function that inserts an ST_ID into a linked list */
-linkedList insert_id(linkedList list, ST_ID newid)
+ID_LIST insert_id(ID_LIST list, ST_ID newid)
 {
-  linkedList new;
-  new = (linkedList) malloc(sizeof(linkedListNode));
+  ID_LIST new;
+  new = (ID_LIST) malloc(sizeof(ID_NODE));
   
   /*Inserts the element and returns the list*/
   new->id = newid;
@@ -48,14 +48,14 @@ linkedList insert_id(linkedList list, ST_ID newid)
 }
 
 /*Function that combines two linked lists*/
-linkedList combineLists(linkedList list1, linkedList list2)
+ID_LIST combineLists(ID_LIST list1, ID_LIST list2)
 {
   /*Checks for null lists*/
   if(list1 == NULL || list2 == NULL)
     bug("Empty list passed to combine linked lists");
 
   /*Copy pointer to list1*/
-  linkedList copy = list1;
+  ID_LIST copy = list1;
 
   /*While there are elements in the list*/
   while(copy->next != NULL)
@@ -230,7 +230,7 @@ void make_type(ST_ID iden, TYPE newtype)
 }
 
 /* Function that makes a variable data record and installs it in the symbol table */
-void make_var(linkedList list, TYPE newtype)
+void make_var(ID_LIST list, TYPE newtype)
 {
   /*Symbol table data record and boolean variable*/
   ST_DR p;  
@@ -292,7 +292,7 @@ void make_var(linkedList list, TYPE newtype)
 }
 
 /* Function that takes a member list and assigns a type to each member */
-MEMBER_LIST type_members(linkedList list, TYPE newtype)
+MEMBER_LIST type_members(ID_LIST list, TYPE newtype)
 {
   /*Member list*/
   MEMBER_LIST memList, p;
@@ -462,7 +462,7 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
 }
 
 /*Converts a linked list to a list of parameters*/
-PARAM_LIST createParamListFromID(linkedList list, BOOLEAN isRef)
+PARAM_LIST createParamListFromID(ID_LIST list, BOOLEAN isRef)
 {
   /*Checks for empty member list*/
   if(!list)
@@ -473,7 +473,7 @@ PARAM_LIST createParamListFromID(linkedList list, BOOLEAN isRef)
   }
 
   /*Member list*/
-  linkedList cList = list;
+  ID_LIST cList = list;
 
   /*Creates parameter lists*/
   PARAM_LIST retList = NULL;
@@ -605,10 +605,10 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
 }
 
 /*Function that creates a member list from the linked list of ST_ID's*/
-MEMBER_LIST createMemberListFromID(linkedList list)
+MEMBER_LIST createMemberListFromID(ID_LIST list)
 {
   /*Linked List*/
-  linkedList copy = list;
+  ID_LIST copy = list;
 
   /*Creates the member lists and allocates memory*/
   MEMBER_LIST memList = NULL;

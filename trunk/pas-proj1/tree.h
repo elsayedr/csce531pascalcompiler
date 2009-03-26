@@ -8,15 +8,15 @@
 #include "symtab.h"
 
 /*Defines a structure that represents a node in a linked list*/
-typedef struct listNode
+typedef struct id_node
 {
   /*Symbol table data record*/
   ST_ID id;
   
   /*Link to next element in the list*/
-  struct listNode *next;
+  struct id_node *next;
 
-}linkedListNode, *linkedList;
+} ID_NODE, *ID_LIST;
 
 /*Fenner's structures*/
 typedef struct {
@@ -112,23 +112,23 @@ extern int fi_top;
 
 
 /*Function definitions*/
-linkedList insert(linkedList list, ST_ID id);
+ID_LIST insert(ID_LIST list, ST_ID id);
 void initialize();
 TYPE make_subrange(long, long);
 TYPE lookup_type(ST_ID);
 TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
-void make_var(linkedList, TYPE);
+void make_var(ID_LIST, TYPE);
 INDEX_LIST insert_index(INDEX_LIST, TYPE);
-linkedList insert_id(linkedList, ST_ID);
-linkedList combineLists(linkedList, linkedList);
-MEMBER_LIST type_members(linkedList, TYPE);
+ID_LIST insert_id(ID_LIST, ST_ID);
+ID_LIST combineLists(ID_LIST, ID_LIST);
+MEMBER_LIST type_members(ID_LIST, TYPE);
 MEMBER_LIST combine_members(MEMBER_LIST, MEMBER_LIST);
-MEMBER_LIST createMemberListFromID(linkedList);
+MEMBER_LIST createMemberListFromID(ID_LIST);
 MEMBER_LIST insertMember(MEMBER_LIST, ST_ID);
 void resolve_ptrs();
 PARAM_LIST insert_id_into_param_list(PARAM_LIST, ST_ID, BOOLEAN);
-PARAM_LIST createParamListFromID(linkedList, BOOLEAN);
+PARAM_LIST createParamListFromID(ID_LIST, BOOLEAN);
 PARAM_LIST type_params(PARAM_LIST, TYPE, BOOLEAN);
 PARAM_LIST combine_params(PARAM_LIST, PARAM_LIST);
 PARAM_LIST insertParam(PARAM_LIST, ST_ID, BOOLEAN);
@@ -139,7 +139,7 @@ void check_params(PARAM_LIST);
 /*Fenner's functions*/
 EXPR_LIST expr_list_reverse(EXPR_LIST list);
 EXPR_LIST expr_prepend(EXPR expr, EXPR_LIST list);
-int process_var_decl(linkedList ids, TYPE type, int cur_offset);
+int process_var_decl(ID_LIST ids, TYPE type, int cur_offset);
 TYPE check_subrange(EXPR lo, EXPR hi);
 void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir);
 char * enter_function(ST_ID id, TYPE type, int * local_var_offset);
