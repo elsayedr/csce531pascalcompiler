@@ -69,9 +69,9 @@ TYPE check_typename(ST_ID id)
   /*If no record is found*/
   if (!data_rec) 
   {
-    /*Undeclared type error, return null*/
+    /*Undeclared type error, return error type*/
     error("Undeclared type name: \"%s\"",st_get_id_str(id));
-    return NULL;
+    return ty_build_basic(TYERROR);
   }
   
   /*Debugging information*/
@@ -145,9 +145,9 @@ TYPE make_array(INDEX_LIST list, TYPE newtype)
   /*If no type, error*/
   if(!newtype)
   {
-    /*Error, return null*/
+    /*Error, return error type*/
     error("Data type expected for array elements"); 
-    return NULL;
+    return ty_build_basic(TYERROR);
   }
   /*Else return the array*/
   else 
@@ -165,11 +165,11 @@ TYPE make_array(INDEX_LIST list, TYPE newtype)
     TYPETAG tag = ty_query(newtype);
 
     /*Checks the type*/
-    if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
+    if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
     {
-      /*Data type expected for array elements, returns null*/
+      /*Data type expected for array elements, returns error type*/
       error("Data type expected for array elements");
-      return NULL;
+      return ty_build_basic(TYERROR);
     }
     else
     {
@@ -240,6 +240,21 @@ void make_var(ID_LIST list, TYPE newtype)
     {
       /*Data type expected for array elements, returns null*/
       error("Variable(s) must be of data type");
+
+      /*Even when there is an error, Fenner installs the variable in the symbol table*/
+      p = stdr_alloc();	  
+      p->tag = GDECL;
+      p->u.decl.type = newtype;
+      p->u.decl.sc = NO_SC;
+
+      /*If the type is error, set the declaration error to true*/
+      if(tag == TYERROR)
+	p->u.decl.err = TRUE;
+
+      /*Installs the variable in the symbol table*/
+      resolved = st_install(list->id, p);
+
+      /*Returns*/
       return;
     }
 	
@@ -255,19 +270,22 @@ void make_var(ID_LIST list, TYPE newtype)
     resolved = st_install(list->id, p); 
 
     /*If the type is not resolved error*/
-    if(!resolved) error("Duplicate variable declaration: \"%s\"", st_get_id_str(list->id));
-    else {
-
-    	/*Calls the encoding function*/
-    	declareVariable(list->id, newtype);
+    if(!resolved) 
+      error("Duplicate variable declaration: \"%s\"", st_get_id_str(list->id));
+    /*Else variable resolved*/
+    else 
+    {
+      /*Calls the encoding function*/
+      declareVariable(list->id, newtype);
 	
-	if(debug)
-    	{
-      	  /*Print debugging statements*/
-      	  printf("GDECL created with type:\n");
-	  ty_print_type(newtype);
-      	  printf("\n");
-	}
+      /*Debugging*/
+      if(debug)
+      {
+	/*Print debugging statements*/
+	printf("GDECL created with type:\n");
+	ty_print_type(newtype);
+	printf("\n");
+      }
     }	/* end else */
 
     /*Move on to the next item in the member list*/
@@ -349,7 +367,10 @@ MEMBER_LIST make_members(ID_LIST list, TYPE newtype)
   if(!p) 
     bug("Empty list passed to add members");
 
-  if (debug) {
+  /*Debugging*/
+  if(debug) 	
+  {
+    /*Prints debugging statements*/
     printf("Typing members with TYPE:\n");
     ty_print_type(newtype);
     printf("\n");
@@ -456,39 +477,16 @@ void resolve_ptrs()
 /*Function that inserts an ID into a parameter list*/
 PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
 {
-  /*Parameter list pointers*/
-  PARAM_LIST previous = NULL;
-  PARAM_LIST toReturn = pList;
+  /*Parameter list pointer, allocates memory*/
+  PARAM_LIST toReturn;
+  toReturn = malloc(sizeof(PARAM));
 
-  /*While loop to determine where the node should be placed*/
-  while(pList != NULL)
-  {
-    /*Goes to the next node in the list*/
-    previous = pList;
-    pList = pList->next;
-    
-  }
-
-  /*If the previous node is equal to null, insert at front*/
-  if(previous == NULL)
-  {
-    /*Create the node and insert it*/
-    toReturn = (PARAM_LIST)malloc(sizeof(PARAM));
-    toReturn->id = id;
-    toReturn->is_ref = isRef;
-    toReturn->next = pList;
-
-    /*Returns the list*/
-    return toReturn;
-  }
-
-  /*Insert somewhere in the middle of the list*/
-  previous->next = (PARAM_LIST)malloc(sizeof(PARAM));
-  previous = previous->next;
-  previous->id = id;
-  previous->is_ref = isRef;
-  previous->next = pList;
-
+  /*Sets attributes*/
+  toReturn->id = id;
+  toReturn->is_ref = isRef;
+  toReturn->sc = NO_SC;
+  toReturn->next = pList;
+  
   /*Returns the list*/
   return toReturn;
 } // end insertParam
@@ -570,16 +568,33 @@ PARAM_LIST param_concat(PARAM_LIST list1, PARAM_LIST list2)
 /* Function that checks for duplicate params */
 void check_params(PARAM_LIST list)
 {
-   PARAM_LIST p = list;
-   ST_ID a,b;
-   a = p->id;
-   if(debug) printf("String ID: %s\n", st_get_id_str(a) );
+  /*Copies of the param list*/
+  PARAM_LIST p = list;
 
-   while (p->next) {
-	p = p->next;
-	b = p->id;
-	if(debug) printf("Compare with string ID: %s\n", st_get_id_str(b) );
-	if (a==b) error ("Duplicate parameter name: \"%s\"", st_get_id_str(a) );
+  /*ST id's*/
+  ST_ID a,b;
+
+  /*Gets the first id off the list*/
+  a = p->id;
+
+  /*Debugging*/
+  if(debug) 
+    printf("String ID: %s\n", st_get_id_str(a) );
+  
+  /*While loop that goes through the list*/
+  while(p->next) 
+  {
+    /*Gets the next element in the list and the id*/
+    p = p->next;
+    b = p->id;
+
+    /*Debugging*/
+    if(debug) 
+      printf("Compare with string ID: %s\n", st_get_id_str(b) );
+
+    /*If duplicate parameters*/
+    if(a==b) 
+      error("Duplicate parameter name: \"%s\"", st_get_id_str(a) );
    }
 } // end check_params
 
