@@ -18,8 +18,6 @@
 #include "symtab.h"
 #include "message.h"
 
-#include <malloc.h>
-
 
 #define HT_LENGTH	997	/* hash table length */
 
@@ -669,7 +667,7 @@ static int spool_num = 0;            /* count of used records */
 static char *alloc_str(int n)
 
 {
-    if (strpool_num + n <=  STRPOOL)  /* fits */
+    if (strpool_num + n + 1 <=  STRPOOL)  /* fits */
 	strpool_num = strpool_num + n + 1;
     else   /* not enough room */
     {
