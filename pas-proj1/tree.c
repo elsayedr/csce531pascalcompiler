@@ -760,3 +760,45 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
   }
 } // end make_function
 
+/*Function that frees an expression*/
+void expr_free(EXPR expr)
+{
+  /*If the expression is an intconst, real, or string const*/
+  if(expr->tag == INTCONST || expr->tag == STRCONST || expr->tag == REALCONST || expr->tag == GID || expr->tag == LFUN || expr->tag == LVAR || expr->tag == NULLOP || expr->tag == ERROR)
+  {
+    /*Frees the expression*/
+    free(expr);
+  }
+  /*Else if unary operation*/
+  else if(expr->tag == UNOP)
+  {
+    /*Frees the expression of the operand, frees the expression*/
+    expr_free(expr->u.unop.operand);
+    free(expr);
+  }
+  /*Else if binary operation*/
+  else if(expr->tag == BINOP)
+  {
+    /*Frees the operands, frees the expression*/
+    expr_free(expr->u.binop.left);
+    expr_free(expr->u.binop.right);
+    free(expr);
+  }
+  /*Else if function call*/
+  else if(expr->tag == FCALL)
+  {
+    /*Frees the reference to the function, frees the arguments list, frees the expression*/
+    expr_free(expr->u.fcall.function);
+    expr_list_free(expr->u.fcall.args);
+    free(expr);
+  }
+}
+
+/*Function that frees up an expression list*/
+void expr_list_free(EXPR_LIST list)
+{
+  /*Frees the expression, recursive call, frees the final list*/
+  expr_free(list->expr);
+  expr_list_free(list->next);
+  free(list);
+}
