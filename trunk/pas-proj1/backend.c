@@ -48,9 +48,9 @@ static int aa_top = -1;
        loc_var_offset - offsets of local vars
 
    They are all initialized in b_func_prologue() and updated in
-   b_store_formal_params(), except retur_val_offset,
+   b_store_formal_params(), except return_val_offset,
    which is initialized in b_alloc_return_value() and never updated.
-   loc_var_offseet is also updated as local variables
+   loc_var_offset is also updated as local variables
    are allocated.
 
    In Pascal, procedure/function definitions can be nested, so the user
@@ -1659,7 +1659,7 @@ void b_prepare_return (TYPETAG return_type)
       return;
 
   if (return_value_offset >= 0)
-      warning("b_prepare_return: no return value allocated");
+      bug("b_prepare_return: no return value allocated");
 
   switch (return_type) {
   case TYSIGNEDCHAR:
@@ -2179,15 +2179,15 @@ void b_alloc_ptr (char *init)
 void b_alloc_float (double init)
 {
   global_float_val = (float)init;
-  emit ("	.long	%d", *(int *)&global_float_val);
+  emit ("	.uaword	%#08lx", *(long *)&global_float_val);
 }
 
 
 void b_alloc_double (double init)
 {
   global_double_val = init;
-  emit ("	.long	%d", *(int *)&global_double_val);
-  emit ("	.long	%d", *((int *)&global_double_val + 1));
+  emit ("	.uaword	%#08lx", *((long *)&global_double_val + 1));
+  emit ("	.uaword	%#08lx", *(long *)&global_double_val);
 }
 
 
