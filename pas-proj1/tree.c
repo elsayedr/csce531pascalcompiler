@@ -119,6 +119,115 @@ EXPR make_realconst_expr(double val)
   return eNode;
 }
 
+/*Function that creates a string constant expression node*/
+EXPR make_strconst_expr(char * str)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the values of the node*/
+  eNode->tag = STRCONST;
+  eNode->u.strval = str;
+  eNode->type = ty_build_basic(TYSIGNEDCHAR);
+
+  /*Returns the node*/
+  return eNode;
+}
+
+/*Function that creates an id expression node*/
+EXPR make_id_expr(ST_ID id)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the values of the node*/
+  eNode->tag = GID;
+  eNode->u.gid = id;
+
+  /*Returns the node*/
+  return eNode;
+}
+
+/*Function that makes a null operation expression node*/
+EXPR make_null_expr(EXPR_NULLOP op)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the attributes of the node*/
+  eNode->tag = NULLOP;
+  eNode->u.nullop.op = op;
+
+  /*Returns the node*/
+  return eNode;
+}
+
+/*Function that makes a unary operator expression node*/
+EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the attributes of the node*/
+  eNode->tag = UNOP;
+  eNode->u.unop.op = op;
+  eNode->u.unop.operand = sub;
+
+  /*Returns the node*/
+  return eNode;
+}
+
+/*Function that makes a binary operator expression node*/
+EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the attributes of the node*/
+  eNode->tag = BINOP;
+  eNode->u.binop.op = op;
+  eNode->u.binop.left = left;
+  eNode->u.binop.right = right;
+
+  /*Returns the node*/
+  return eNode;
+}
+
+/*Function that makes a function call expression node*/
+EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the attributes of the node*/
+  eNode->tag = FCALL;
+  eNode->u.fcall.args = args;
+  eNode->u.fcall.function = func;
+
+  /*Returns the node*/
+  return eNode;
+}
+
+/*Function that makes an error expression node*/
+EXPR make_error_expr()
+{
+  /*Creates the node and allocates memory*/
+  EXPR eNode;
+  eNode = malloc(sizeof(EXPR_NODE));
+
+  /*Sets the attributes of the node*/
+  eNode->tag = ERROR;
+
+  /*Returns the node*/
+  return eNode;
+}
+
 /*Function that creates a subrange*/
 TYPE make_subrange(long a, long b)
 {
