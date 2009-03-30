@@ -802,3 +802,13 @@ void expr_list_free(EXPR_LIST list)
   expr_list_free(list->next);
   free(list);
 }
+
+/*Function that frees up a linked list*/
+void id_list_free(ID_LIST list)
+{
+  /*Frees the next node in the list*/
+  id_list_free(list->next);
+
+  /*Frees the list*/
+  free(list);
+}

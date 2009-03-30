@@ -148,6 +148,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs);
 BOOLEAN is_lval(EXPR expr);
 void expr_free(EXPR expr);
 void expr_list_free(EXPR_LIST list);
+void id_list_free(ID_LIST list);
 
 #endif
 
