@@ -773,23 +773,28 @@ void expr_free(EXPR expr)
   else if(expr->tag == UNOP)
   {
     /*Frees the expression of the operand, frees the expression*/
-    expr_free(expr->u.unop.operand);
+    if(expr->u.unop.operand)
+      expr_free(expr->u.unop.operand);
     free(expr);
   }
   /*Else if binary operation*/
   else if(expr->tag == BINOP)
   {
     /*Frees the operands, frees the expression*/
-    expr_free(expr->u.binop.left);
-    expr_free(expr->u.binop.right);
+    if(expr->u.binop.left)
+      expr_free(expr->u.binop.left);
+    if(expr->u.binop.right)
+      expr_free(expr->u.binop.right);
     free(expr);
   }
   /*Else if function call*/
   else if(expr->tag == FCALL)
   {
     /*Frees the reference to the function, frees the arguments list, frees the expression*/
-    expr_free(expr->u.fcall.function);
-    expr_list_free(expr->u.fcall.args);
+    if(expr->u.fcall.function)
+      expr_free(expr->u.fcall.function);
+    if(expr->u.fcall.args)
+      expr_list_free(expr->u.fcall.args);
     free(expr);
   }
 }
@@ -798,18 +803,23 @@ void expr_free(EXPR expr)
 void expr_list_free(EXPR_LIST list)
 {
   /*Frees the expression, recursive call, frees the final list*/
-  expr_free(list->expr);
-  expr_list_free(list->next);
+  if(list->expr)
+    expr_free(list->expr);
+  if(list->next)
+    expr_list_free(list->next);
   free(list);
 }
 
 /*Function that frees up a linked list*/
 void id_list_free(ID_LIST list)
 {
-  /*Frees the next node in the list*/
-  id_list_free(list->next);
+  /*If the next element exists*/
+  if(list->next)
+  {
+    /*Frees the next node in the list*/
+    id_list_free(list->next);
+  }
 
   /*Frees the list*/
-  free(list->id);
   free(list);
 }

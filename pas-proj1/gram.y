@@ -492,10 +492,10 @@ procedural_type_formal_parameter_list
     ;
 
 procedural_type_formal_parameter
-    : id_list				{ $$ = make_params($1, ty_build_basic(TYVOID), FALSE); }
-    | id_list ':' typename		{ $$ = make_params($1, $3, FALSE); }
-    | LEX_VAR id_list ':' typename	{ $$ = make_params($2, $4, TRUE); }
-    | LEX_VAR id_list			{ $$ = make_params($2, ty_build_basic(TYVOID), TRUE); }
+    : id_list				{ $$ = make_params($1, ty_build_basic(TYVOID), FALSE); id_list_free($1); }
+    | id_list ':' typename		{ $$ = make_params($1, $3, FALSE); id_list_free($1); }
+    | LEX_VAR id_list ':' typename	{ $$ = make_params($2, $4, TRUE); id_list_free($2); }
+    | LEX_VAR id_list			{ $$ = make_params($2, ty_build_basic(TYVOID), TRUE); id_list_free($2); }
     ;
 
 new_structured_type
