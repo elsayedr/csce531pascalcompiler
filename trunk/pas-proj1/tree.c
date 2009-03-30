@@ -810,5 +810,6 @@ void id_list_free(ID_LIST list)
   id_list_free(list->next);
 
   /*Frees the list*/
+  free(list->id);
   free(list);
 }
