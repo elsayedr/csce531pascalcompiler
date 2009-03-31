@@ -118,24 +118,12 @@ TYPE check_typename(ST_ID);
 TYPE make_subrange(long, long);
 TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
-// Why doesn't Fenner have make_var()?
 void make_var(ID_LIST, TYPE);
 void resolve_ptr_types();
-
-/* Do we not need these? They are in Fenner's tree.h
-PARAM_LIST check_params(PARAM_LIST params);
-BOOLEAN is_simple_type(TYPETAG tag);
-BOOLEAN is_ordinal_type(TYPETAG tag);
-BOOLEAN is_index_type(TYPE type);
-BOOLEAN is_data_type(TYPETAG tag);
-*/
-
-// Why isn't MEMBER_LIST used in Fenner's code?
 MEMBER_LIST make_members(ID_LIST, TYPE);
 MEMBER_LIST member_concat(MEMBER_LIST, MEMBER_LIST);
 PARAM_LIST make_params(ID_LIST, TYPE, BOOLEAN);
 PARAM_LIST param_concat(PARAM_LIST, PARAM_LIST);
-// Not in Fenner's
 TYPE make_func(PARAM_LIST, TYPE);
 
 
