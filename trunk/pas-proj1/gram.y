@@ -59,6 +59,7 @@ Josh Van Buren */
 #include "defs.h"
 #include "tree.h"
 #include "symtab.h"
+#include "string.h"
 
 /* Cause the `yydebug' variable to be defined.  */
 #define YYDEBUG 1
@@ -394,24 +395,24 @@ sign
     ;
 
 constant_literal
-    : combined_string
-  {}| predefined_literal
-  {};
+    : combined_string	{ $$ = make_strconst_expr($1); }
+    | predefined_literal	{ $$ = $1; }
+    ;
 
 predefined_literal
-    : LEX_NIL
-  {}| p_FALSE
-  {}| p_TRUE
-  {};
+    : LEX_NIL		{ $$ = make_null_expr(NIL_OP); }
+    | p_FALSE		{ $$ = make_strconst_expr($1); }
+    | p_TRUE		{ $$ = make_strconst_expr($1); }
+    ;
 
 combined_string
-    : string
-  {};
+    : string 	/*Default*/
+    ;
 
 string
-    : LEX_STRCONST
-  {}| string LEX_STRCONST
-  {};
+    : LEX_STRCONST	/*Default*/
+    | string LEX_STRCONST	{ strcat($1, $2); $$ = $1; }
+    ;
 
 /* type definition part */
 
