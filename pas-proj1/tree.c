@@ -519,7 +519,7 @@ MEMBER_LIST member_concat(MEMBER_LIST list1, MEMBER_LIST list2)
 } // end member_concat
 
 /*Function that resolves pointers*/
-void resolve_ptrs()
+void resolve_ptr_types()
 {
   /*Symbol table data record, type variables, symbol table id, block number, and boolean variable*/
   ST_DR data_rec;

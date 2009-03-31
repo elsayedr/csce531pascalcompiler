@@ -2,7 +2,7 @@
 #include "backend.h"
 #include "types.h"
 
-/*Function that outputs the necessar code for a global delcaration*/
+/*Function that outputs the necessary code for a global declaration*/
 void declareVariable(ST_ID id, TYPE type)
 {
   /*Variables for the alignment and skip sizes*/

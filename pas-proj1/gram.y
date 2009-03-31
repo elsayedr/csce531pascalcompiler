@@ -314,7 +314,7 @@ import_or_any_declaration_part
   {};
 
 any_declaration_import_part
-    : /*empty*/
+    : /*Empty*/
   {}| any_declaration_import_part any_or_import_decl
   {};
 
@@ -324,7 +324,7 @@ any_or_import_decl
   {};
 
 any_declaration_part
-    : /*empty*/
+    : /*Empty*/
   {}| any_declaration_part any_decl
   {};
 
@@ -353,7 +353,7 @@ label_list
 
 /* Labels are returned as identifier nodes for compatibility with gcc */
 label
-	: LEX_INTCONST		{}	/*will not be needed*/
+	: LEX_INTCONST		{}	/*Will not be needed*/
 	| new_identifier	{}
 	;
 
@@ -375,13 +375,13 @@ constant_definition
 constant
     : identifier		{}/*Evaluates the value of the identifier*/
     | sign identifier		{}/*Negative sign so flip the value*/
-    | number			/*default*/
-    | constant_literal	 	/*not configured yet*/
+    | number			/*Default*/
+    | constant_literal	 	/*Not configured yet*/
     ;
 
 number
     : sign unsigned_number	{} /*Negates the number if the sign is negative*/ 
-    | unsigned_number		/*default*/
+    | unsigned_number		/*Default*/
     ;
 
 unsigned_number
@@ -411,13 +411,13 @@ combined_string
 
 string
     : LEX_STRCONST	/*Default*/
-    | string LEX_STRCONST	{ strcat($1, $2); $$ = $1; }
+    | string LEX_STRCONST	{ $$ = strcat($1, $2); }
     ;
 
 /* type definition part */
 
 type_definition_part
-    : LEX_TYPE type_definition_list semi	{ resolve_ptrs(); }
+    : LEX_TYPE type_definition_list semi	{ resolve_ptr_types(); }
     ;
 
 type_definition_list
@@ -456,10 +456,10 @@ enum_list
     ;
 
 enumerator
-    : new_identifier	{ $$ = 1; }	/*start count of enumerated type entries at 1*/
+    : new_identifier	{ $$ = 1; }	/*Start count of enumerated type entries at 1*/
     ;
 
-subrange_type				 		/*builds the subrange type*/
+subrange_type				 		/*Builds the subrange type*/
     : constant LEX_RANGE constant	{ $$ = make_subrange($1->u.intval, $3->u.intval); }
     ;
 
@@ -616,7 +616,7 @@ one_case_constant
 /* variable declaration part */
 
 variable_declaration_part
-    : LEX_VAR variable_declaration_list		{ resolve_ptrs(); }
+    : LEX_VAR variable_declaration_list		{ resolve_ptr_types(); }
     ;
 
 variable_declaration_list
@@ -625,7 +625,7 @@ variable_declaration_list
   {};
 
 variable_declaration
-    : id_list ':' type_denoter semi		{ resolve_ptrs(); make_var($1,$3); }
+    : id_list ':' type_denoter semi		{ resolve_ptr_types(); make_var($1,$3); }
     ;
 
 function_declaration
