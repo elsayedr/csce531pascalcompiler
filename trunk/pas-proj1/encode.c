@@ -197,3 +197,17 @@ int getSkipSize(TYPE type)
     break;
   }
 }
+
+/*Function that calls backend routines to enter the main program body*/
+void enter_main_body()
+{
+  /*Calls the backend routine*/
+  b_func_prologue("main");
+}
+
+/*Function that calls backend routines to exit the main program body*/
+void exit_main_body()
+{
+  /*Calls the backend routine*/
+  b_func_epilogue("main");
+}

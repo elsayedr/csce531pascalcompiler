@@ -226,17 +226,16 @@ program_component
   {};
 
 main_program_declaration
-    : program_heading semi import_or_any_declaration_part statement_part
-  {};
+    : program_heading { enter_main_body(); } semi import_or_any_declaration_part statement_part	{ exit_main_body(); };
 
 program_heading
-    : LEX_PROGRAM new_identifier optional_par_id_list
-  {};
+    : LEX_PROGRAM new_identifier optional_par_id_list	{ $$ = id_prepend($3, $1); }
+    ;
 
 optional_par_id_list
-    : /*empty*/
-  {}| '(' id_list ')'
-  {};
+    : /*empty*/ {}
+    | '(' id_list ')'	{ $$ = $2; }
+    ;
 
 id_list
     : new_identifier			{ $$ = id_prepend(NULL,$1); }
