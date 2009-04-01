@@ -976,12 +976,12 @@ index_expression_item
 /* expressions */
 
 static_expression
-    : expression
-  {};
+    : expression	// default
+    ;
 
 boolean_expression
-    : expression
-  {};
+    : expression	// default
+    ;
 
 expression  
     : expression relational_operator simple_expression	{ make_bin_expr($2,$1,$3); }
@@ -992,10 +992,10 @@ expression
 simple_expression
     : term					// default
     | simple_expression adding_operator term	{ make_bin_expr($2,$1,$3); }
-    | simple_expression LEX_SYMDIFF term
-  {}| simple_expression LEX_OR term
-  {}| simple_expression LEX_XOR term
-  {};
+    | simple_expression LEX_SYMDIFF term	{ make_bin_expr(SYMDIFF_OP,$1,$3); }
+    | simple_expression LEX_OR term		{ make_bin_expr(OR_OP,$1,$3); }
+    | simple_expression LEX_XOR term		{ make_bin_expr(XOR_OP,$1,$3); }
+    ;
 
 term
     : signed_primary
@@ -1122,25 +1122,25 @@ rts_fun_parlist
   {};
 
 relational_operator
-    : LEX_NE
-  {}| LEX_LE
-  {}| LEX_GE
-  {}| '='
-  {}| '<'
-  {}| '>'
-  {};
+    : LEX_NE	{ $$ = NE_OP; }
+    | LEX_LE	{ $$ = LE_OP; }
+    | LEX_GE	{ $$ = GE_OP; }
+    | '='	{ $$ = EQ_OP; }
+    | '<'	{ $$ = LESS_OP; }
+    | '>'	{ $$ = GREATER_OP; }
+    ;
 
 multiplying_operator
-    : LEX_DIV
-  {}| LEX_MOD
-  {}| '/'
-  {}| '*'
-  {};
+    : LEX_DIV	{ $$ = REALDIV_OP; }
+    | LEX_MOD	{ $$ = MOD_OP; }
+    | '/'	{ $$ = DIV_OP; }
+    | '*'	{ $$ = MUL_OP; }
+    ;
 
 adding_operator
-    : '-'
-  {}| '+'
-  {};
+    : '-'	{ $$ = ADD_OP; }
+    | '+'	{ $$ = SUB_OP; }
+    ;
 
 semi
     : ';'
