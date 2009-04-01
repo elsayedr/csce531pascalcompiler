@@ -373,14 +373,29 @@ constant_definition
   {};
 
 constant
-    : identifier		{}/*Evaluates the value of the identifier*/
-    | sign identifier		{}/*Negative sign so flip the value*/
+    : identifier		{ $$ = make_id_expr($1); }
+    | sign identifier		{ $$ = make_un_expr($1, make_id_expr($2)); }
     | number			/*Default*/
     | constant_literal	 	/*Not configured yet*/
     ;
 
 number
-    : sign unsigned_number	{} /*Negates the number if the sign is negative*/ 
+    : sign unsigned_number	{
+				  /*Checks the tag, if intconst*/
+				  if($2->tag == INTCONST)
+				  {
+				    /*If the sign is negative*/
+				    if($1 == NEG_OP)
+				      $2->u.intval = $2->u.intval * -1;
+				  }
+				  /*If realconst*/
+				  else if($2->tag == REALCONST)
+				  {
+				    /*If the sign is negative*/
+				    if($1 == NEG_OP)
+				      $2->u.realval = $2->u.realval * -1;
+				  }
+				}  
     | unsigned_number		/*Default*/
     ;
 
@@ -390,8 +405,8 @@ unsigned_number
     ;
 
 sign
-    : '+'	{ $$ = '+'; }
-    | '-'	{ $$ = '-'; }
+    : '+'	{ $$ = UPLUS_OP; }
+    | '-'	{ $$ = NEG_OP; }
     ;
 
 constant_literal

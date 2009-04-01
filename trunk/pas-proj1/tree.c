@@ -138,12 +138,20 @@ EXPR make_strconst_expr(char * str)
 /*Function that creates an id expression node*/
 EXPR make_id_expr(ST_ID id)
 {
+  /*Symbol table data record and block number*/
+  ST_DR record;
+  int blockNum;
+
+  /*Gets the ST_DR for the type*/
+  record = st_lookup(id, &blockNum);
+
   /*Creates the node and allocates memory*/
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
   /*Sets the values of the node*/
   eNode->tag = GID;
+  eNode->type = record->u.decl.type;
   eNode->u.gid = id;
 
   /*Returns the node*/
