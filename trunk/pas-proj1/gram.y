@@ -198,7 +198,7 @@ int block;
 %type <y_type> new_structured_type subrange_type new_procedural_type
 %type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type functiontype
 %type <y_ptrobj> pointer_domain_type
-%type <y_param> optional_procedural_type_formal_parameter_list procedural_type_formal_parameter_list procedural_type_formal_parameter
+%type <y_param> optional_procedural_type_formal_parameter_list procedural_type_formal_parameter_list procedural_type_formal_parameter optional_par_formal_parameter_list formal_parameter_list formal_parameter
 %type <y_index> array_index_list
 %type <y_idlist> id_list optional_par_id_list
 %type <y_member> record_field_list fixed_part record_section variant_part
@@ -648,9 +648,9 @@ function_declaration
   {};
 
 function_heading
-    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list
-  {}| LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype
-  {};
+    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list	{ $$.type = make_func($3, ty_build_basic(TYVOID)); $$.id = $2; }
+    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype	{ $$.type = make_func($3, $4); $$.id = $2; }
+    ;
 
 directive_list
     : directive
@@ -670,27 +670,27 @@ functiontype
 /* parameter specification section */
 
 optional_par_formal_parameter_list
-    : /*empty*/
-  {}| '(' formal_parameter_list ')'
-  {};
+    : /*empty*/	{}
+    | '(' formal_parameter_list ')'	{ $$ = $2; }
+    ;
 
 formal_parameter_list
-    : formal_parameter
-  {}| formal_parameter_list semi formal_parameter
-  {};
+    : formal_parameter	/*Default*/
+    | formal_parameter_list semi formal_parameter	{ $$ = param_concat($1, $3); }
+    ;
 
 formal_parameter
-    : id_list ':' parameter_form
-  {}| LEX_VAR id_list ':' parameter_form
-  {}| function_heading
-  {}| id_list ':' conformant_array_schema
-  {}| LEX_VAR id_list ':' conformant_array_schema
-  {};
+    : id_list ':' parameter_form	{ $$ = make_params($1, $3, FALSE); }
+    | LEX_VAR id_list ':' parameter_form	{ $$ = make_params($2, $4, TRUE); }
+    | function_heading	{}
+    | id_list ':' conformant_array_schema	{}
+    | LEX_VAR id_list ':' conformant_array_schema	{}
+    ;
 
 parameter_form
-    : typename
-  {}| open_array
-  {};
+    : typename	/*Default*/
+    | open_array	{}
+    ;
 
 conformant_array_schema
     : packed_conformant_array_schema
