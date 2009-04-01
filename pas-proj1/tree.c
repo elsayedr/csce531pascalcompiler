@@ -167,6 +167,7 @@ EXPR make_null_expr(EXPR_NULLOP op)
 
   /*Sets the attributes of the node*/
   eNode->tag = NULLOP;
+  eNode->type = NULL;
   eNode->u.nullop.op = op;
 
   /*Returns the node*/
@@ -182,6 +183,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 
   /*Sets the attributes of the node*/
   eNode->tag = UNOP;
+  eNode->type = NULL;
   eNode->u.unop.op = op;
   eNode->u.unop.operand = sub;
 
@@ -198,6 +200,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 
   /*Sets the attributes of the node*/
   eNode->tag = BINOP;
+  eNode->type = NULL;
   eNode->u.binop.op = op;
   eNode->u.binop.left = left;
   eNode->u.binop.right = right;
@@ -215,6 +218,7 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 
   /*Sets the attributes of the node*/
   eNode->tag = FCALL;
+  eNode->type = NULL;
   eNode->u.fcall.args = args;
   eNode->u.fcall.function = func;
 
@@ -231,6 +235,7 @@ EXPR make_error_expr()
 
   /*Sets the attributes of the node*/
   eNode->tag = ERROR;
+  eNode->type = NULL;
 
   /*Returns the node*/
   return eNode;
@@ -425,7 +430,7 @@ void make_var(ID_LIST list, TYPE newtype)
 } // end make_var
 
 /*Function that inserts an ID into a member list*/
-MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
+MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id) // internal
 {
   /*Member list pointers*/
   MEMBER_LIST previous = NULL;
@@ -463,7 +468,7 @@ MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)
 } // end insertMember
 
 /*Function that creates a member list from the linked list of ST_ID's*/
-MEMBER_LIST createMemberListFromID(ID_LIST list)
+MEMBER_LIST createMemberListFromID(ID_LIST list) // internal
 {
   /*Linked List*/
   ID_LIST copy = list;
@@ -487,7 +492,7 @@ MEMBER_LIST createMemberListFromID(ID_LIST list)
 } // end 
 
 /* Function that takes a member list and assigns a type to each member */
-MEMBER_LIST make_members(ID_LIST list, TYPE newtype)
+MEMBER_LIST make_members(ID_LIST list, TYPE newtype)  // exported
 {
   /*Member list*/
   MEMBER_LIST memList, p;
@@ -520,7 +525,7 @@ MEMBER_LIST make_members(ID_LIST list, TYPE newtype)
 } // end make_members
 
 /*Function that adds two member lists together*/
-MEMBER_LIST member_concat(MEMBER_LIST list1, MEMBER_LIST list2)
+MEMBER_LIST member_concat(MEMBER_LIST list1, MEMBER_LIST list2)  // exported
 {
   /*Member list*/
   MEMBER_LIST p = list1;
@@ -541,7 +546,7 @@ MEMBER_LIST member_concat(MEMBER_LIST list1, MEMBER_LIST list2)
 } // end member_concat
 
 /*Function that resolves pointers*/
-void resolve_ptr_types()
+void resolve_ptr_types() 	// exported
 {
   /*Symbol table data record, type variables, symbol table id, block number, and boolean variable*/
   ST_DR data_rec;
@@ -606,7 +611,7 @@ void resolve_ptr_types()
 } // end resolve_ptrs
 
 /*Function that inserts an ID into a parameter list*/
-PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
+PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)	// internal
 {
   /*Parameter list pointer, allocates memory*/
   PARAM_LIST toReturn;
@@ -623,7 +628,7 @@ PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)
 } // end insertParam
 
 /*Converts a linked list to a list of parameters*/
-PARAM_LIST createParamListFromID(ID_LIST list, BOOLEAN isRef)
+PARAM_LIST createParamListFromID(ID_LIST list, BOOLEAN isRef)	// internal
 {
   /*Checks for empty member list*/
   if(!list)
@@ -652,7 +657,7 @@ PARAM_LIST createParamListFromID(ID_LIST list, BOOLEAN isRef)
 } // end
 
 /*Function that sets the type for all of the elements in the parameter list*/
-PARAM_LIST make_params(ID_LIST list, TYPE newtype, BOOLEAN isRef)
+PARAM_LIST make_params(ID_LIST list, TYPE newtype, BOOLEAN isRef)	// exported
 {
   /*Parameter list*/
   PARAM_LIST p, paramList = createParamListFromID(list, isRef);
@@ -676,7 +681,7 @@ PARAM_LIST make_params(ID_LIST list, TYPE newtype, BOOLEAN isRef)
 } // end make_params
 
 /*Function that combines two parameter lists*/
-PARAM_LIST param_concat(PARAM_LIST list1, PARAM_LIST list2)
+PARAM_LIST param_concat(PARAM_LIST list1, PARAM_LIST list2)	// exported
 {
   /*Parameter list*/
   PARAM_LIST p = list1;
@@ -697,7 +702,7 @@ PARAM_LIST param_concat(PARAM_LIST list1, PARAM_LIST list2)
 } // end param_concat
 
 /* Function that checks for duplicate params */
-void check_params(PARAM_LIST list)
+void check_params(PARAM_LIST list)	// internal
 {
   /*Copies of the param list*/
   PARAM_LIST p = list;
@@ -730,7 +735,7 @@ void check_params(PARAM_LIST list)
 } // end check_params
 
 /*Function that creates a function type*/
-TYPE make_func(PARAM_LIST list, TYPE newtype)
+TYPE make_func(PARAM_LIST list, TYPE newtype)	// exported
 {
    /*Checks to see if the parameter list exists*/
    if(!list)
@@ -783,7 +788,7 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
 } // end make_function
 
 /*Function that frees an expression*/
-void expr_free(EXPR expr)
+void expr_free(EXPR expr)	// exported
 {
   /*If the expression is an intconst, real, or string const*/
   if(expr->tag == INTCONST || expr->tag == STRCONST || expr->tag == REALCONST || expr->tag == GID || expr->tag == LFUN || expr->tag == LVAR || expr->tag == NULLOP || expr->tag == ERROR)
@@ -822,7 +827,7 @@ void expr_free(EXPR expr)
 }
 
 /*Function that frees up an expression list*/
-void expr_list_free(EXPR_LIST list)
+void expr_list_free(EXPR_LIST list)	// exported
 {
   /*Frees the expression, recursive call, frees the final list*/
   if(list->expr)
@@ -833,7 +838,7 @@ void expr_list_free(EXPR_LIST list)
 }
 
 /*Function that frees up a linked list*/
-void id_list_free(ID_LIST list)
+void id_list_free(ID_LIST list)	// exported
 {
   /*If the next element exists*/
   if(list->next)
