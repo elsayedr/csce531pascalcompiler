@@ -115,7 +115,7 @@ extern int fi_top;
 ID_LIST id_prepend(ID_LIST, ST_ID);
 INDEX_LIST index_append(INDEX_LIST, TYPE);
 TYPE check_typename(ST_ID);
-TYPE make_subrange(long, long);
+TYPE make_subrange(EXPR, EXPR);
 TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
 void make_var(ID_LIST, TYPE);

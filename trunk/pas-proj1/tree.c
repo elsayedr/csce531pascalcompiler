@@ -237,10 +237,24 @@ EXPR make_error_expr()
 }
 
 /*Function that creates a subrange*/
-TYPE make_subrange(long a, long b)
+TYPE make_subrange(EXPR a, EXPR b)
 {
+  long low, high;
+
+  if (a->tag!=INTCONST) {
+	error("Subrange lower index is not Integer");
+	return NULL;
+  }
+  if (b->tag!=INTCONST) {
+	error("Subrange upper index is not Integer");
+	return NULL;
+  }
+
+  low=a->u.intval;
+  high=b->u.intval;
+
   /*If subrange is invalid, error*/
-  if(a>b)
+  if(low>high)
   {
     /*Error, return null*/
     error("Empty subrange in array index");
@@ -250,9 +264,9 @@ TYPE make_subrange(long a, long b)
   else
   {
     /*Debugging information*/
-    if(debug) printf("Building subrange of INT from %d to %d\n", (int)a, (int)b);
+    if(debug) printf("Building subrange of INT from %d to %d\n", (int)low, (int)high);
 
-    return ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), a, b);
+    return ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), low, high);
   }
 } // end make_subrange
 

@@ -474,7 +474,7 @@ enumerator
     ;
 
 subrange_type				 		/*Builds the subrange type*/
-    : constant LEX_RANGE constant	{ $$ = make_subrange($1->u.intval, $3->u.intval); }
+    : constant LEX_RANGE constant	{ $$ = make_subrange($1, $3); }
     ;
 
 new_pointer_type
