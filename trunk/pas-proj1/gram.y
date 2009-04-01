@@ -851,19 +851,19 @@ optional_par_actual_parameter_list
   {};
 
 actual_parameter_list
-    : actual_parameter
-  {}| actual_parameter_list ',' actual_parameter
-  {};
+    : actual_parameter					{ expr_prepend(NULL,$1); }
+    | actual_parameter_list ',' actual_parameter	{ expr_prepend($1,$3); }
+    ;
 
 actual_parameter
-    : expression
-  {};
+    : expression					// default
+    ;
 
 /* ASSIGNMENT and procedure calls */
 
 assignment_or_call_statement
-    : variable_or_function_access_maybe_assignment rest_of_statement
-  {};
+    : variable_or_function_access_maybe_assignment rest_of_statement	{}	// $$=check_assign_or_proc_call($1,ID?,$2);
+    ;
 
 variable_or_function_access_maybe_assignment
     : identifier
@@ -872,9 +872,9 @@ variable_or_function_access_maybe_assignment
   {};
 
 rest_of_statement
-	: /*empty*/
-  {}| LEX_ASSIGN expression
-  {};
+    : /*empty*/			{}
+    | LEX_ASSIGN expression	{ $$ = $2; }	
+    ;
 
 standard_procedure_statement
     : rts_proc_onepar '(' actual_parameter ')'
@@ -984,15 +984,15 @@ boolean_expression
   {};
 
 expression  
-    : expression relational_operator simple_expression
-  {}| expression LEX_IN simple_expression
-  {}| simple_expression
-  {};
+    : expression relational_operator simple_expression	{ make_bin_expr($2,$1,$3); }
+    | expression LEX_IN simple_expression		{}
+    | simple_expression					// default
+    ;
 
 simple_expression
-    : term
-  {}| simple_expression adding_operator term
-  {}| simple_expression LEX_SYMDIFF term
+    : term					// default
+    | simple_expression adding_operator term	{ make_bin_expr($2,$1,$3); }
+    | simple_expression LEX_SYMDIFF term
   {}| simple_expression LEX_OR term
   {}| simple_expression LEX_XOR term
   {};

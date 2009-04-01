@@ -11,6 +11,18 @@
 #include "encode.h"
 
 /* Function that inserts an ST_ID into a linked list */
+EXPR_LIST expr_prepend(EXPR_LIST list, EXPR expr)
+{
+  EXPR_LIST new;
+  new = (EXPR_LIST) malloc(sizeof(EXPR_LIST_NODE));
+  
+  /*Inserts the element and returns the list*/
+  new->expr = expr;
+  new->next = list;
+  return new;
+} // end expr_prepend
+
+/* Function that inserts an ST_ID into a linked list */
 ID_LIST id_prepend(ID_LIST list, ST_ID newid)
 {
   ID_LIST new;
@@ -21,7 +33,7 @@ ID_LIST id_prepend(ID_LIST list, ST_ID newid)
   new->next = list;
   return new;
   
-} // end id-prepend
+} // end id_prepend
 
 /* Function that inserts an index into the index list */
 INDEX_LIST index_append(INDEX_LIST list, TYPE newtype)
@@ -838,7 +850,7 @@ void expr_list_free(EXPR_LIST list)	// exported
 }
 
 /*Function that frees up a linked list*/
-void id_list_free(ID_LIST list)	// exported
+void id_list_free(ID_LIST list)
 {
   /*If the next element exists*/
   if(list->next)
