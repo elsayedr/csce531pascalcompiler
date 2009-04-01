@@ -129,7 +129,7 @@ EXPR make_strconst_expr(char * str)
   /*Sets the values of the node*/
   eNode->tag = STRCONST;
   eNode->u.strval = str;
-  eNode->type = ty_build_basic(TYSIGNEDCHAR);
+  eNode->type = ty_build_ptr(NULL, ty_build_basic(TYSIGNEDCHAR) );
 
   /*Returns the node*/
   return eNode;

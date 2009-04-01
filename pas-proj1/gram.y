@@ -251,7 +251,7 @@ identifier
     ;
 
 new_identifier
-    : new_identifier_1	{ $$ = (ST_ID) st_enter_id($1); if (debug) printf("NEW ID: %s\n",$1); }
+    : new_identifier_1	{ $$ = (ST_ID)st_enter_id($1); if (debug) printf("NEW ID: %s\n",$1); }
     ;
 
 new_identifier_1
@@ -743,7 +743,7 @@ statement
   {};
 
 unlabelled_statement
-	: structured_statement
+    : structured_statement
   {}| simple_statement
   {};
 
