@@ -16,7 +16,7 @@ ID_LIST id_prepend(ID_LIST list, ST_ID newid)  // exported
   ID_LIST new;
   new = (ID_LIST) malloc(sizeof(ID_NODE));
   
-  /*Inserts the element and returns the list*/
+  /* Inserts the element and returns the list */
   new->id = newid;
   new->next = list;
   return new;
@@ -26,14 +26,14 @@ ID_LIST id_prepend(ID_LIST list, ST_ID newid)  // exported
 /* Inserts an index into the index list */
 INDEX_LIST index_append(INDEX_LIST list, TYPE newtype)  // exported
 {
-  /*Works by using the prev field to link back to the current list*/
-  /*Creates the index list*/
+  /* Works by using the prev field to link back to the current list */
+  /* Creates the index list */
   INDEX_LIST new, p;
 
-  /*Checks to see if the new type exists*/
+  /* Checks to see if the new type exists */
   if(!newtype)
   {
-    /*Error and returns*/
+    /* Error and returns */
     error("Illegal index type (ignored)");	
     return list;
   }
@@ -41,49 +41,49 @@ INDEX_LIST index_append(INDEX_LIST list, TYPE newtype)  // exported
   {
     new = (INDEX_LIST) malloc(sizeof(INDEX));
   
-    /* initialize new */	
+    /* Initialize new */	
     new->type = newtype;
     new->next = NULL;
 
     p=list;
     if (p) {	
-	if (debug) printf("List not empty\n");	/* if list exists */
-	while(p->next) p=p->next; 	/* go to end of list */
-    	p->next=new;			/* append new */
-	return list;			/* return current list */
+	if (debug) printf("List not empty\n");	/* If list exists */
+	while(p->next) p=p->next; 	/* Go to end of list */
+    	p->next=new;			/* Append new */
+	return list;			/* Return current list */
     }
-    else return new;			/* otherwise just return new */
+    else return new;			/* Otherwise just return new */
   }
 } // end index_append
 
 /* Looks up the type given from a symbol table id */
 TYPE check_typename(ST_ID id)  // exported
 {
-  /*Data record from the symbol table and block number*/
+  /* Data record from the symbol table and block number */
   ST_DR data_rec;
   int block;
 
-  /*Gets the data record from the symbol table*/
+  /* Gets the data record from the symbol table */
   data_rec = st_lookup(id, &block); 
   
-  /*If no record is found*/
+  /* If no record is found */
   if (!data_rec) 
   {
-    /*Undeclared type error, return error type*/
+    /* Undeclared type error, return error type */
     error("Undeclared type name: \"%s\"",st_get_id_str(id));
     return ty_build_basic(TYERROR);
   }
   
-  /*Debugging information*/
+  /* Debugging information */
   else if(debug) 
   { 
-    /*Print the debugging information*/
+    /* Print the debugging information */
     printf("Denoter typename: %s\n", st_get_id_str(id) );
     printf("Reference TYPE:\n");
     ty_print_type(data_rec->u.typename.type); 
     printf("\n");
   }
-  /*Returns the type of the data record*/
+  /* Returns the type of the data record */
   return data_rec->u.typename.type; 
 } // end check_typename 
 
@@ -104,17 +104,17 @@ TYPE make_subrange(EXPR a, EXPR b)  // exported
   low=a->u.intval;
   high=b->u.intval;
 
-  /*If subrange is invalid, error*/
+  /* If subrange is invalid, error */
   if(low>high)
   {
-    /*Error, return null*/
+    /* Error, return null */
     error("Empty subrange in array index");
     return NULL;
   }
-  /*Else build the subrange*/
+  /* Else build the subrange */
   else
   {
-    /*Debugging information*/
+    /* Debugging information */
     if(debug) printf("Building subrange of INT from %d to %d\n", (int)low, (int)high);
 
     return ty_build_subrange(ty_build_basic(TYSIGNEDLONGINT), low, high);
@@ -124,38 +124,38 @@ TYPE make_subrange(EXPR a, EXPR b)  // exported
 /* Creates an array */
 TYPE make_array(INDEX_LIST list, TYPE newtype)  // exported
 {
-  /*If no type, error*/
+  /* If no type, error */
   if(!newtype)
   {
-    /*Error, return error type*/
+    /* Error, return error type */
     error("Data type expected for array elements"); 
     return ty_build_basic(TYERROR);
   }
-  /*Else return the array*/
+  /* Else return the array */
   else 
   {
-    /*Debugging information*/
+    /* Debugging information */
     if(debug) 
     {
-      /*Prints debugging information*/
+      /* Prints debugging information */
       printf("Build array of TYPE:\n");
       ty_print_type(newtype); 
       printf("\n");
     }
 
-    /*Gets the type tag of the type of the elements of the array*/
+    /* Gets the type tag of the type of the elements of the array */
     TYPETAG tag = ty_query(newtype);
 
-    /*Checks the type*/
+    /* Checks the type */
     if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
     {
-      /*Data type expected for array elements, returns error type*/
+      /* Data type expected for array elements, returns error type */
       error("Data type expected for array elements");
       return ty_build_basic(TYERROR);
     }
     else
     {
-      /*Returns the array TYPE*/
+      /* Returns the array TYPE */
       return ty_build_array(newtype, list);
     }
   }
@@ -169,14 +169,14 @@ void make_type(ST_ID iden, TYPE newtype)  // exported
   p = stdr_alloc();
   BOOLEAN resolved;	
 
-  /*Return if the type does not exist*/
+  /* Return if the type does not exist */
   if(!newtype) 
   {
-    /*Debugging information*/
+    /* Debugging information */
     if(debug) 
       printf("Type does not exist\n");
 	
-    /*Return*/
+    /* Return */
     return;
   }
 
@@ -184,13 +184,13 @@ void make_type(ST_ID iden, TYPE newtype)  // exported
   p->tag = TYPENAME;
   p->u.typename.type = newtype;
 
-  /*Checks to see if the type has been resolved*/
+  /* Checks to see if the type has been resolved */
   resolved = st_install(iden, p);
 
-  /*If the type has not been resolved error*/
+  /* If the type has not been resolved error */
   if(!resolved) 
     error("Duplicate definition of \"%s\" in block %d", st_get_id_str(iden), st_get_cur_block());
-  /*Debugging*/
+  /* Debugging */
   else if(debug) 
     printf("TYPE name %s installed\n", st_get_id_str(iden));
 } // end make_type
@@ -198,79 +198,79 @@ void make_type(ST_ID iden, TYPE newtype)  // exported
 /* Makes a variable data record and installs it in the symbol table */
 void make_var(ID_LIST list, TYPE newtype)  // exported
 {
-  /*Symbol table data record and boolean variable*/
+  /* Symbol table data record and boolean variable */
   ST_DR p;  
   BOOLEAN resolved;
   
-  /*If the member list is empty, error*/
+  /* If the member list is empty, error */
   if(!list) 
     bug("Empty list passed to make_var");
 
-  /*If undefined type, error*/
+  /* If undefined type, error */
   if(!newtype) 
   {
-    /*Error, return*/
+    /* Error, return */
     error("Variable(s) must be of data type"); 
     return;
   }
 
-    /*Gets the type tag of the type of the elements of the array*/
+    /* Gets the type tag of the type of the elements of the array */
     TYPETAG tag = ty_query(newtype);
 
-    /*Checks the type*/
+    /* Checks the type */
     if(tag == TYFUNC || tag == TYERROR)
     {
-      /*Data type expected for array elements, returns null*/
+      /* Data type expected for array elements, returns null */
       error("Variable(s) must be of data type");
 
-      /*Even when there is an error, Fenner installs the variable in the symbol table*/
+      /* Even when there is an error, Fenner installs the variable in the symbol table */
       p = stdr_alloc();	  
       p->tag = GDECL;
       p->u.decl.type = newtype;
       p->u.decl.sc = NO_SC;
 
-      /*If the type is error, set the declaration error to true*/
+      /* If the type is error, set the declaration error to true */
       if(tag == TYERROR)
 	p->u.decl.err = TRUE;
 
-      /*Installs the variable in the symbol table*/
+      /* Installs the variable in the symbol table */
       resolved = st_install(list->id, p);
 
-      /*Returns*/
+      /* Return */
       return;
     }
 	
-  /*While the list is not null*/
+  /* While the list is not null */
   while(list) 
   {
-    /*Allocates memory for the data record, sets the tag, sets the type*/
+    /* Allocates memory for the data record, sets the tag, sets the type */
     p = stdr_alloc();	  
     p->tag = GDECL;
     p->u.decl.type = newtype;
 
-    /*Installs the variable in the symbol table*/
+    /* Installs the variable in the symbol table */
     resolved = st_install(list->id, p); 
 
-    /*If the type is not resolved error*/
+    /* If the type is not resolved error */
     if(!resolved) 
       error("Duplicate variable declaration: \"%s\"", st_get_id_str(list->id));
-    /*Else variable resolved*/
+    /* Else variable resolved */
     else 
     {
-      /*Calls the encoding function*/
+      /* Calls the encoding function */
       declareVariable(list->id, newtype);
 	
-      /*Debugging*/
+      /* Debugging */
       if(debug)
       {
-	/*Print debugging statements*/
+	/* Print debugging statements */
 	printf("GDECL created with type:\n");
 	ty_print_type(newtype);
 	printf("\n");
       }
-    }	/* end else */
+    }	/*  end else */
 
-    /*Move on to the next item in the member list*/
+    /* Move on to the next item in the member list */
     list=list->next;
   }
 } // end make_var
@@ -278,303 +278,303 @@ void make_var(ID_LIST list, TYPE newtype)  // exported
 /* Resolves pointers */
 void resolve_ptr_types()  // exported
 {
-  /*Symbol table data record, type variables, symbol table id, block number, and boolean variable*/
+  /* Symbol table data record, type variables, symbol table id, block number, and boolean variable */
   ST_DR data_rec;
   TYPE list, ptr, next;
   ST_ID id;
   int block;
   BOOLEAN resolved;
 
-  /*Debugging information*/
+  /* Debugging information */
   if(debug) 
     printf("Attempting to resolve pointers.\n");
 
-  /*Gets the list of unresolved pointers*/
+  /* Gets the list of unresolved pointers */
   list = ty_get_unresolved();
 
-  /*If the list is empty no unresolved pointers*/
+  /* If the list is empty no unresolved pointers */
   if(!list) 
   {
-    /*Debugging information*/
+    /* Debugging information */
     if(debug) 
       printf("No unresolved pointers\n");
     
-    /*Return*/
+    /* Return */
     return;
   }
 
-  /*While there are still elements in the list*/
+  /* While there are still elements in the list */
   while(list) 
   {
-    /*Gets the pointer, id, and next*/  
+    /* Gets the pointer, id, and next */  
     ptr = ty_query_ptr(list, &id, &next);	
 	  
-    /*Gets the data record for the id*/
+    /* Gets the data record for the id */
     data_rec = st_lookup(id, &block); 
 		
-    /*If the data record does not exist, error*/
+    /* If the data record does not exist, error */
     if(!data_rec) 
       error("Unresolved type name: \"%s\"",st_get_id_str(id));
 				
-    /*Else attempt to resolve the pointer*/
+    /* Else attempt to resolve the pointer */
     else
     {
-      /*Try to resolve the type of the pointer*/
+      /* Try to resolve the type of the pointer */
       resolved = ty_resolve_ptr(list, data_rec->u.typename.type);
 
-      /*If the pointer is not resolved, error*/
+      /* If the pointer is not resolved, error */
       if(!resolved) 
 	error("Unresolved pointer");
-      /*Debugging information*/
+      /* Debugging information */
       else if(debug) 
       {
-	/*Debugging information*/
+	/* Debugging information */
 	printf("Resolved %s ptr with type: \n",st_get_id_str(id));
 	ty_print_type(data_rec->u.typename.type);
 	printf("\n");
       }
     }
 
-    /*Move on to the next item in the list*/
+    /* Move on to the next item in the list */
     list = next;
   } 	
 } // end resolve_ptrs
 
-/* Inserts an ID into a member list */
+/*  Inserts an ID into a member list */
 MEMBER_LIST insertMember(MEMBER_LIST mList, ST_ID id)  // internal
 {
-  /*Member list pointers*/
+  /* Member list pointers */
   MEMBER_LIST previous = NULL;
   MEMBER_LIST toReturn = mList;
 
-  /*While loop to determine where the node should be placed*/
+  /* While loop to determine where the node should be placed */
   while(mList != NULL)
   {
-    /*Goes to the next node in the list*/
+    /* Goes to the next node in the list */
     previous = mList;
     mList = mList->next;
     
   }
 
-  /*If the previous node is equal to null, insert at front*/
+  /* If the previous node is equal to null, insert at front */
   if(previous == NULL)
   {
-    /*Create the node and insert it*/
+    /* Create the node and insert it */
     toReturn = (MEMBER_LIST)malloc(sizeof(MEMBER));
     toReturn->id = id;
     toReturn->next = mList;
 
-    /*Returns the list*/
+    /* Returns the list */
     return toReturn;
   }
 
-  /*Insert somewhere in the middle of the list*/
+  /* Insert somewhere in the middle of the list */
   previous->next = (MEMBER_LIST)malloc(sizeof(MEMBER));
   previous = previous->next;
   previous->id = id;
   previous->next = mList;
 
-  /*Returns the list*/
+  /* Returns the list */
   return toReturn; 
 } // end insertMember
 
-/* Creates a member list from the linked list of ST_ID's */
+/*  Creates a member list from the linked list of ST_ID's */
 MEMBER_LIST createMemberListFromID(ID_LIST list)  // internal
 {
-  /*Linked List*/
+  /* Linked List */
   ID_LIST copy = list;
 
-  /*Creates the member lists and allocates memory*/
+  /* Creates the member lists and allocates memory */
   MEMBER_LIST memList = NULL;
 
-  /*While there are still elements in the list*/
+  /* While there are still elements in the list */
   while(copy != NULL)
   {
-    /*Calls the function to insert the ID into the member list*/
+    /* Calls the function to insert the ID into the member list */
     memList = insertMember(memList, copy->id);
 
-    /*Moves on to the next element*/
+    /* Moves on to the next element */
     copy = copy->next;
 
   }
 
-  /*Returns the member list*/
+  /* Returns the member list */
   return memList;
 } // end 
 
 /* Takes a member list and assigns a type to each member */
 MEMBER_LIST make_members(ID_LIST list, TYPE newtype)  // exported
 {
-  /*Member list*/
+  /* Member list */
   MEMBER_LIST memList, p;
   memList = createMemberListFromID(list);
   p = memList;
 
-  /*If empty list, bug*/
+  /* If empty list, bug */
   if(!p) 
     bug("Empty list passed to add members");
 
-  /*Debugging*/
+  /* Debugging */
   if(debug) 	
   {
-    /*Prints debugging statements*/
+    /* Prints debugging statements */
     printf("Typing members with TYPE:\n");
     ty_print_type(newtype);
     printf("\n");
   }
 
-  /*While there are still elements in the list*/
+  /* While there are still elements in the list */
   while(p) 
   {
-    /*Sets the type of the element, moves on to the next element*/
+    /* Sets the type of the element, moves on to the next element */
     p->type = newtype;
     p=p->next;
   }
 
-  /*Returns the member list*/
+  /* Returns the member list */
   return memList;
 } // end make_members
 
 /* Adds two member lists together */
 MEMBER_LIST member_concat(MEMBER_LIST list1, MEMBER_LIST list2)  // exported
 {
-  /*Member list*/
+  /* Member list */
   MEMBER_LIST p = list1;
 
-  /*If no member list, bug*/
+  /* If no member list, bug */
   if(!p) 
     bug("Empty list passed to combine members");
 
-  /*While there are still elements in the first member list, add them to the beginning of the second*/
+  /* While there are still elements in the first member list, add them to the beginning of the second */
   while(p->next) 
     p=p->next;
 
-  /*Links end of the first list and the beginning of the second*/
+  /* Links end of the first list and the beginning of the second */
   p->next = list2;	
   
-  /*Returns the list*/
+  /* Returns the list */
   return list1;
 } // end member_concat
 
 /* Inserts an ID into a parameter list */
 PARAM_LIST insertParam(PARAM_LIST pList, ST_ID id, BOOLEAN isRef)  // internal
 {
-  /*Parameter list pointer, allocates memory*/
+  /* Parameter list pointer, allocates memory */
   PARAM_LIST toReturn;
   toReturn = malloc(sizeof(PARAM));
 
-  /*Sets attributes*/
+  /* Sets attributes */
   toReturn->id = id;
   toReturn->is_ref = isRef;
   toReturn->sc = NO_SC;
   toReturn->next = pList;
   
-  /*Returns the list*/
+  /* Returns the list */
   return toReturn;
 } // end insertParam
 
 /* Converts a linked list to a list of parameters */
 PARAM_LIST createParamListFromID(ID_LIST list, BOOLEAN isRef)  // internal
 {
-  /*Checks for empty member list*/
+  /* Checks for empty member list */
   if(!list)
   {
-    /*Prints bug and returns*/
+    /* Prints bug and returns */
     bug("Empty linked list passed to convert to parameter list");
     return NULL;
   }
 
-  /*Member list*/
+  /* Member list */
   ID_LIST cList = list;
 
-  /*Creates parameter lists*/
+  /* Creates parameter lists */
   PARAM_LIST retList = NULL;
 
-  /*While there are still elements in the member list*/
+  /* While there are still elements in the member list */
   while(cList)
   {
-    /*Inserts the element into the parameter list and moves on to the next element*/
+    /* Inserts the element into the parameter list and moves on to the next element */
     retList = insertParam(retList, cList->id, isRef);
     cList = cList->next;
   }
 
-    /*Returns the parameter list*/
+    /* Returns the parameter list */
     return retList;
 } // end
 
 /* Sets the type for all of the elements in the parameter list */
 PARAM_LIST make_params(ID_LIST list, TYPE newtype, BOOLEAN isRef)  // exported
 {
-  /*Parameter list*/
+  /* Parameter list */
   PARAM_LIST p, paramList = createParamListFromID(list, isRef);
   p = paramList;
 
-  /*If empty list, bug*/
+  /* If empty list, bug */
   if(!p) 
     bug("Empty list passed to add type parameters");
 
-  /*While there are still elements in the list*/
+  /* While there are still elements in the list */
   while(p) 
   {
-    /*Sets the type of the element, moves on to the next element*/
+    /* Sets the type of the element, moves on to the next element */
     p->type = newtype;
     p->is_ref = isRef;
     p=p->next;
   }
 
-  /*Returns the parameter list*/
+  /* Returns the parameter list */
   return paramList;
 } // end make_params
 
 /* Combines two parameter lists */
 PARAM_LIST param_concat(PARAM_LIST list1, PARAM_LIST list2)  // exported
 {
-  /*Parameter list*/
+  /* Parameter list */
   PARAM_LIST p = list1;
 
-  /*If no member list, bug*/
+  /* If no member list, bug */
   if(!p) 
     bug("Empty list passed to combine parameters");
 
-  /*While there are still elements in the first member list, add them to the beginning of the second*/
+  /* While there are still elements in the first member list, add them to the beginning of the second */
   while(p->next) 
     p=p->next;
 
-  /*Links end of the first list and the beginning of the second*/
+  /* Links end of the first list and the beginning of the second */
   p->next = list2;	
   
-  /*Returns the list*/
+  /* Returns the list */
   return list1;
 } // end param_concat
 
 /* Checks for duplicate params */
 void check_params(PARAM_LIST list)  // internal
 {
-  /*Copies of the param list*/
+  /* Copies of the param list */
   PARAM_LIST p = list;
 
-  /*ST id's*/
+  /* ST id's */
   ST_ID a,b;
 
-  /*Gets the first id off the list*/
+  /* Gets the first id off the list */
   a = p->id;
 
-  /*Debugging*/
+  /* Debugging */
   if(debug) 
     printf("String ID: %s\n", st_get_id_str(a) );
   
-  /*While loop that goes through the list*/
+  /* While loop that goes through the list */
   while(p->next) 
   {
-    /*Gets the next element in the list and the id*/
+    /* Gets the next element in the list and the id */
     p = p->next;
     b = p->id;
 
-    /*Debugging*/
+    /* Debugging */
     if(debug) 
       printf("Compare with string ID: %s\n", st_get_id_str(b) );
 
-    /*If duplicate parameters*/
+    /* If duplicate parameters */
     if(a==b) 
       error("Duplicate parameter name: \"%s\"", st_get_id_str(a) );
    }
@@ -583,52 +583,52 @@ void check_params(PARAM_LIST list)  // internal
 /* Creates a function type */
 TYPE make_func(PARAM_LIST list, TYPE newtype)  // exported
 {
-   /*Checks to see if the parameter list exists*/
+   /* Checks to see if the parameter list exists */
    if(!list)
    {
       /* Not an error: function with no params */
       if (debug) printf("Empty parameter list for function\n");
    }
 
-  /*Gets the type tag of the return type*/
+  /* Gets the type tag of the return type */
   TYPETAG tag = ty_query(newtype);
 
-  /*Checks the return type*/
+  /* Checks the return type */
   if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
   {
-    /*Error, function must reutrn simple type*/
+    /* Error, function must reutrn simple type */
     error("Function return type must be simple type");
   }
-  /*Else check the parameters*/
+  /* Else check the parameters */
   else
   {
-    /*Copy of the parameter list*/
+    /* Copy of the parameter list */
     PARAM_LIST copy = list;
 
-    /*TYPETAG of the current parameter*/
+    /* TYPETAG of the current parameter */
     TYPETAG ptag;
 
-    /*While loop to check the parameters*/
+    /* While loop to check the parameters */
     while(copy != NULL)
     {
-      /*Gets the type tag of the current parameter*/
+      /* Gets the type tag of the current parameter */
       ptag = ty_query(copy->type);
 
-      /*Checks the type of the parameter*/
+      /* Checks the type of the parameter */
       if(ptag == TYUNION || ptag == TYENUM || ptag == TYSTRUCT || ptag == TYARRAY || ptag == TYSET || ptag == TYFUNC || ptag == TYBITFIELD || ptag == TYSUBRANGE || ptag == TYERROR)
       {
-	/*Parameter not simple type error, returns NULL*/
+	/* Parameter not simple type error, returns NULL */
 	error("Parameter type must be a simple type");
       }
 
       /* check for duplicate params */
       check_params(copy);
 
-      /*Gets the next parameter*/
+      /* Gets the next parameter */
       copy = copy->next;
     }
 
-    /*Create the function and return it*/
+    /* Create the function and return it */
     return ty_build_func(newtype, list, TRUE);
   }
 } // end make_function
@@ -660,7 +660,7 @@ EXPR_LIST expr_prepend(EXPR_LIST list, EXPR expr)  // exported
   EXPR_LIST new;
   new = (EXPR_LIST) malloc(sizeof(EXPR_LIST_NODE));
   
-  /*Inserts the element and returns the list*/
+  /* Inserts the element and returns the list */
   new->expr = expr;
   new->next = list;
   return new;
@@ -693,179 +693,179 @@ char * enter_function(ST_ID id, TYPE type, int * local_var_offset)
 /* Creates an integer constant expression node */
 EXPR make_intconst_expr(long val, TYPE type)  // exported
 {
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the values of the node*/
+  /* Sets the values of the node */
   eNode->tag = INTCONST;
   eNode->u.intval = val;
   eNode->type = type;
  
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Creates a real constant expression node */
 EXPR make_realconst_expr(double val)  // exported
 {
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the values of the node*/
+  /* Sets the values of the node */
   eNode->tag = REALCONST;
   eNode->u.realval = val;
   eNode->type = ty_build_basic(TYDOUBLE);
 
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Creates a string constant expression node */
 EXPR make_strconst_expr(char * str)  // exported
 {
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the values of the node*/
+  /* Sets the values of the node */
   eNode->tag = STRCONST;
   eNode->u.strval = str;
   eNode->type = ty_build_ptr(NULL, ty_build_basic(TYSIGNEDCHAR) );
 
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Creates an id expression node */
 EXPR make_id_expr(ST_ID id)  // exported
 {
-  /*Symbol table data record and block number*/
+  /* Symbol table data record and block number */
   ST_DR record;
   int blockNum;
 
-  /*Gets the ST_DR for the type*/
+  /* Gets the ST_DR for the type */
   record = st_lookup(id, &blockNum);
 
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the values of the node*/
+  /* Sets the values of the node */
   eNode->tag = GID;
   eNode->type = record->u.decl.type;
   eNode->u.gid = id;
 
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Makes a null operation expression node */
 EXPR make_null_expr(EXPR_NULLOP op)  // exported
 {
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the attributes of the node*/
+  /* Sets the attributes of the node */
   eNode->tag = NULLOP;
   eNode->type = NULL;
   eNode->u.nullop.op = op;
 
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Makes a unary operator expression node */
 EXPR make_un_expr(EXPR_UNOP op, EXPR sub)  // exported
 {
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the attributes of the node*/
+  /* Sets the attributes of the node */
   eNode->tag = UNOP;
   eNode->type = NULL;
   eNode->u.unop.op = op;
   eNode->u.unop.operand = sub;
 
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Makes a binary operator expression node */
 EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)  // exported
 {
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the attributes of the node*/
+  /* Sets the attributes of the node */
   eNode->tag = BINOP;
   eNode->type = NULL;
   eNode->u.binop.op = op;
   eNode->u.binop.left = left;
   eNode->u.binop.right = right;
 
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Makes a function call expression node */
 EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 {
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the attributes of the node*/
+  /* Sets the attributes of the node */
   eNode->tag = FCALL;
   eNode->type = NULL;
   eNode->u.fcall.args = args;
   eNode->u.fcall.function = func;
 
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Makes an error expression node */
 EXPR make_error_expr()
 {
-  /*Creates the node and allocates memory*/
+  /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*Sets the attributes of the node*/
+  /* Sets the attributes of the node */
   eNode->tag = ERROR;
   eNode->type = NULL;
 
-  /*Returns the node*/
+  /* Returns the node */
   return eNode;
 }
 
 /* Negates a number if its sign is negative */
 EXPR check_sign_of_number(EXPR_UNOP op, EXPR num)  // exported
 {
-	/*Checks the tag, if intconst*/
+	/* Checks the tag, if intconst */
 	if(num->tag == INTCONST)
 	{
-		/*If the sign is negative*/
+		/* If the sign is negative */
 		if(op == NEG_OP)
 			num->u.intval = num->u.intval * -1;
 	}
-	/*If realconst*/
+	/* If realconst */
 	else if(num->tag == REALCONST)
 	{
-		/*If the sign is negative*/
+		/* If the sign is negative */
 		if(op == NEG_OP)
 			num->u.realval = num->u.realval * -1;
 	}
-	/*If not intconst or realconst*/
+	/* If not intconst or realconst */
 	else
 		error("Failed to check sign, number is not INTCONST or REALCONST");
 	
-	/*Returns the node*/
+	/* Returns the node */
 	return num;
 }
 
@@ -884,34 +884,34 @@ BOOLEAN is_lval(EXPR expr)
 /* Frees an expression */
 void expr_free(EXPR expr)  // exported
 {
-  /*If the expression is an intconst, real, or string const*/
+  /* If the expression is an intconst, real, or string const */
   if(expr->tag == INTCONST || expr->tag == STRCONST || expr->tag == REALCONST || expr->tag == GID || expr->tag == LFUN || expr->tag == LVAR || expr->tag == NULLOP || expr->tag == ERROR)
   {
-    /*Frees the expression*/
+    /* Frees the expression */
     free(expr);
   }
-  /*Else if unary operation*/
+  /* Else if unary operation */
   else if(expr->tag == UNOP)
   {
-    /*Frees the expression of the operand, frees the expression*/
+    /* Frees the expression of the operand, frees the expression */
     if(expr->u.unop.operand)
       expr_free(expr->u.unop.operand);
     free(expr);
   }
-  /*Else if binary operation*/
+  /* Else if binary operation */
   else if(expr->tag == BINOP)
   {
-    /*Frees the operands, frees the expression*/
+    /* Frees the operands, frees the expression */
     if(expr->u.binop.left)
       expr_free(expr->u.binop.left);
     if(expr->u.binop.right)
       expr_free(expr->u.binop.right);
     free(expr);
   }
-  /*Else if function call*/
+  /* Else if function call */
   else if(expr->tag == FCALL)
   {
-    /*Frees the reference to the function, frees the arguments list, frees the expression*/
+    /* Frees the reference to the function, frees the arguments list, frees the expression */
     if(expr->u.fcall.function)
       expr_free(expr->u.fcall.function);
     if(expr->u.fcall.args)
@@ -923,7 +923,7 @@ void expr_free(EXPR expr)  // exported
 /* Frees up an expression list */
 void expr_list_free(EXPR_LIST list)  // exported
 {
-  /*Frees the expression, recursive call, frees the final list*/
+  /* Frees the expression, recursive call, frees the final list */
   if(list->expr)
     expr_free(list->expr);
   if(list->next)
@@ -934,13 +934,13 @@ void expr_list_free(EXPR_LIST list)  // exported
 /* Frees up a linked list */
 void id_list_free(ID_LIST list)  // exported
 {
-  /*If the next element exists*/
+  /* If the next element exists */
   if(list->next)
   {
-    /*Frees the next node in the list*/
+    /* Frees the next node in the list */
     id_list_free(list->next);
   }
 
-  /*Frees the list*/
+  /* Frees the list */
   free(list);
 }
