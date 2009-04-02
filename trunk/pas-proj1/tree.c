@@ -652,7 +652,7 @@ EXPR_LIST expr_list_reverse(EXPR_LIST list)
 
 	/* Returns reversed list */
 	return revList;
-}
+} // end expr_list_reverse
 
 /* Inserts an ST_ID into a linked list */
 EXPR_LIST expr_prepend(EXPR_LIST list, EXPR expr)  // exported
@@ -873,6 +873,10 @@ EXPR check_sign_of_number(EXPR_UNOP op, EXPR num)  // exported
 EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 {
 	// not implemented yet
+
+	EXPR new = NULL;
+
+	return new;
 }
 
 /* Returns whether an expr is an lval */
