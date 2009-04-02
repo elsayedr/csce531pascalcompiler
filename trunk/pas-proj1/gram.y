@@ -59,7 +59,7 @@ Josh Van Buren */
 #include "symtab.h"
 #include "string.h"
 
-/* Cause the `yydebug' variable to be defined.  */
+/* Cause the `yydebug' variable to be defined. */
 #define YYDEBUG 1
 
 void set_yydebug(int);
@@ -377,13 +377,13 @@ constant_definition
 constant
     : identifier		{ $$ = make_id_expr($1); }
     | sign identifier		{ $$ = make_un_expr($1, make_id_expr($2)); }
-    | number			/*Default*/
-    | constant_literal	 	/*Not configured yet*/
+    | number			/* Default */
+    | constant_literal	 	/* not configured yet */
     ;
 
 number
     : sign unsigned_number	{ $$ = check_sign_of_number($1, $2); }  
-    | unsigned_number		/*Default*/
+    | unsigned_number		/* Default */
     ;
 
 unsigned_number
@@ -408,11 +408,11 @@ predefined_literal
     ;
 
 combined_string
-    : string 	/*Default*/
+    : string 	/* Default */
     ;
 
 string
-    : LEX_STRCONST	/*Default*/
+    : LEX_STRCONST	/* Default */
     | string LEX_STRCONST	{ $$ = strcat($1, $2); }
     ;
 
@@ -423,17 +423,17 @@ type_definition_part
     ;
 
 type_definition_list
-    : type_definition 	{ /*action occurs during assignment below*/ }
+    : type_definition 	{}
     | type_definition_list semi type_definition	{}
     ;
 
-type_definition				/*Installs a new identifier in the symtab as a new TYPENAME*/ 
+type_definition				/* Installs a new identifier in the symtab as a new TYPENAME */ 
     : new_identifier '=' type_denoter 	{ make_type($1,$3); }
     ;
 
 type_denoter
-    : typename		/*typename already a TYPE paramater*/
-    | type_denoter_1	/*default*/
+    : typename		/* typename already a TYPE paramater */
+    | type_denoter_1	/* Default */
     ;
 
 type_denoter_1
@@ -445,7 +445,7 @@ type_denoter_1
 
 new_ordinal_type
     : enumerated_type	{ $$ = ty_build_enum($1); }
-    | subrange_type		/*default*/
+    | subrange_type		/* Default */
     ;
 
 enumerated_type
@@ -453,15 +453,15 @@ enumerated_type
     ;
 
 enum_list
-    : enumerator				/*default*/		
+    : enumerator				/* Default */		
     | enum_list ',' enumerator	{ $$ = $1 + $3; }
     ;
 
 enumerator
-    : new_identifier	{ $$ = 1; }	/*Start count of enumerated type entries at 1*/
+    : new_identifier	{ $$ = 1; }	/* Start count of enumerated type entries at 1 */
     ;
 
-subrange_type				 		/*Builds the subrange type*/
+subrange_type				 		/* Builds the subrange type */
     : constant LEX_RANGE constant	{ $$ = make_subrange($1, $3); }
     ;
 
@@ -485,7 +485,7 @@ new_procedural_type
     ;
 
 optional_procedural_type_formal_parameter_list
-    : /* empty */					{ $$ = NULL; }
+    : /* Empty */					{ $$ = NULL; }
     | '(' procedural_type_formal_parameter_list ')'	{ $$ = $2; }
     ;
 
@@ -503,12 +503,12 @@ procedural_type_formal_parameter
 
 new_structured_type
     : LEX_PACKED unpacked_structured_type	{ $$ = $2; }
-    | unpacked_structured_type			/*default*/
+    | unpacked_structured_type			/* Default */
     ;
 
 unpacked_structured_type
     : array_type
-    | file_type		{} 	/*not configured yet*/
+    | file_type		{} 	/* not configured yet */
     | set_type
     | record_type	
     ;
@@ -525,8 +525,8 @@ array_index_list
   ;
 
 ordinal_index_type
-    : new_ordinal_type		/*Passes TYPE*/
-    | typename			/*now passes TYPE also*/
+    : new_ordinal_type		/* Default */
+    | typename			/* Default */
     ;
 
 /* FILE */
@@ -536,11 +536,11 @@ file_type
     ;
 
 direct_access_index_type
-    : /*empty*/
+    : /* Empty */
   {}| '[' ordinal_index_type ']'
   {};
 
-/* sets */
+/* Sets */
 set_type
     : LEX_SET LEX_OF type_denoter	{ $$ = ty_build_set($3);
 					  if (debug) {
@@ -551,6 +551,8 @@ set_type
 					}
     ;
 
+/* Records */
+	
 record_type
     : LEX_RECORD record_field_list LEX_END	{ $$ = ty_build_struct($2);
 					  	  if (debug) {
@@ -562,9 +564,9 @@ record_type
 	;
 						
 record_field_list
-    : /* empty */			{ $$ = NULL; }
-    | fixed_part optional_semicolon	/*default*/
-    | fixed_part semi variant_part	/*add combiner later*/
+    : /* Empty */			{ $$ = NULL; }
+    | fixed_part optional_semicolon	/* Default */
+    | fixed_part semi variant_part	/* add combiner later */
     | variant_part			{}
     ;
 
@@ -651,19 +653,19 @@ directive
   {};
 
 functiontype
-    : /*empty*/ 	{ $$ = NULL; }	/* empty function type */
+    : /* Empty */ 	{ $$ = NULL; }	/* Empty function type */
     | ':' typename  	{ $$ = $2; }
     ;
 
 /* parameter specification section */
 
 optional_par_formal_parameter_list
-    : /*empty*/				{ $$ = NULL; }
+    : /* Empty */				{ $$ = NULL; }
     | '(' formal_parameter_list ')'	{ $$ = $2; }
     ;
 
 formal_parameter_list
-    : formal_parameter					/*Default*/
+    : formal_parameter					/* Default */
     | formal_parameter_list semi formal_parameter	{ $$ = param_concat($1, $3); }
     ;
 
@@ -676,7 +678,7 @@ formal_parameter
     ;
 
 parameter_form
-    : typename		/*Default*/
+    : typename		/* Default */
     | open_array	{}
     ;
 
@@ -824,7 +826,7 @@ simple_statement
   {};
 
 empty_statement
-    : /*empty*/ %prec lower_than_error
+    : /* Empty */ %prec lower_than_error
   {};
 
 goto_statement
@@ -834,7 +836,7 @@ goto_statement
 /* function calls */
 
 optional_par_actual_parameter_list
-    : /*empty*/				{}
+    : /* Empty */				{}
     | '(' actual_parameter_list ')'	{ $$ = $2; }
     ;
 
@@ -860,7 +862,7 @@ variable_or_function_access_maybe_assignment
   {};
 
 rest_of_statement
-    : /*empty*/			{}
+    : /* Empty */			{}
     | LEX_ASSIGN expression	{ $$ = $2; }	
     ;
 
@@ -878,7 +880,7 @@ standard_procedure_statement
   {};
 
 optional_par_write_parameter_list
-    : /*empty*/
+    : /* Empty */
   {}| '(' write_actual_parameter_list ')'
   {};
 
@@ -1069,7 +1071,7 @@ standard_functions
   {};
 
 optional_par_actual_parameter
-    : /*empty*/
+    : /* Empty */
   {}| '(' actual_parameter ')'
   {};
 
@@ -1135,12 +1137,12 @@ semi
   {};
 
 optional_semicolon
-    : /*empty*/
+    : /* Empty */
   {}| ';'
   {};
 
 optional_rename
-    : /*empty*/
+    : /* Empty */
   {}| LEX_RENAME new_identifier
   {};
 
@@ -1164,18 +1166,18 @@ import_specification
   {};
 
 optional_access_qualifier
-    : /*empty*/
+    : /* Empty */
   {}| LEX_QUALIFIED
   {};
 
 optional_import_qualifier
-    : /*empty*/
+    : /* Empty */
   {}| '(' import_clause_list ')'
   {}| LEX_ONLY '(' import_clause_list ')'
   {};
 
 optional_unit_filename
-    : /*empty*/
+    : /* Empty */
   {}| LEX_IN combined_string
   {};
 

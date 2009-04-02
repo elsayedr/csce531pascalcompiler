@@ -2,127 +2,127 @@
 #include "backend.h"
 #include "types.h"
 
-/*Function that outputs the necessary code for a global declaration*/
+/* Function that outputs the necessary code for a global declaration */
 void declareVariable(ST_ID id, TYPE type)
 {
-  /*Variables for the alignment and skip sizes*/
+  /* Variables for the alignment and skip sizes */
   int align, skip;
 
-  /*Gets the alignment value and skip value*/
+  /* Gets the alignment value and skip value */
   align = getAlignSize(type);
   skip = getSkipSize(type);
 
-  /*Calls the backend functions*/
+  /* Calls the backend functions */
   b_global_decl(st_get_id_str(id), align);
   b_skip(skip);
 }
 
-/*Function that gets the required alignment value*/
+/* Function that gets the required alignment value */
 int getAlignSize(TYPE type)
 {
-  /*Gets the type tag from the type*/
+  /* Gets the type tag from the type */
   TYPETAG tag = ty_query(type);
 
-  /*Represents the index list*/
+  /* Represents the index list */
   INDEX_LIST list;
 
-  /*Low and high for subrange type*/
+  /* Low and high for subrange type */
   long low;
   long high;
 
-  /*Switch based on typetag*/
+  /* Switch based on typetag */
   switch(tag)
   {
-    /*Array case*/
+    /* Array case */
     case TYARRAY:
-      /*Recursive call to handle array*/
+      /* Recursive call to handle array */
       return getAlignSize(ty_query_array(type, &list));
       break;
-    /*Pointer case*/
+    /* Pointer case */
     case TYPTR:
-      /*Returns the size*/
+      /* Returns the size */
       return sizeof(char *);
       break;
-    /*Subrange case*/
+    /* Subrange case */
     case TYSUBRANGE:
       return getAlignSize(ty_query_subrange(type, &low, &high));
       break;
-    /*Double case*/
+    /* Double case */
     case TYDOUBLE:
-      /*Returns the size of a double*/
+      /* Returns the size of a double */
       return sizeof(double);
       break;
-   /*Float*/
+   /* Float */
    case TYFLOAT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(float);
     break;
-   /*Long double*/
+   /* Long double */
    case TYLONGDOUBLE:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(long double);
     break;
-   /*Signed long int*/
+   /* Signed long int */
    case TYSIGNEDLONGINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(signed long int);
     break;
-   /*Signed short int*/
+   /* Signed short int */
    case TYSIGNEDSHORTINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(signed short int);
     break;
-   /*Signed int*/
+   /* Signed int */
    case TYSIGNEDINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(signed int);
     break;
-   /*Unsigned long int*/
+   /* Unsigned long int */
    case TYUNSIGNEDLONGINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(unsigned long int);
     break;
-   /*Unsigned short int*/
+   /* Unsigned short int */
    case TYUNSIGNEDSHORTINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(unsigned short int);
     break;
-   /*Unsigned integer*/
+   /* Unsigned integer */
    case TYUNSIGNEDINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(unsigned int);
     break;
-   /*Unsigned char*/
+   /* Unsigned char */
    case TYUNSIGNEDCHAR:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(unsigned char);
     break;
-   /*Signed char*/
+   /* Signed char */
    case TYSIGNEDCHAR:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(signed char);
     break;
   }
 }
 
-/*Function that gets the required skip value*/
+/* Function that gets the required skip value */
 int getSkipSize(TYPE type)
 {
-  /*Gets the type tag from the type*/
+  /* Gets the type tag from the type */
   TYPETAG tag = ty_query(type);
 
-  /*Represents the index list*/
+  /* Represents the index list */
   INDEX_LIST list;
 
-  /*Low and high for subrange type*/
+  /* Low and high for subrange type */
   long low, high, size;
 
-  /*Switch based on typetag*/
+  /* Switch based on typetag */
   switch(tag)
   {
-    /*Array case*/
+    /* Array case */
     case TYARRAY:
-      /*Recursive call to handle array*/
+      /* Recursive call to handle array */
       size = getSkipSize(ty_query_array(type, &list));
       while (list) {
 	ty_query_subrange(list->type, &low, &high); 
@@ -131,83 +131,83 @@ int getSkipSize(TYPE type)
       }
       return size;
       break;
-    /*Pointer case*/
+    /* Pointer case */
     case TYPTR:
-      /*Returns the size*/
+      /* Returns the size */
       return sizeof(char *);
       break;
-    /*Subrange case*/
+    /* Subrange case */
     case TYSUBRANGE:
       return getSkipSize(ty_query_subrange(type, &low, &high));
       break;
-    /*Double case*/
+    /* Double case */
     case TYDOUBLE:
-      /*Returns the size of a double*/
+      /* Returns the size of a double */
       return sizeof(double);
       break;
-   /*Float*/
+   /* Float */
    case TYFLOAT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(float);
     break;
-   /*Long double*/
+   /* Long double */
    case TYLONGDOUBLE:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(long double);
     break;
-   /*Signed long int*/
+   /* Signed long int */
    case TYSIGNEDLONGINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(signed long int);
     break;
-   /*Signed short int*/
+   /* Signed short int */
    case TYSIGNEDSHORTINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(signed short int);
     break;
-   /*Signed int*/
+   /* Signed int */
    case TYSIGNEDINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(signed int);
     break;
-   /*Unsigned long int*/
+   /* Unsigned long int */
    case TYUNSIGNEDLONGINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(unsigned long int);
     break;
-   /*Unsigned short int*/
+   /* Unsigned short int */
    case TYUNSIGNEDSHORTINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(unsigned short int);
     break;
-   /*Unsigned integer*/
+   /* Unsigned integer */
    case TYUNSIGNEDINT:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(unsigned int);
     break;
-   /*Unsigned char*/
+   /* Unsigned char */
    case TYUNSIGNEDCHAR:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(unsigned char);
     break;
-   /*Signed char*/
+   /* Signed char */
    case TYSIGNEDCHAR:
-    /*Returns the size*/
+    /* Returns the size */
     return sizeof(signed char);
     break;
   }
 }
 
-/*Function that calls backend routines to enter the main program body*/
+/* Function that calls backend routines to enter the main program body */
 void enter_main_body()
 {
-  /*Calls the backend routine*/
+  /* Calls the backend routine */
   b_func_prologue("main");
 }
 
-/*Function that calls backend routines to exit the main program body*/
+/* Function that calls backend routines to exit the main program body */
 void exit_main_body()
 {
-  /*Calls the backend routine*/
+  /* Calls the backend routine */
   b_func_epilogue("main");
 }
