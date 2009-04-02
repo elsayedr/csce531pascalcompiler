@@ -1,8 +1,6 @@
-/* Build 14
-
-change summary:
-standardize naming convention like Fenner's
-streamlined the exported headers in tree.h to only function called by other modules
+/* Build 15
+Change summary:
+Edited production types to conform with Fenner's.  
 
 Team Project:
 Jeff Barton
@@ -85,13 +83,13 @@ int block;
     int		y_cint;
     long 	y_int;
     double 	y_real;
-    ST_ID 	y_id;
     TYPE	y_type;
-    PTR_OBJ	y_ptrobj;
-    PARAM_LIST	y_param;
-    INDEX_LIST 	y_index;
-    MEMBER_LIST	y_member;
     ID_LIST	y_idlist;
+    ST_ID 	y_stid;
+    PTR_OBJ	y_ptrobj;
+    PARAM_LIST	y_params;
+    MEMBER_LIST	y_member;
+    INDEX_LIST 	y_indices;
     EXPR	y_expr;
     EXPR_LIST	y_exprlist;
     EXPR_NULLOP	y_nullop;
@@ -191,21 +189,25 @@ int block;
 %type <y_unop> sign rts_fun_onepar rts_fun_parlist
 %type <y_binop> relational_operator multiplying_operator adding_operator
 %type <y_exprid> variable_or_function_access_maybe_assignment
-%type <y_int> enumerator enumerated_type enum_list
-%type <y_id> identifier new_identifier label
+%type <y_idlist> id_list optional_par_id_list
+%type <y_stid> identifier new_identifier label
 %type <y_string> new_identifier_1 string combined_string 
 %type <y_type> typename type_denoter type_denoter_1 new_ordinal_type new_pointer_type parameter_form
 %type <y_type> new_structured_type subrange_type new_procedural_type
 %type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type functiontype
+%type <y_indices> array_index_list
 %type <y_ptrobj> pointer_domain_type
-%type <y_param> optional_procedural_type_formal_parameter_list procedural_type_formal_parameter_list procedural_type_formal_parameter optional_par_formal_parameter_list formal_parameter_list formal_parameter
-%type <y_index> array_index_list
-%type <y_idlist> id_list optional_par_id_list
+%type <y_params> optional_procedural_type_formal_parameter_list 
+%type <y_params> procedural_type_formal_parameter_list
+%type <y_params> procedural_type_formal_parameter
+%type <y_params> optional_par_formal_parameter_list formal_parameter_list
+%type <y_params> formal_parameter
 %type <y_member> record_field_list fixed_part record_section variant_part
 %type <y_funchead> function_heading
 %type <y_dir> directive_list directive
 %type <y_cint> variable_declaration_part variable_declaration_list
 %type <y_cint> variable_declaration simple_decl any_decl any_declaration_part
+%type <y_int> enumerator enumerated_type enum_list
 
 %%
 
