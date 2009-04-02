@@ -68,9 +68,6 @@ void yyerror(const char *);
 /* Like YYERROR but do call yyerror */
 #define YYERROR1 { yyerror ("syntax error"); YYERROR; }
 
-ST_DR data_rec;
-int block;
-
 %}
 
 /* Start symbol for the grammar */
@@ -193,7 +190,7 @@ int block;
 %type <y_stid> identifier new_identifier label
 %type <y_string> new_identifier_1 string combined_string 
 %type <y_type> typename type_denoter type_denoter_1 new_ordinal_type new_pointer_type parameter_form
-%type <y_type> new_structured_type subrange_type new_procedural_type
+%type <y_type> new_structured_type subrange_type new_procedural_type open_array
 %type <y_type> unpacked_structured_type array_type ordinal_index_type set_type file_type record_type functiontype
 %type <y_indices> array_index_list
 %type <y_ptrobj> pointer_domain_type
@@ -232,7 +229,7 @@ main_program_declaration
 	;
 
 program_heading
-    : LEX_PROGRAM new_identifier optional_par_id_list	{}	// do something with the param list
+    : LEX_PROGRAM new_identifier optional_par_id_list	{}	// ignore
     ;
 
 optional_par_id_list
@@ -258,13 +255,13 @@ new_identifier
     ;
 
 new_identifier_1
-    : LEX_ID		
+    : LEX_ID	// default
 /* Standard Pascal constants */
-    | p_MAXINT
-  {}| p_FALSE
-  {}| p_TRUE
+    | p_MAXINT	{}
+    | p_FALSE	{ $$ = "False"; }
+    | p_TRUE	{ $$ = "True"; }
 /* Standard Pascal I/O */
-  {}| p_INPUT
+    | p_INPUT
   {}| p_OUTPUT
   {}| p_REWRITE
   {}| p_RESET
@@ -276,12 +273,12 @@ new_identifier_1
   {}| p_READLN
   {}| p_PAGE
   {}| p_EOF
-  {}| p_EOLN
+  {}| p_EOLN	{}
 /* Standard Pascal heap handling */
-  {}| p_NEW
-  {}| p_DISPOSE
+    | p_NEW	{ $$ = "New"; }
+    | p_DISPOSE	{ $$ = "Dispose"; }
 /* Standard Pascal arithmetic */
-  {}| p_ABS
+    | p_ABS
   {}| p_SQR
   {}| p_SIN
   {}| p_COS
@@ -293,13 +290,13 @@ new_identifier_1
   {}| p_ROUND
 /* Standard Pascal transfer functions */
   {}| p_PACK
-  {}| p_UNPACK
+  {}| p_UNPACK	{}
 /* Standard Pascal ordinal functions */
-  {}| p_ORD
-  {}| p_CHR
-  {}| p_SUCC
-  {}| p_PRED
-  {}| p_ODD
+    | p_ORD	{ $$ = "Ord"; }
+    | p_CHR	{ $$ = "Chr"; }
+    | p_SUCC	{ $$ = "Succ"; }
+    | p_PRED	{ $$ = "Pred"; }
+    | p_ODD	{}
 /* Other extensions */
   {}| BREAK
   {}| CONTINUE
@@ -375,10 +372,10 @@ constant_definition
   {};
 
 constant
-    : identifier		{ $$ = make_id_expr($1); }
-    | sign identifier		{ $$ = make_un_expr($1, make_id_expr($2)); }
+    : identifier		{}	// ignore 
+    | sign identifier		{}	// ignore
     | number			/* Default */
-    | constant_literal	 	/* not configured yet */
+    | constant_literal	 	// default
     ;
 
 number
@@ -397,7 +394,7 @@ sign
     ;
 
 constant_literal
-    : combined_string	{ $$ = make_strconst_expr($1); }
+    : combined_string		{ $$ = make_strconst_expr($1); }
     | predefined_literal	{ $$ = $1; }
     ;
 
@@ -412,7 +409,7 @@ combined_string
     ;
 
 string
-    : LEX_STRCONST	/* Default */
+    : LEX_STRCONST		/* Default */
     | string LEX_STRCONST	{ $$ = strcat($1, $2); }
     ;
 
@@ -629,7 +626,7 @@ variable_declaration_list
   {};
 
 variable_declaration
-    : id_list ':' type_denoter semi		{ resolve_ptr_types(); make_var($1,$3); }
+    : id_list ':' type_denoter semi		{ make_var($1,$3); resolve_ptr_types(); }
     ;
 
 function_declaration
@@ -660,7 +657,7 @@ functiontype
 /* parameter specification section */
 
 optional_par_formal_parameter_list
-    : /* Empty */				{ $$ = NULL; }
+    : /* Empty */			{ $$ = NULL; }
     | '(' formal_parameter_list ')'	{ $$ = $2; }
     ;
 
@@ -672,14 +669,14 @@ formal_parameter_list
 formal_parameter
     : id_list ':' parameter_form			{ $$ = make_params($1, $3, FALSE); }
     | LEX_VAR id_list ':' parameter_form		{ $$ = make_params($2, $4, TRUE); }
-    | function_heading					{}
-    | id_list ':' conformant_array_schema		{}
-    | LEX_VAR id_list ':' conformant_array_schema	{}
+    | function_heading					{}	// ignore
+    | id_list ':' conformant_array_schema		{}	// ignore
+    | LEX_VAR id_list ':' conformant_array_schema	{}	// ignore
     ;
 
 parameter_form
     : typename		/* Default */
-    | open_array	{}
+    | open_array	// ignore
     ;
 
 conformant_array_schema
@@ -836,7 +833,7 @@ goto_statement
 /* function calls */
 
 optional_par_actual_parameter_list
-    : /* Empty */				{}
+    : /* Empty */			{ $$ = NULL; }
     | '(' actual_parameter_list ')'	{ $$ = $2; }
     ;
 
@@ -852,17 +849,17 @@ actual_parameter
 /* ASSIGNMENT and procedure calls */
 
 assignment_or_call_statement
-    : variable_or_function_access_maybe_assignment rest_of_statement	{}	// $$=check_assign_or_proc_call($1,ID?,$2);
+    : variable_or_function_access_maybe_assignment rest_of_statement	{}	// $$=check_assign_or_proc_call($1.expr,$1.id,$2);
     ;
 
 variable_or_function_access_maybe_assignment
-    : identifier
-  {}| address_operator variable_or_function_access
-  {}| variable_or_function_access_no_id
-  {};
+    : identifier					{ $$.expr = NULL; $$.id = $1; }
+    | address_operator variable_or_function_access	{}		// ignore
+    | variable_or_function_access_no_id			{}		
+    ;
 
 rest_of_statement
-    : /* Empty */			{}
+    : /* Empty */		{ $$ = NULL; }
     | LEX_ASSIGN expression	{ $$ = $2; }	
     ;
 
@@ -975,7 +972,7 @@ boolean_expression
 
 expression  
     : expression relational_operator simple_expression	{ make_bin_expr($2,$1,$3); }
-    | expression LEX_IN simple_expression		{}
+    | expression LEX_IN simple_expression		{}	// what do we do with IN operator?
     | simple_expression					// default
     ;
 
