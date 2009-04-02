@@ -650,8 +650,8 @@ function_declaration
   {};
 
 function_heading
-    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list	{ $$.type = make_func($3, ty_build_basic(TYVOID)); $$.id = $2; }
-    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype	{ $$.type = make_func($3, $4); $$.id = $2; }
+    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list	{ $$.id = $2; $$.type = make_func($3, ty_build_basic(TYVOID)); }
+    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype	{ $$.id = $2; $$.type = make_func($3, $4); }
     ;
 
 directive_list
@@ -672,25 +672,25 @@ functiontype
 /* parameter specification section */
 
 optional_par_formal_parameter_list
-    : /*empty*/	{}
+    : /*empty*/				{ $$ = NULL; }
     | '(' formal_parameter_list ')'	{ $$ = $2; }
     ;
 
 formal_parameter_list
-    : formal_parameter	/*Default*/
+    : formal_parameter					/*Default*/
     | formal_parameter_list semi formal_parameter	{ $$ = param_concat($1, $3); }
     ;
 
 formal_parameter
-    : id_list ':' parameter_form	{ $$ = make_params($1, $3, FALSE); }
-    | LEX_VAR id_list ':' parameter_form	{ $$ = make_params($2, $4, TRUE); }
-    | function_heading	{}
-    | id_list ':' conformant_array_schema	{}
+    : id_list ':' parameter_form			{ $$ = make_params($1, $3, FALSE); }
+    | LEX_VAR id_list ':' parameter_form		{ $$ = make_params($2, $4, TRUE); }
+    | function_heading					{}
+    | id_list ':' conformant_array_schema		{}
     | LEX_VAR id_list ':' conformant_array_schema	{}
     ;
 
 parameter_form
-    : typename	/*Default*/
+    : typename		/*Default*/
     | open_array	{}
     ;
 
