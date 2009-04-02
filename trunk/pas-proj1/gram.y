@@ -835,12 +835,12 @@ goto_statement
 
 optional_par_actual_parameter_list
     : /*empty*/
-  {}| '(' actual_parameter_list ')'
-  {};
+	| '(' actual_parameter_list ')'		{ $$ = $2; }
+	;
 
 actual_parameter_list
-    : actual_parameter					{ expr_prepend(NULL,$1); }
-    | actual_parameter_list ',' actual_parameter	{ expr_prepend($1,$3); }
+    : actual_parameter					{ $$ = expr_prepend(NULL,$1); }
+    | actual_parameter_list ',' actual_parameter	{ $$ = expr_prepend($1,$3); }
     ;
 
 actual_parameter
