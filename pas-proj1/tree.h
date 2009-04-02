@@ -143,6 +143,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub);
 EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right);
 EXPR make_fcall_expr(EXPR func, EXPR_LIST args);
 EXPR make_error_expr();
+EXPR check_sign_of_number(EXPR_UNOP op, EXPR num);
 EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs);
 BOOLEAN is_lval(EXPR expr);
 void expr_free(EXPR expr);

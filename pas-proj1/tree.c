@@ -253,6 +253,31 @@ EXPR make_error_expr()
   return eNode;
 }
 
+/*Function that negates a number if its sign is negative*/
+EXPR check_sign_of_number(EXPR_UNOP op, EXPR num)
+{
+	/*Checks the tag, if intconst*/
+	if(num->tag == INTCONST)
+	{
+		/*If the sign is negative*/
+		if(op == NEG_OP)
+			num->u.intval = num->u.intval * -1;
+	}
+	/*If realconst*/
+	else if(num->tag == REALCONST)
+	{
+		/*If the sign is negative*/
+		if(op == NEG_OP)
+			num->u.realval = num->u.realval * -1;
+	}
+	/*If not intconst or realconst*/
+	else
+		error("Failed to check sign, number is not INTCONST or REALCONST");
+	
+	/*Returns the node*/
+	return num;
+}
+
 /*Function that creates a subrange*/
 TYPE make_subrange(EXPR a, EXPR b)
 {
