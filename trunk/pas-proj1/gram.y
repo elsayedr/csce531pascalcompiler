@@ -834,9 +834,9 @@ goto_statement
 /* function calls */
 
 optional_par_actual_parameter_list
-    : /*empty*/
-	| '(' actual_parameter_list ')'		{ $$ = $2; }
-	;
+    : /*empty*/				{}
+    | '(' actual_parameter_list ')'	{ $$ = $2; }
+    ;
 
 actual_parameter_list
     : actual_parameter					{ $$ = expr_prepend(NULL,$1); }
