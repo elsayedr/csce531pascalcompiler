@@ -183,7 +183,7 @@ void yyerror(const char *);
 %type <y_expr> variable_access_or_typename optional_par_actual_parameter
 %type <y_exprlist> actual_parameter_list optional_par_actual_parameter_list
 %type <y_nullop> rts_fun_optpar
-%type <y_unop> sign rts_fun_onepar rts_fun_parlist
+%type <y_unop> sign rts_fun_onepar rts_fun_parlist pointer_char
 %type <y_binop> relational_operator multiplying_operator adding_operator
 %type <y_exprid> variable_or_function_access_maybe_assignment
 %type <y_idlist> id_list optional_par_id_list
@@ -471,7 +471,8 @@ new_pointer_type
 
 pointer_char
     : '^'  { $$ = DEREF_OP; }
-    | '@'  { $$ = ADDRESS_OP; };
+    | '@'  { $$ = ADDRESS_OP; }
+    ;
 
 pointer_domain_type
     : new_identifier		{ $$.id = $1; $$.type = NULL; }
@@ -661,8 +662,8 @@ directive_list
     ;
 
 directive
-    : LEX_FORWARD	/* Default */
-    | LEX_EXTERNAL	/* Default */
+    : LEX_FORWARD	{ $$ = DIR_FORWARD; }
+    | LEX_EXTERNAL	{ $$ = DIR_EXTERNAL; }
     ;
 
 functiontype
