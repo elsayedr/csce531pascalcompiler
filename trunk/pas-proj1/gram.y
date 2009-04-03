@@ -211,7 +211,7 @@ void yyerror(const char *);
 /* Pascal parser starts here */
 
 pascal_program
-    : /*empty*/
+    : /* Empty */
   {}| program_component_list
   {};
 
@@ -226,14 +226,14 @@ program_component
 
 main_program_declaration
     : program_heading { enter_main_body(); } semi import_or_any_declaration_part statement_part	{ exit_main_body(); }
-	;
+    ;
 
 program_heading
-    : LEX_PROGRAM new_identifier optional_par_id_list	{}	// ignore
+    : LEX_PROGRAM new_identifier optional_par_id_list	{}  /* Ignore */
     ;
 
 optional_par_id_list
-    : /*empty*/ {}
+    : /* Empty */		{}
     | '(' id_list ')'	{ $$ = $2; }
     ;
 
@@ -255,12 +255,12 @@ new_identifier
     ;
 
 new_identifier_1
-    : LEX_ID	// default
-/* Standard Pascal constants */
+    : LEX_ID	/* Default */
+    /* Standard Pascal constants */
     | p_MAXINT	{}
     | p_FALSE	{ $$ = "False"; }
     | p_TRUE	{ $$ = "True"; }
-/* Standard Pascal I/O */
+    /* Standard Pascal I/O */
     | p_INPUT
   {}| p_OUTPUT
   {}| p_REWRITE
@@ -274,10 +274,10 @@ new_identifier_1
   {}| p_PAGE
   {}| p_EOF
   {}| p_EOLN	{}
-/* Standard Pascal heap handling */
+    /* Standard Pascal heap handling */
     | p_NEW	{ $$ = "New"; }
     | p_DISPOSE	{ $$ = "Dispose"; }
-/* Standard Pascal arithmetic */
+    /* Standard Pascal arithmetic */
     | p_ABS
   {}| p_SQR
   {}| p_SIN
@@ -288,16 +288,16 @@ new_identifier_1
   {}| p_ARCTAN
   {}| p_TRUNC
   {}| p_ROUND
-/* Standard Pascal transfer functions */
-  {}| p_PACK
-  {}| p_UNPACK	{}
-/* Standard Pascal ordinal functions */
+    /* Standard Pascal transfer functions */
+  {}| p_PACK	{}  /* Ignore */
+    | p_UNPACK	{}  /* Ignore */
+    /* Standard Pascal ordinal functions */
     | p_ORD	{ $$ = "Ord"; }
     | p_CHR	{ $$ = "Chr"; }
     | p_SUCC	{ $$ = "Succ"; }
     | p_PRED	{ $$ = "Pred"; }
     | p_ODD	{}
-/* Other extensions */
+    /* Other extensions */
   {}| BREAK
   {}| CONTINUE
   {}| RETURN_
@@ -308,12 +308,14 @@ new_identifier_1
   {}| BITSIZEOF
   {};
 
+/* Import or declaration part */  
+  
 import_or_any_declaration_part
     : any_declaration_import_part
   {};
 
 any_declaration_import_part
-    : /*Empty*/
+    : /* Empty */
   {}| any_declaration_import_part any_or_import_decl
   {};
 
@@ -323,7 +325,7 @@ any_or_import_decl
   {};
 
 any_declaration_part
-    : /*Empty*/
+    : /* Empty */
   {}| any_declaration_part any_decl
   {};
 
@@ -333,53 +335,52 @@ any_decl
   {};
 
 simple_decl
-    : label_declaration_part
-  {}| constant_definition_part
-  {}| type_definition_part
+    : label_declaration_part	{}  /* Ignore */
+    | constant_definition_part	{}  /* Ignore */
+    | type_definition_part
   {}| variable_declaration_part
   {};
 
 /* Label declaration part */
 
 label_declaration_part
-    : LEX_LABEL label_list semi
-  {};
+    : LEX_LABEL label_list semi	{}  /* Ignore */
+    ;
 
 label_list
-    : label
-  {}| label_list ',' label
-  {};
+    : label			{}  /* Ignore */
+    | label_list ',' label	{}  /* Ignore */
+    ;
 
-/* Labels are returned as identifier nodes for compatibility with gcc */
-label
-	: LEX_INTCONST		{}	/*Will not be needed*/
-	| new_identifier	{}
+label  /* Labels are returned as identifier nodes for compatibility with gcc */
+	: LEX_INTCONST		{}  /* Ignore */
+	| new_identifier	{}  /* Ignore */
 	;
 
-/* constant definition part */
+/* Constant definition part */
 
 constant_definition_part
-    : LEX_CONST constant_definition_list
-  {};
+    : LEX_CONST constant_definition_list  {}  /* Ignore */
+    ;
 
 constant_definition_list
-    : constant_definition
-  {}| constant_definition_list constant_definition
-  {};
+    : constant_definition				{}  /* Ignore */
+    | constant_definition_list constant_definition	{}  /* Ignore */
+    ;
 
 constant_definition
-    : new_identifier '=' static_expression semi
-  {};
+    : new_identifier '=' static_expression semi  {}  /* Ignore */
+    ;
 
 constant
-    : identifier		{}	// ignore 
-    | sign identifier		{}	// ignore
+    : identifier		{}  /* Ignore */
+    | sign identifier		{}  /* Ignore */
     | number			/* Default */
-    | constant_literal	 	// default
+    | constant_literal	 	/* Default */
     ;
 
 number
-    : sign unsigned_number	{ $$ = check_sign_of_number($1, $2); }  
+    : sign unsigned_number	{ $$ = apply_sign_to_number($1, $2); }  
     | unsigned_number		/* Default */
     ;
 
@@ -400,8 +401,8 @@ constant_literal
 
 predefined_literal
     : LEX_NIL		{ $$ = make_null_expr(NIL_OP); }
-    | p_FALSE		{ $$ = make_strconst_expr($1); }
-    | p_TRUE		{ $$ = make_strconst_expr($1); }
+    | p_FALSE		{ $$ = make_intconst_expr(0, ty_build_basic(TYSIGNEDCHAR)); }
+    | p_TRUE		{ $$ = make_intconst_expr(1, ty_build_basic(TYSIGNEDCHAR)); }
     ;
 
 combined_string
@@ -410,22 +411,23 @@ combined_string
 
 string
     : LEX_STRCONST		/* Default */
-    | string LEX_STRCONST	{ $$ = strcat($1, $2); }
+    | string LEX_STRCONST	{}  /* Ignore */
     ;
 
-/* type definition part */
+/* Type definition part */
 
 type_definition_part
     : LEX_TYPE type_definition_list semi	{ resolve_ptr_types(); }
     ;
 
 type_definition_list
-    : type_definition 	{}
-    | type_definition_list semi type_definition	{}
+    : type_definition				 {}  /* Default */
+    | type_definition_list semi type_definition  {}
     ;
 
-type_definition				/* Installs a new identifier in the symtab as a new TYPENAME */ 
-    : new_identifier '=' type_denoter 	{ make_type($1,$3); }
+type_definition				 
+    : new_identifier '=' type_denoter 	
+	{ make_type($1,$3); }  /* Installs a new identifier in the symtab as a new TYPENAME */
     ;
 
 type_denoter
@@ -442,24 +444,25 @@ type_denoter_1
 
 new_ordinal_type
     : enumerated_type	{ $$ = ty_build_enum($1); }
-    | subrange_type		/* Default */
+    | subrange_type	/* Default */
     ;
 
 enumerated_type
-    : '(' enum_list ')'		{ $$ = $2; if (debug) printf("Enumerated list with %d elements\n",(int)$2); }
+    : '(' enum_list ')'	 { $$ = $2; if (debug) printf("Enumerated list with %d elements\n",(int)$2); }
     ;
 
 enum_list
-    : enumerator				/* Default */		
+    : enumerator		/* Default */		
     | enum_list ',' enumerator	{ $$ = $1 + $3; }
     ;
 
 enumerator
-    : new_identifier	{ $$ = 1; }	/* Start count of enumerated type entries at 1 */
+    : new_identifier  { $$ = 1; }  /* Start count of enumerated type entries at 1 */
     ;
 
-subrange_type				 		/* Builds the subrange type */
-    : constant LEX_RANGE constant	{ $$ = make_subrange($1, $3); }
+subrange_type				 
+    : constant LEX_RANGE constant  
+	{ $$ = make_subrange($1, $3); }  /* Builds the subrange type */
     ;
 
 new_pointer_type
@@ -467,9 +470,8 @@ new_pointer_type
     ;
 
 pointer_char
-    : '^'
-  {}| '@'
-  {};
+    : '^'  { $$ = DEREF_OP; }
+    | '@'  { $$ = ADDRESS_OP; };
 
 pointer_domain_type
     : new_identifier		{ $$.id = $1; $$.type = NULL; }
@@ -477,18 +479,22 @@ pointer_domain_type
     ;
 
 new_procedural_type
-    : LEX_PROCEDURE optional_procedural_type_formal_parameter_list		{ $$ = make_func($2, ty_build_basic(TYVOID)); }
-    | LEX_FUNCTION optional_procedural_type_formal_parameter_list functiontype	{ $$ = make_func($2, $3); }
+    : LEX_PROCEDURE optional_procedural_type_formal_parameter_list		
+	{ $$ = make_func($2, ty_build_basic(TYVOID)); }
+    | LEX_FUNCTION optional_procedural_type_formal_parameter_list functiontype	
+	{ $$ = make_func($2, $3); }
     ;
 
 optional_procedural_type_formal_parameter_list
-    : /* Empty */					{ $$ = NULL; }
+    : /* Empty */						{ $$ = NULL; }
     | '(' procedural_type_formal_parameter_list ')'	{ $$ = $2; }
     ;
 
 procedural_type_formal_parameter_list
-    : procedural_type_formal_parameter	{ $$ = $1; }
-    | procedural_type_formal_parameter_list semi procedural_type_formal_parameter	{ $$ = param_concat($1, $3); }
+    : procedural_type_formal_parameter	
+	{ $$ = $1; }
+    | procedural_type_formal_parameter_list semi procedural_type_formal_parameter	
+	{ $$ = param_concat($1, $3); }
     ;
 
 procedural_type_formal_parameter
@@ -499,13 +505,13 @@ procedural_type_formal_parameter
     ;
 
 new_structured_type
-    : LEX_PACKED unpacked_structured_type	{ $$ = $2; }
+    : LEX_PACKED unpacked_structured_type	{}  /* Ignore */
     | unpacked_structured_type			/* Default */
     ;
 
 unpacked_structured_type
     : array_type
-    | file_type		{} 	/* not configured yet */
+    | file_type		{}  // not configured yet
     | set_type
     | record_type	
     ;
@@ -513,7 +519,8 @@ unpacked_structured_type
 /* Array */
 
 array_type
-    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter 	{ $$ = make_array($3, $6); }	
+    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter  
+	{ $$ = make_array($3, $6); }	
     ;
 
 array_index_list
@@ -522,14 +529,14 @@ array_index_list
   ;
 
 ordinal_index_type
-    : new_ordinal_type		/* Default */
-    | typename			/* Default */
+    : new_ordinal_type	/* Default */
+    | typename		/* Default */
     ;
 
-/* FILE */
+/* File */
 
 file_type
-    : LEX_FILE direct_access_index_type LEX_OF type_denoter	{}
+    : LEX_FILE direct_access_index_type LEX_OF type_denoter  {}
     ;
 
 direct_access_index_type
@@ -537,7 +544,8 @@ direct_access_index_type
   {}| '[' ordinal_index_type ']'
   {};
 
-/* Sets */
+/* Set */
+
 set_type
     : LEX_SET LEX_OF type_denoter	{ $$ = ty_build_set($3);
 					  if (debug) {
@@ -548,7 +556,7 @@ set_type
 					}
     ;
 
-/* Records */
+/* Record */
 	
 record_type
     : LEX_RECORD record_field_list LEX_END	{ $$ = ty_build_struct($2);
@@ -561,9 +569,9 @@ record_type
 	;
 						
 record_field_list
-    : /* Empty */			{ $$ = NULL; }
+    : /* Empty */				{ $$ = NULL; }
     | fixed_part optional_semicolon	/* Default */
-    | fixed_part semi variant_part	/* add combiner later */
+    | fixed_part semi variant_part	// add combiner later
     | variant_part			{}
     ;
 
@@ -614,10 +622,10 @@ one_case_constant
   {}| static_expression LEX_RANGE static_expression
   {};
 
-/* variable declaration part */
+/* Variable declaration part */
 
 variable_declaration_part
-    : LEX_VAR variable_declaration_list		{ resolve_ptr_types(); }
+    : LEX_VAR variable_declaration_list  { resolve_ptr_types(); }
     ;
 
 variable_declaration_list
@@ -626,38 +634,46 @@ variable_declaration_list
   {};
 
 variable_declaration
-    : id_list ':' type_denoter semi		{ make_var($1,$3); resolve_ptr_types(); }
+    : id_list ':' type_denoter semi  { make_var($1,$3); resolve_ptr_types(); }
     ;
 
+/* Function declaration section */
+    
 function_declaration
     : function_heading semi directive_list semi
-  {}| function_heading semi any_declaration_part statement_part semi
-  {};
+	{ build_func_decl($1.id, $1.type, $3); }
+    | function_heading semi 
+	{} 
+	any_declaration_part statement_part semi
+	{}
+    ;
 
 function_heading
-    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list	{ $$.id = $2; $$.type = make_func($3, ty_build_basic(TYVOID)); }
-    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype	{ $$.id = $2; $$.type = make_func($3, $4); }
+    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list
+	{ $$.id = $2; $$.type = make_func($3, ty_build_basic(TYVOID)); }
+    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype
+	{ $$.id = $2; $$.type = make_func($3, $4); }
     ;
 
 directive_list
-    : directive
-  {}| directive_list semi directive
-  {};
+    : directive				/* Default */
+    | directive_list semi directive	{}  /* Ignore */
+    ;
 
 directive
-    : LEX_FORWARD
-  {}| LEX_EXTERNAL
-  {};
+    : LEX_FORWARD	/* Default */
+    | LEX_EXTERNAL	/* Default */
+    ;
 
 functiontype
-    : /* Empty */ 	{ $$ = NULL; }	/* Empty function type */
+    : /* Empty */		{ $$ = NULL; }  /* Empty function type */
     | ':' typename  	{ $$ = $2; }
     ;
 
-/* parameter specification section */
+/* Parameter specification section */
 
 optional_par_formal_parameter_list
-    : /* Empty */			{ $$ = NULL; }
+    : /* Empty */				{ $$ = NULL; }
     | '(' formal_parameter_list ')'	{ $$ = $2; }
     ;
 
@@ -669,34 +685,36 @@ formal_parameter_list
 formal_parameter
     : id_list ':' parameter_form			{ $$ = make_params($1, $3, FALSE); }
     | LEX_VAR id_list ':' parameter_form		{ $$ = make_params($2, $4, TRUE); }
-    | function_heading					{}	// ignore
-    | id_list ':' conformant_array_schema		{}	// ignore
-    | LEX_VAR id_list ':' conformant_array_schema	{}	// ignore
+    | function_heading					{}  /* Ignore */
+    | id_list ':' conformant_array_schema		{}  /* Ignore */
+    | LEX_VAR id_list ':' conformant_array_schema	{}  /* Ignore */
     ;
 
 parameter_form
     : typename		/* Default */
-    | open_array	// ignore
+    | open_array	{}  /* Ignore */
     ;
 
 conformant_array_schema
-    : packed_conformant_array_schema
-  {}| unpacked_conformant_array_schema
-  {};
+    : packed_conformant_array_schema	{}  /* Ignore */
+    | unpacked_conformant_array_schema	{}  /* Ignore */
+    ;
 
 typename_or_conformant_array_schema
-    : typename
-  {}| packed_conformant_array_schema
-  {}| unpacked_conformant_array_schema
-  {};
+    : typename				{}  /* Ignore */
+    | packed_conformant_array_schema	{}  /* Ignore */
+    | unpacked_conformant_array_schema	{}  /* Ignore */
+    ;
 
 packed_conformant_array_schema
-    : LEX_PACKED LEX_ARRAY '[' index_type_specification ']' LEX_OF typename_or_conformant_array_schema
-  {};
+    : LEX_PACKED LEX_ARRAY '[' index_type_specification ']' LEX_OF typename_or_conformant_array_schema  
+	{}  /* Ignore */
+    ;
 
 unpacked_conformant_array_schema
     : LEX_ARRAY '[' index_type_specification_list ']' LEX_OF typename_or_conformant_array_schema
-  {};
+	{}  /* Ignore */
+    ;
 
 index_type_specification
     : new_identifier LEX_RANGE new_identifier ':' typename
@@ -708,8 +726,8 @@ index_type_specification_list
   {};
 
 open_array
-    : LEX_ARRAY LEX_OF typename
-  {};
+    : LEX_ARRAY LEX_OF typename  {}  /* Ignore */
+    ;
 
 statement_part
     : compound_statement
@@ -830,23 +848,25 @@ goto_statement
     : LEX_GOTO label
   {};
 
-/* function calls */
+/* Function calls */
 
 optional_par_actual_parameter_list
-    : /* Empty */			{ $$ = NULL; }
+    : /* Empty */				{ $$ = NULL; }
     | '(' actual_parameter_list ')'	{ $$ = $2; }
     ;
 
 actual_parameter_list
-    : actual_parameter					{ $$ = expr_prepend(NULL,$1); }
-    | actual_parameter_list ',' actual_parameter	{ $$ = expr_prepend($1,$3); }
+    : actual_parameter
+	{ $$ = expr_prepend(NULL,$1); }
+    | actual_parameter_list ',' actual_parameter	
+	{ $$ = expr_prepend($1,$3); }
     ;
 
 actual_parameter
-    : expression					// default
+    : expression	/* Default */
     ;
 
-/* ASSIGNMENT and procedure calls */
+/* Assignment and procedure calls */
 
 assignment_or_call_statement
     : variable_or_function_access_maybe_assignment rest_of_statement	{}	// $$=check_assign_or_proc_call($1.expr,$1.id,$2);
@@ -854,12 +874,12 @@ assignment_or_call_statement
 
 variable_or_function_access_maybe_assignment
     : identifier					{ $$.expr = NULL; $$.id = $1; }
-    | address_operator variable_or_function_access	{}		// ignore
+    | address_operator variable_or_function_access	{}	/* Iignore */
     | variable_or_function_access_no_id			{}		
     ;
 
 rest_of_statement
-    : /* Empty */		{ $$ = NULL; }
+    : /* Empty */			{ $$ = NULL; }
     | LEX_ASSIGN expression	{ $$ = $2; }	
     ;
 
@@ -892,7 +912,7 @@ write_actual_parameter
   {}| actual_parameter ':' expression ':' expression
   {};
 
-/* run time system calls with one parameter */
+/* Run time system calls with one parameter */
 rts_proc_onepar
     : p_PUT
   {}| p_GET
@@ -916,12 +936,12 @@ rts_proc_parlist
   {}| p_SEEKWRITE
   {}| p_SEEKUPDATE
   {}| p_DEFINESIZE  /* Two args */
-  {}| LEX_AND           /* Two args */
-  {}| LEX_OR            /* Two args */
-  {}| LEX_NOT           /* One arg */
-  {}| LEX_XOR        /* Two args */
-  {}| LEX_SHL           /* Two args */
-  {}| LEX_SHR           /* Two args */
+  {}| LEX_AND       /* Two args */
+  {}| LEX_OR        /* Two args */
+  {}| LEX_NOT       /* One arg */
+  {}| LEX_XOR       /* Two args */
+  {}| LEX_SHL       /* Two args */
+  {}| LEX_SHR       /* Two args */
   {};
 
 statement_extensions
@@ -960,24 +980,24 @@ index_expression_item
   {}| expression LEX_RANGE expression
   {};
 
-/* expressions */
+/* Expressions */
 
 static_expression
-    : expression	// default
+    : expression	/* Default */
     ;
 
 boolean_expression
-    : expression	// default
+    : expression	/* Default */
     ;
 
 expression  
     : expression relational_operator simple_expression	{ make_bin_expr($2,$1,$3); }
     | expression LEX_IN simple_expression		{}	// what do we do with IN operator?
-    | simple_expression					// default
+    | simple_expression					/* Default */
     ;
 
 simple_expression
-    : term					// default
+    : term					/* Default */
     | simple_expression adding_operator term	{ make_bin_expr($2,$1,$3); }
     | simple_expression LEX_SYMDIFF term	{ make_bin_expr(SYMDIFF_OP,$1,$3); }
     | simple_expression LEX_OR term		{ make_bin_expr(OR_OP,$1,$3); }

@@ -214,12 +214,12 @@ void make_var(ID_LIST list, TYPE newtype)  // exported
     return;
   }
 
-    /* Gets the type tag of the type of the elements of the array */
-    TYPETAG tag = ty_query(newtype);
+  /* Gets the type tag of the type of the elements of the array */
+  TYPETAG tag = ty_query(newtype);
 
-    /* Checks the type */
-    if(tag == TYFUNC || tag == TYERROR)
-    {
+  /* Checks the type */
+  if(tag == TYFUNC || tag == TYERROR)
+  {
       /* Data type expected for array elements, returns null */
       error("Variable(s) must be of data type");
 
@@ -238,7 +238,7 @@ void make_var(ID_LIST list, TYPE newtype)  // exported
 
       /* Return */
       return;
-    }
+  }
 	
   /* While the list is not null */
   while(list) 
@@ -268,7 +268,7 @@ void make_var(ID_LIST list, TYPE newtype)  // exported
 	ty_print_type(newtype);
 	printf("\n");
       }
-    }	/*  end else */
+    } // end else
 
     /* Move on to the next item in the member list */
     list=list->next;
@@ -681,7 +681,59 @@ TYPE check_subrange(EXPR lo, EXPR hi)
 /* Builds function declarations */
 void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
 {
-	// not implemented yet
+  /* Creates the data record */
+  ST_DR p;
+  BOOLEAN resolved;
+    
+  /* Return if the type does not exist */
+  if(!type) 
+  {
+    /* Debugging information */
+    if(debug) 
+      printf("Type for function declaration does not exist\n");
+	
+    /* Return */
+    return;
+  }
+  
+  p = stdr_alloc();	  
+  p->tag = GDECL;
+  p->u.decl.type = type;
+
+  /* If directive is external, set storage class to SC_EXTERN */
+  if(dir == DIR_EXTERNAL)
+    p->u.decl.sc = NO_SC;
+  /* Else if directive is forward set storage class to NO_SC */
+  else if(dir == DIR_FORWARD)
+    p->u.decl.sc = NO_SC;
+  /* Not external or forward, error */
+  else
+    error("Invalid directive: \"%s\"", dir);
+    
+  /* Installs the function in the symbol table */
+  resolved = st_install(id, p); 
+
+  /* If the function is not resolved error */
+  if(!resolved) 
+    error("Duplicate function declaration: \"%s\"", st_get_id_str(id));
+  /* Else function resolved */
+  else 
+  {
+    /* Calls the encoding function */
+    declareFunction(id, type);
+	
+    /* Debugging */
+    if(debug)
+    {
+      /* Print debugging statements */
+      printf("GDECL created with type:\n");
+      ty_print_type(type);
+      printf("\n");
+    }
+  } // end else
+
+  /* Return */
+  return;  
 }
 
 /* Called when a function is entered */
@@ -844,8 +896,8 @@ EXPR make_error_expr()
   return eNode;
 }
 
-/* Negates a number if its sign is negative */
-EXPR check_sign_of_number(EXPR_UNOP op, EXPR num)  // exported
+/* Negates a number if its sign op is negative */
+EXPR apply_sign_to_number(EXPR_UNOP op, EXPR num)  // exported
 {
 	/* Checks the tag, if intconst */
 	if(num->tag == INTCONST)
