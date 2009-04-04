@@ -1094,40 +1094,40 @@ optional_par_actual_parameter
   {};
 
 rts_fun_optpar
-    : p_EOF
-  {}| p_EOLN
-  {};
+    : p_EOF	{ $$ = UN_EOF_OP; }
+    | p_EOLN	{ $$ = UN_EOLN_OP; }
+    ;
 
 rts_fun_onepar
-    : p_ABS
-  {}| p_SQR
-  {}| p_SIN
-  {}| p_COS
-  {}| p_EXP
-  {}| p_LN
-  {}| p_SQRT
-  {}| p_ARCTAN
-  {}| p_ARG
-  {}| p_TRUNC
-  {}| p_ROUND
-  {}| p_CARD
-  {}| p_ORD
-  {}| p_CHR
-  {}| p_ODD
-  {}| p_EMPTY
-  {}| p_POSITION
-  {}| p_LASTPOSITION
-  {}| p_LENGTH
-  {}| p_TRIM
-  {}| p_BINDING
-  {}| p_DATE
-  {}| p_TIME
-  {};
+    : p_ABS  		{ $$ = ABS_OP; }
+    | p_SQR  		{ $$ = SQR_OP; }
+    | p_SIN		{ $$ = SIN_OP; }
+    | p_COS		{ $$ = COS_OP; }
+    | p_EXP		{ $$ = EXP_OP; }
+    | p_LN		{ $$ = LN_OP; }
+    | p_SQRT		{ $$ = SQRT_OP; }
+    | p_ARCTAN		{ $$ = ARCTAN_OP; }
+    | p_ARG		{ $$ = ARG_OP; }
+    | p_TRUNC		{ $$ = TRUNC_OP; }
+    | p_ROUND		{ $$ = ROUND_OP; }
+    | p_CARD		{ $$ = CARD_OP; }
+    | p_ORD		{ $$ = ORD_OP; }
+    | p_CHR		{ $$ = CHR_OP; }
+    | p_ODD		{ $$ = ODD_OP; }
+    | p_EMPTY		{ $$ = EMPTY_OP; }
+    | p_POSITION	{ $$ = POSITITON_OP; }
+    | p_LASTPOSITION	{ $$ = LASTPOSITION_OP; }
+    | p_LENGTH		{ $$ = LENGTH_OP; }
+    | p_TRIM		{ $$ = TRIM_OP; }
+    | p_BINDING		{ $$ = BINDING_OP; }
+    | p_DATE		{ $$ = DATE_OP; }
+    | p_TIME  		{ $$ = TIME_OP; }
+    ;
 
 rts_fun_parlist
-    : p_SUCC        /* One or two args */
-  {}| p_PRED        /* One or two args */
-  {};
+    : p_SUCC	{ /* $$ = UN_SUCC_OP -or- $$ = BIN_SUCC_OP; */ }  /* One or two args */
+    | p_PRED	{ /* $$ = UN_PRED_OP -or- $$ = BIN_PRED_OP; */ }  /* One or two args */
+    ;
 
 relational_operator
     : LEX_NE	{ $$ = NE_OP; }
@@ -1151,13 +1151,13 @@ adding_operator
     ;
 
 semi
-    : ';'
-  {};
+    : ';'	{ $$ = UN_EOLN_OP; }
+    ;
 
 optional_semicolon
-    : /* Empty */
-  {}| ';'
-  {};
+    : /* Empty */	{}
+    | ';'	{ $$ = UN_EOLN_OP; }
+    ;
 
 optional_rename
     : /* Empty */
