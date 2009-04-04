@@ -702,7 +702,7 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
 
   /* If directive is external, set storage class to SC_EXTERN */
   if(dir == DIR_EXTERNAL)
-    p->u.decl.sc = SC_EXTERN;
+    p->u.decl.sc = EXTERN_SC;
   /* Else if directive is forward set storage class to NO_SC */
   else if(dir == DIR_FORWARD)
     p->u.decl.sc = NO_SC;
