@@ -64,6 +64,7 @@ Josh Van Buren */
 
 void set_yydebug(int);
 void yyerror(const char *);
+int localOffset;
 
 /* Like YYERROR but do call yyerror */
 #define YYERROR1 { yyerror ("syntax error"); YYERROR; }
@@ -337,9 +338,9 @@ any_decl
 simple_decl
     : label_declaration_part	{}  /* Ignore */
     | constant_definition_part	{}  /* Ignore */
-    | type_definition_part
-  {}| variable_declaration_part
-  {};
+    | type_definition_part	{}
+    | variable_declaration_part	{}
+    ;
 
 /* Label declaration part */
 
@@ -385,7 +386,7 @@ number
     ;
 
 unsigned_number
-    : LEX_INTCONST	{ $$ = make_intconst_expr($1, ty_build_basic(TYUNSIGNEDINT)); }
+    : LEX_INTCONST	{ $$ = make_intconst_expr($1, ty_build_basic(TYSIGNEDLONGINT)); }
     | LEX_REALCONST	{ $$ = make_realconst_expr($1); }
     ;
 
@@ -641,19 +642,13 @@ variable_declaration
 /* Function declaration section */
     
 function_declaration
-    : function_heading semi directive_list semi
-	{ build_func_decl($1.id, $1.type, $3); }
-    | function_heading semi 
-	{} 
-	any_declaration_part statement_part semi
-	{}
+    : function_heading semi directive_list semi	{ build_func_decl($1.id, $1.type, $3); }
+    | function_heading semi {} any_declaration_part {} statement_part semi	{}
     ;
 
 function_heading
-    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list
-	{ $$.id = $2; $$.type = make_func($3, ty_build_basic(TYVOID)); }
-    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype
-	{ $$.id = $2; $$.type = make_func($3, $4); }
+    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list	{ $$.id = $2; $$.type = make_func($3, ty_build_basic(TYVOID)); }
+    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype	{ $$.id = $2; $$.type = make_func($3, $4); }
     ;
 
 directive_list
