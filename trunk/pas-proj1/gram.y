@@ -1115,7 +1115,7 @@ rts_fun_onepar
     | p_CHR		{ $$ = CHR_OP; }
     | p_ODD		{ $$ = ODD_OP; }
     | p_EMPTY		{ $$ = EMPTY_OP; }
-    | p_POSITION	{ $$ = POSITITON_OP; }
+    | p_POSITION	{ $$ = POSITION_OP; }
     | p_LASTPOSITION	{ $$ = LASTPOSITION_OP; }
     | p_LENGTH		{ $$ = LENGTH_OP; }
     | p_TRIM		{ $$ = TRIM_OP; }
@@ -1151,12 +1151,12 @@ adding_operator
     ;
 
 semi
-    : ';'	{ $$ = UN_EOLN_OP; }
+    : ';'	{}
     ;
 
 optional_semicolon
     : /* Empty */	{}
-    | ';'	{ $$ = UN_EOLN_OP; }
+    | ';'	{}
     ;
 
 optional_rename
