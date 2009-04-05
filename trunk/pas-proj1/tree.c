@@ -699,6 +699,7 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
   p = stdr_alloc();	  
   p->tag = GDECL;
   p->u.decl.type = type;
+  p->u.decl.is_ref = FALSE;
 
   /* If directive is external, set storage class to SC_EXTERN */
   if(dir == DIR_EXTERNAL)
