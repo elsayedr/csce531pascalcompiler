@@ -17,12 +17,6 @@ void declareVariable(ST_ID id, TYPE type)
   b_skip(skip);
 }
 
-/* Function that outputs the necessary code for a function declaration */
-void declareFunction(ST_ID id, TYPE type)
-{
-	// not implemented yet
-}
-
 /* Function that gets the required alignment value */
 int getAlignSize(TYPE type)
 {
