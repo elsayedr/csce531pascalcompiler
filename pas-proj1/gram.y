@@ -643,7 +643,9 @@ variable_declaration
     
 function_declaration
     : function_heading semi directive_list semi	{ build_func_decl($1.id, $1.type, $3); }
-    | function_heading semi { checkFuncDec($1); } any_declaration_part {} statement_part semi	{}
+    | function_heading semi 	{ check_func_decl($1); } 
+        any_declaration_part 	{ enter_func_body($<y_nameoffset>3.name, $1.type, $4); } 
+	statement_part semi	{ exit_func_body($<y_nameoffset>3.name, $1.type); }
     ;
 
 function_heading

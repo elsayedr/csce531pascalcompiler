@@ -198,6 +198,21 @@ int getSkipSize(TYPE type)
   }
 }
 
+/* Function that is called when a function block is entered */
+void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
+{
+  b_func_prologue(global_func_name);
+  b_store_formal_param(type);
+  // not sure what loc_var_size is for
+} // end enter_func_body
+
+/* Function that is called when a function block is exited */
+void exit_func_body(char * global_func_name, TYPE type)
+{
+  b_func_epilogue();
+  st_exit_block();
+} // end exit_func_body
+
 /* Function that calls backend routines to enter the main program body */
 void enter_main_body()
 {

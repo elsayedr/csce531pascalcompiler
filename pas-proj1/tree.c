@@ -676,7 +676,7 @@ int process_var_decl(ID_LIST ids, TYPE type, int cur_offset)
 TYPE check_subrange(EXPR lo, EXPR hi)
 {
 	// not implemented yet
-}
+} // end check_subranges 
 
 /* Builds function declarations */
 void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
@@ -733,13 +733,13 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
 
   /* Return */
   return;  
-}
+} // end build_func_decl
 
 /* Called when a function is entered */
 char * enter_function(ST_ID id, TYPE type, int * local_var_offset)
 {
 	// not implemented yet
-}
+} // end enter_function
 
 /* Creates an integer constant expression node */
 EXPR make_intconst_expr(long val, TYPE type)  // exported
@@ -755,7 +755,7 @@ EXPR make_intconst_expr(long val, TYPE type)  // exported
  
   /* Returns the node */
   return eNode;
-}
+} // end make_intconst_expr
 
 /* Creates a real constant expression node */
 EXPR make_realconst_expr(double val)  // exported
@@ -771,7 +771,7 @@ EXPR make_realconst_expr(double val)  // exported
 
   /* Returns the node */
   return eNode;
-}
+} // end make_realconst_expr
 
 /* Creates a string constant expression node */
 EXPR make_strconst_expr(char * str)  // exported
@@ -787,7 +787,7 @@ EXPR make_strconst_expr(char * str)  // exported
 
   /* Returns the node */
   return eNode;
-}
+} // end make_strconst_expr
 
 /* Creates an id expression node */
 EXPR make_id_expr(ST_ID id)  // exported
@@ -810,7 +810,7 @@ EXPR make_id_expr(ST_ID id)  // exported
 
   /* Returns the node */
   return eNode;
-}
+} // end make_id_expr
 
 /* Makes a null operation expression node */
 EXPR make_null_expr(EXPR_NULLOP op)  // exported
@@ -826,7 +826,7 @@ EXPR make_null_expr(EXPR_NULLOP op)  // exported
 
   /* Returns the node */
   return eNode;
-}
+} // end make_null_expr
 
 /* Makes a unary operator expression node */
 EXPR make_un_expr(EXPR_UNOP op, EXPR sub)  // exported
@@ -843,7 +843,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)  // exported
 
   /* Returns the node */
   return eNode;
-}
+} // end make_un_expr
 
 /* Makes a binary operator expression node */
 EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)  // exported
@@ -861,7 +861,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)  // exported
 
   /* Returns the node */
   return eNode;
-}
+} // end make_bin_expr
 
 /* Makes a function call expression node */
 EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
@@ -878,7 +878,7 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 
   /* Returns the node */
   return eNode;
-}
+} // end make_fcall_expr
 
 /* Makes an error expression node */
 EXPR make_error_expr()
@@ -893,7 +893,7 @@ EXPR make_error_expr()
 
   /* Returns the node */
   return eNode;
-}
+} // end make_error_expr
 
 /* Negates a number if its sign op is negative */
 EXPR apply_sign_to_number(EXPR_UNOP op, EXPR num)  // exported
@@ -918,7 +918,7 @@ EXPR apply_sign_to_number(EXPR_UNOP op, EXPR num)  // exported
 	
 	/* Returns the node */
 	return num;
-}
+} // end apply_sign_to_number
 
 /* Checks for assignment or procedure call */
 EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
@@ -928,13 +928,13 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	EXPR new = NULL;
 
 	return new;
-}
+} // end check_assign_or_proc_call
 
 /* Returns whether an expr is an lval */
 BOOLEAN is_lval(EXPR expr)
 {
 	// not implemented yet
-}
+} // end is_val
 
 /* Frees an expression */
 void expr_free(EXPR expr)  // exported
@@ -973,7 +973,7 @@ void expr_free(EXPR expr)  // exported
       expr_list_free(expr->u.fcall.args);
     free(expr);
   }
-}
+} // end expr_free
 
 /* Frees up an expression list */
 void expr_list_free(EXPR_LIST list)  // exported
@@ -984,7 +984,7 @@ void expr_list_free(EXPR_LIST list)  // exported
   if(list->next)
     expr_list_free(list->next);
   free(list);
-}
+} // end expr_list_free
 
 /* Frees up a linked list */
 void id_list_free(ID_LIST list)  // exported
@@ -998,102 +998,102 @@ void id_list_free(ID_LIST list)  // exported
 
   /* Frees the list */
   free(list);
-}
+} // end id_list_free
 
-/*Function that checks the function declaration*/
-NAME_OFFSET checkFuncDec(FUNC_HEAD fC)
+/* Function that checks the function declaration */
+NAME_OFFSET check_func_decl(FUNC_HEAD fC)
 {
-  /*Variable that represents the current block number*/
+  /* Variable that represents the current block number */
   int block;
 
-  /*Symbol table data record*/
+  /* Symbol table data record */
   ST_DR datRec;
   
-  /*Looks for the data record in the symbol table*/
+  /* Looks for the data record in the symbol table */
   datRec = st_lookup(fC.id, &block);
 
-  /*If is is not found install it in the symbol table*/
+  /* If data record is not found install it in the symbol table */
   if(datRec == NULL)
   {
-    /*Allocates memory for the new data record*/
+    /* Allocates memory for the new data record */
     datRec = stdr_alloc();
 
-    /*Sets the attributes of the data record*/
+    /* Sets the attributes of the data record */
     datRec->tag = FDECL;
     datRec->u.decl.type = fC.type;
     datRec->u.decl.sc = NO_SC;
     datRec->u.decl.is_ref = FALSE;
 
-    /*Installs the data record*/
+    /* Installs the data record */
     st_install(datRec, fC.id);
   }
-  /*If is found check the record*/
+  /* If data record is found check the record */
   else
   {
-    /*Checks the tag and storage class*/
+    /* Checks the tag and storage class */
     if(datRec->tag != GDECL || datRec->u.decl.sc != NO_SC)
     {
-      /*Error, duplicate delcaration*/
+      /* Error, duplicate delcaration */
       error("Duplicate variable declaration");
 
-      /*Return*/
+      /* Return */
       return;
     }
-    /*Else change the tag*/
+    /* Else change the tag */
     else
     {
-      /*Changes the tag*/
+      /* Changes the tag */
       datRec->tag = FDECL;
     }
   }
 
-  /*Function checks out, so we enter a new block*/
+  /* Function checks out, so we enter a new block */
   st_enter_block();
 
-  /*Parameter list, type, and boolean variable for function query*/
+  /* Parameter list, type, and boolean variable for function query */
   PARAM_LIST fParams;
   BOOLEAN checkArgs;
   TYPE funcRetType;
 
-  /*Gets the ret type, param list, etc*/
+  /* Gets the ret type, param list, etc */
   funcRetType = ty_query_func(fC.type, &fParams, &checkArgs);
 
-  /*Installs the parameters*/
-  installLocalParams(fParams);
+  /* Installs the parameters */
+  install_local_params(fParams);
 
-  /*Creates the name offset*/
+  /* Creates the name offset */
   NAME_OFFSET nOff;
   nOff.name = st_get_id_str(fC.id);
-  /*Set the offset value here, but I do not know how*/
+  /* Set the offset value here, but I do not know how */
 
-  /*Return the name offset*/
+  /* Return the name offset */
   return nOff;
-}
+} // end check_func_decl
 
-/*Function that installs local parameters*/
-void installLocalParams(PARAM_LIST pList)
+/* Function that installs local parameters */
+void install_local_params(PARAM_LIST pList)
 {
-  /*Copy of the parameter list*/
+  /* Copy of the parameter list */
   PARAM_LIST copy = pList;
 
-  /*While there are still elements in the list*/
+  /* While there are still elements in the list */
   while(copy != NULL)
   {
-    /*Creates the symbol table data record*/
+    /* Creates the symbol table data record */
     ST_DR datRec;
     datRec = stdr_alloc();
 
-    /*Sets the attributs of the symbol table data record*/
+    /* Sets the attributes of the symbol table data record */
     datRec->tag = PDECL;
     datRec->u.decl.type = copy->type;
     datRec->u.decl.sc = copy->sc;
     datRec->u.decl.is_ref = copy->is_ref;
     datRec->u.decl.err = copy->err;
 
-    /*Installs the parameter*/
+    /* Installs the parameter */
     st_install(datRec, copy->id);
 
-    /*Moves on to the next element*/
+    /* Moves on to the next element */
     copy = copy->next;
   }
-}
+} // end install_local_params
