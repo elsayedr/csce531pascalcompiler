@@ -700,6 +700,7 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
   p->tag = GDECL;
   p->u.decl.type = type;
   p->u.decl.is_ref = FALSE;
+  p->u.decl.v.global_func_name = st_get_id_str(id);
 
   /* If directive is external, set storage class to SC_EXTERN */
   if(dir == DIR_EXTERNAL)
@@ -719,10 +720,7 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
     error("Duplicate function declaration: \"%s\"", st_get_id_str(id));
   /* Else function resolved */
   else 
-  {
-    /* Calls the encoding function */
-    declareFunction(id, type);
-	
+  {	
     /* Debugging */
     if(debug)
     {
@@ -1000,4 +998,102 @@ void id_list_free(ID_LIST list)  // exported
 
   /* Frees the list */
   free(list);
+}
+
+/*Function that checks the function declaration*/
+NAME_OFFSET checkFuncDec(FUNC_HEAD fC)
+{
+  /*Variable that represents the current block number*/
+  int block;
+
+  /*Symbol table data record*/
+  ST_DR datRec;
+  
+  /*Looks for the data record in the symbol table*/
+  datRec = st_lookup(fC.id, &block);
+
+  /*If is is not found install it in the symbol table*/
+  if(datRec == NULL)
+  {
+    /*Allocates memory for the new data record*/
+    datRec = stdr_alloc();
+
+    /*Sets the attributes of the data record*/
+    datRec->tag = FDECL;
+    datRec->u.decl.type = fC.type;
+    datRec->u.decl.sc = NO_SC;
+    datRec->u.decl.is_ref = FALSE;
+
+    /*Installs the data record*/
+    st_install(datRec, fC.id);
+  }
+  /*If is found check the record*/
+  else
+  {
+    /*Checks the tag and storage class*/
+    if(datRec->tag != GDECL || datRec->u.decl.sc != NO_SC)
+    {
+      /*Error, duplicate delcaration*/
+      error("Duplicate variable declaration");
+
+      /*Return*/
+      return;
+    }
+    /*Else change the tag*/
+    else
+    {
+      /*Changes the tag*/
+      datRec->tag = FDECL;
+    }
+  }
+
+  /*Function checks out, so we enter a new block*/
+  st_enter_block();
+
+  /*Parameter list, type, and boolean variable for function query*/
+  PARAM_LIST fParams;
+  BOOLEAN checkArgs;
+  TYPE funcRetType;
+
+  /*Gets the ret type, param list, etc*/
+  funcRetType = ty_query_func(fC.type, &fParams, &checkArgs);
+
+  /*Installs the parameters*/
+  installLocalParams(fParams);
+
+  /*Creates the name offset*/
+  NAME_OFFSET nOff;
+  nOff.name = st_get_id_str(fC.id);
+  /*Set the offset value here, but I do not know how*/
+
+  /*Return the name offset*/
+  return nOff;
+}
+
+/*Function that installs local parameters*/
+void installLocalParams(PARAM_LIST pList)
+{
+  /*Copy of the parameter list*/
+  PARAM_LIST copy = pList;
+
+  /*While there are still elements in the list*/
+  while(copy != NULL)
+  {
+    /*Creates the symbol table data record*/
+    ST_DR datRec;
+    datRec = stdr_alloc();
+
+    /*Sets the attributs of the symbol table data record*/
+    datRec->tag = PDECL;
+    datRec->u.decl.type = copy->type;
+    datRec->u.decl.sc = copy->sc;
+    datRec->u.decl.is_ref = copy->is_ref;
+    datRec->u.decl.err = copy->err;
+
+    /*Installs the parameter*/
+    st_install(datRec, copy->id);
+
+    /*Moves on to the next element*/
+    copy = copy->next;
+  }
 }

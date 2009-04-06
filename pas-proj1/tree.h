@@ -120,6 +120,8 @@ TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
 void make_var(ID_LIST, TYPE);
 void resolve_ptr_types();
+NAME_OFFSET checkFuncDec(FUNC_HEAD);
+void installLocalParams(PARAM_LIST);
 MEMBER_LIST make_members(ID_LIST, TYPE);
 MEMBER_LIST member_concat(MEMBER_LIST, MEMBER_LIST);
 PARAM_LIST make_params(ID_LIST, TYPE, BOOLEAN);
