@@ -206,6 +206,11 @@ void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
   PARAM_LIST fParams;
   BOOLEAN checkArgs;
 
+  /*Offset value for each variable, block number, data record*/
+  int lVarOffset;
+  int blockNum;
+  ST_DR dataRec;
+
   /* Queries the function */
   fType = ty_query_func(type, &fParams, &checkArgs);
 
@@ -220,12 +225,21 @@ void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
     tag = ty_query(fParams->type);
 
     /* Stores the formal parameter */
-    b_store_formal_param(tag);
+    lVarOffset = b_store_formal_param(tag);
+
+    /*Gets the data record for the formal parameter*/
+    dataRec = st_lookup(fParams->id, &blockNum);
+
+    /*Compares the offset values*/
+    if(lVarOffset != dataRec->u.decl.v.offset)
+      bug("Local variable offset does not match");
 
     /* Moves to the next element in the list */
     fParams = fParams->next;
   }
-  /* not sure what loc_var_size is for */
+  
+  /*Allocates space for the local variables*/
+  b_alloc_local_vars(loc_var_size);
 }/* End enter_func_body */
 
 /* Function that is called when a function block is exited */

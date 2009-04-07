@@ -225,9 +225,16 @@ void make_var(ID_LIST list, TYPE newtype)
 
       /* Even when there is an error, Fenner installs the variable in the symbol table */
       p = stdr_alloc();	  
-      p->tag = GDECL;
+      
       p->u.decl.type = newtype;
       p->u.decl.sc = NO_SC;
+
+      /*If the variable is global*/
+      if(st_get_cur_block() == 0)
+	p->tag = GDECL;
+      /*Else local variable*/
+      else
+	p->tag = PDECL;
 
       /* If the type is error, set the declaration error to true */
       if(tag == TYERROR)
@@ -1001,7 +1008,7 @@ void id_list_free(ID_LIST list)
 }/* End id_list_free */
 
 /* Function that checks the function declaration */
-NAME_OFFSET check_func_decl(FUNC_HEAD fC)
+void check_func_decl(FUNC_HEAD fC)
 {
   /* Variable that represents the current block number */
   int block;
@@ -1023,6 +1030,7 @@ NAME_OFFSET check_func_decl(FUNC_HEAD fC)
     datRec->u.decl.type = fC.type;
     datRec->u.decl.sc = NO_SC;
     datRec->u.decl.is_ref = FALSE;
+    datRec->u.decl.v.global_func_name = st_get_id_str(fC.id);
 
     /* Installs the data record */
     st_install(datRec, fC.id);
@@ -1060,14 +1068,6 @@ NAME_OFFSET check_func_decl(FUNC_HEAD fC)
 
   /* Installs the parameters */
   install_local_params(fParams);
-
-  /* Creates the name offset */
-  NAME_OFFSET nOff;
-  nOff.name = st_get_id_str(fC.id);
-  /* Set the offset value here, but I do not know how */
-
-  /* Return the name offset */
-  return nOff;
 }/* End check_func_decl */
 
 /* Function that installs local parameters */
@@ -1089,6 +1089,7 @@ void install_local_params(PARAM_LIST pList)
     datRec->u.decl.sc = copy->sc;
     datRec->u.decl.is_ref = copy->is_ref;
     datRec->u.decl.err = copy->err;
+    datRec->u.decl.v.offset = b_get_formal_param_offset(ty_query(copy->type));
 
     /* Installs the parameter */
     st_install(datRec, copy->id);
