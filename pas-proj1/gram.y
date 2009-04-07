@@ -64,7 +64,8 @@ Josh Van Buren */
 
 void set_yydebug(int);
 void yyerror(const char *);
-int localOffset;
+int offsetStack[BS_DEPTH];
+int stackTop = -1;
 
 /* Like YYERROR but do call yyerror */
 #define YYERROR1 { yyerror ("syntax error"); YYERROR; }
@@ -644,8 +645,8 @@ variable_declaration
 function_declaration
     : function_heading semi directive_list semi	{ build_func_decl($1.id, $1.type, $3); }
     | function_heading semi 	{ check_func_decl($1); } 
-        any_declaration_part 	{ enter_func_body($<y_nameoffset>3.name, $1.type, $4); } 
-	statement_part semi	{ exit_func_body($<y_nameoffset>3.name, $1.type); }
+        any_declaration_part 	{} 
+	statement_part semi	{}
     ;
 
 function_heading
