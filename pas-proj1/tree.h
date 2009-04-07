@@ -1,4 +1,4 @@
-/* Definitions to support tree.c */
+/*Definitions to support tree.c*/
 
 #ifndef TREE_H
 #define TREE_H
@@ -7,18 +7,18 @@
 #include "types.h"
 #include "symtab.h"
 
-/* Defines a structure that represents a node in a linked list */
+/*Defines a structure that represents a node in a linked list*/
 typedef struct id_node
 {
-  /* Symbol table data record */
+  /*Symbol table data record*/
   ST_ID id;
   
-  /* Link to next element in the list */
+  /*Link to next element in the list*/
   struct id_node *next;
 
 } ID_NODE, *ID_LIST;
 
-/* Fenner's structures */
+/*Fenner's structures*/
 typedef struct {
     struct exprnode * expr;
     ST_ID id;
@@ -35,7 +35,7 @@ typedef struct {
 } NAME_OFFSET;
 
 
-/* Structures for syntax tree nodes (EXPR and EXPR_LIST) */
+/*Structures for syntax tree nodes (EXPR and EXPR_LIST)*/
 
 typedef enum {
     INTCONST, REALCONST, STRCONST, GID, LVAR, LFUN, NULLOP, UNOP, BINOP,
@@ -61,7 +61,7 @@ typedef enum {
     BIN_PRED_OP, ASSIGN_OP
 } EXPR_BINOP;
 
-/* Used for lists of actual arguments to functions/procedures */
+/*Used for lists of actual arguments to functions/procedures*/
 typedef struct exprlistnode {
     struct exprnode * expr;
     struct exprlistnode * next;
@@ -74,7 +74,7 @@ typedef struct exprnode {
 	long intval;
 	double realval;
 	char * strval;
-	ST_ID gid;	/* For global variables and global functions */
+	ST_ID gid;	/*For global variables and global functions*/
 	struct {
 	    BOOLEAN is_ref;
 	    int offset;
@@ -106,12 +106,12 @@ typedef struct exprnode {
 typedef enum { DIR_EXTERNAL, DIR_FORWARD } DIRECTIVE;
 
 
-/* Records the current function identifier to detect return value assigns */
+/*Records the current function identifier to detect return value assigns*/
 extern ST_ID func_id_stack[BS_DEPTH];
 extern int fi_top;
 
 
-/* Function definitions */
+/*Function definitions*/
 ID_LIST id_prepend(ID_LIST, ST_ID);
 INDEX_LIST index_append(INDEX_LIST, TYPE);
 TYPE check_typename(ST_ID);
@@ -129,7 +129,7 @@ PARAM_LIST param_concat(PARAM_LIST, PARAM_LIST);
 TYPE make_func(PARAM_LIST, TYPE);
 
 
-/* Fenner's functions for 2nd installment */
+/*Fenner's functions for 2nd installment*/
 EXPR_LIST expr_list_reverse(EXPR_LIST list);
 EXPR_LIST expr_prepend(EXPR_LIST list, EXPR expr);
 int process_var_decl(ID_LIST ids, TYPE type, int cur_offset);
