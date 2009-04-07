@@ -201,18 +201,40 @@ int getSkipSize(TYPE type)
 /*Function that is called when a function block is entered*/
 void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
 {
-  /*Gets the TYPETAG for the function*/
-  TYPETAG tag = ty_query(type);
-  
+  /*Type, parameter list, and boolean variables for querying functions*/
+  TYPE fType;
+  PARAM_LIST fParams;
+  BOOLEAN checkArgs;
+
+  /*Queries the function*/
+  fType = ty_query_func(type, &fParams, &checkArgs);
+
+  /*Calls encoding function*/
   b_func_prologue(global_func_name);
-  b_store_formal_param(tag);
+
+  /*While there are still elements in the list*/
+  while(fParams != NULL)
+  {
+    /*Gets the type tag*/
+    TYPETAG tag;
+    tag = ty_query(fParams->type);
+
+    /*Stores the formal parameter*/
+    b_store_formal_param(tag);
+
+    /*Moves to the next element in the list*/
+    fParams = fParams->next;
+  }
   /*not sure what loc_var_size is for*/
 }/*End enter_func_body*/
 
 /*Function that is called when a function block is exited*/
 void exit_func_body(char * global_func_name, TYPE type)
 {
+  /*Calls the encoding function*/
   b_func_epilogue(global_func_name);
+
+  /*Exits the block*/
   st_exit_block();
 }/*End exit_func body*/
 
