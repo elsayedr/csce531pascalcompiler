@@ -1169,7 +1169,7 @@ void install_local_params(PARAM_LIST pList)
     datRec->u.decl.sc = copy->sc;
     datRec->u.decl.is_ref = copy->is_ref;
     datRec->u.decl.err = copy->err;
-    datRec->u.decl.v.offset = b_get_formal_param_offset(ty_query(copy->type));
+    datRec->u.decl.v.offset = getFormalParameterOffset(ty_query(copy->type));
 
     /* Installs the parameter */
     st_install(datRec, copy->id);
