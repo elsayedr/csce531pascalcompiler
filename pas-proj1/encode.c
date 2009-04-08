@@ -286,3 +286,10 @@ void decrementStack()
   /*Decrements*/
   bo_top--;
 }
+
+/*Gets the formal parameter offset value for a certian type*/
+int getFormalParameterOffset(TYPETAG tag)
+{
+  /*Returns the offset value*/
+  return b_get_formal_param_offset(tag);
+}

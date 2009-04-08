@@ -15,6 +15,7 @@ int getAlignSize(TYPE);
 int getSkipSize(TYPE);
 void incrementStack();
 void decrementStack();
+int getFormalParameterOffset(TYPETAG);
 
 /*Fenner's functions*/
 void enter_func_body(char * global_func_name, TYPE type, int loc_var_size);
