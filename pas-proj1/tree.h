@@ -110,7 +110,6 @@ typedef enum { DIR_EXTERNAL, DIR_FORWARD } DIRECTIVE;
 extern ST_ID func_id_stack[BS_DEPTH];
 extern int fi_top;
 
-
 /*Function definitions*/
 ID_LIST id_prepend(ID_LIST, ST_ID);
 INDEX_LIST index_append(INDEX_LIST, TYPE);
@@ -127,6 +126,9 @@ MEMBER_LIST member_concat(MEMBER_LIST, MEMBER_LIST);
 PARAM_LIST make_params(ID_LIST, TYPE, BOOLEAN);
 PARAM_LIST param_concat(PARAM_LIST, PARAM_LIST);
 TYPE make_func(PARAM_LIST, TYPE);
+int getOffsetStackTop();
+void incrementStack();
+void decrementStack();
 
 
 /*Fenner's functions for 2nd installment*/
