@@ -265,3 +265,24 @@ void exit_main_body()
   /* Calls the backend routine */
   b_func_epilogue("main");
 }/* End exit_main_body */
+
+/*Returns the local variable offset*/
+int get_local_var_offset()
+{
+  /*Returns the local variable offset*/
+  return b_get_local_var_offset();
+}
+
+/*Increments the stack top*/
+void incrementStack()
+{
+  /*Increments*/
+  bo_top++;
+}
+
+/*Decrements the stack top*/
+void decrementStack()
+{
+  /*Decrements*/
+  bo_top--;
+}

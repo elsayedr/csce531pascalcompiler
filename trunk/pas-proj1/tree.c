@@ -10,9 +10,6 @@
 #include "message.h"
 #include "encode.h"
 
-int offsetStack[BS_DEPTH];
-int stackTop = -1;
-
 /*   Inserts an ST_ID into a linked list */
 ID_LIST id_prepend(ID_LIST list, ST_ID newid) 
 {
@@ -711,20 +708,20 @@ int process_var_decl(ID_LIST ids, TYPE type, int cur_offset)
   else
   {
     /*Aligns the offset*/
-    offsetStack[stackTop] = offsetStack[stackTop] - getAlignSize(ty_build_basic(tag));
+    base_offset_stack[bo_top] = base_offset_stack[bo_top] - getAlignSize(ty_build_basic(tag));
   }
 	
   /* While the list is not null */
   while(ids) 
   {
     /*Decreases the offset by the size of the data type*/
-    offsetStack[stackTop] = offsetStack[stackTop] - getSkipSize(type);
+    base_offset_stack[bo_top] = base_offset_stack[bo_top] - getSkipSize(type);
 
     /* Allocates memory for the data record, sets the tag, sets the type */
     p = stdr_alloc();	  
     p->tag = LDECL;
     p->u.decl.type = type;
-    p->u.decl.v.offset = offsetStack[stackTop];
+    p->u.decl.v.offset = base_offset_stack[bo_top];
 
     /* Installs the variable in the symbol table */
     resolved = st_install(ids->id, p); 
@@ -753,7 +750,7 @@ int process_var_decl(ID_LIST ids, TYPE type, int cur_offset)
   } 
 
   /*I think this is the value that should be returned*/
-  offsetStack[stackTop];
+  return base_offset_stack[bo_top];
 }
 
 /* Checks subranges */
@@ -1147,10 +1144,10 @@ void check_func_decl(FUNC_HEAD fC)
   install_local_params(fParams);
 
   /*Increments the stack pointer*/
-  stackTop++;
+  incrementStack();
 
   /*Gets the initial off set*/
-  offsetStack[stackTop] = b_get_local_var_offset();
+  base_offset_stack[bo_top] = get_local_var_offset();
 }/* End check_func_decl */
 
 /* Function that installs local parameters */
@@ -1181,24 +1178,3 @@ void install_local_params(PARAM_LIST pList)
     copy = copy->next;
   }
 }/* End install_local_params */
-
-/*Function that returns the top of the offset Stack*/
-int getOffsetStackTop()
-{
-  /*Returns the top of the offset stack*/
-  return offsetStack[stackTop];
-}
-
-/*Increments the stack top*/
-void incrementStack()
-{
-  /*Increments*/
-  stackTop++;
-}
-
-/*Decrements the stack top*/
-void decrementStack()
-{
-  /*Decrements*/
-  stackTop--;
-}

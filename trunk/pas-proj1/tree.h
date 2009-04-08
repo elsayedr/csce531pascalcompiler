@@ -7,6 +7,10 @@
 #include "types.h"
 #include "symtab.h"
 
+/*Reference to stack variables declared in gram.y*/
+extern int base_offset_stack[BS_DEPTH];
+extern int bo_top;
+
 /*Defines a structure that represents a node in a linked list*/
 typedef struct id_node
 {
@@ -126,9 +130,6 @@ MEMBER_LIST member_concat(MEMBER_LIST, MEMBER_LIST);
 PARAM_LIST make_params(ID_LIST, TYPE, BOOLEAN);
 PARAM_LIST param_concat(PARAM_LIST, PARAM_LIST);
 TYPE make_func(PARAM_LIST, TYPE);
-int getOffsetStackTop();
-void incrementStack();
-void decrementStack();
 
 
 /*Fenner's functions for 2nd installment*/

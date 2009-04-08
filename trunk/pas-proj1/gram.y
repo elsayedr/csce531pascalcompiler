@@ -65,6 +65,10 @@ Josh Van Buren */
 void set_yydebug(int);
 void yyerror(const char *);
 
+/*Reference to stack variables declared in gram.y*/
+int base_offset_stack[BS_DEPTH];
+int bo_top = -1;
+
 /* Like YYERROR but do call yyerror */
 #define YYERROR1 { yyerror ("syntax error"); YYERROR; }
 
@@ -639,7 +643,7 @@ variable_declaration
 					if(st_get_cur_block == 0)
 					  make_var($1,$3); 
 					else
-					  $$ = process_var_decl($1, $3, getOffsetStackTop());
+					  $$ = process_var_decl($1, $3, bo_top);
 
 					resolve_ptr_types(); 
 				     }
