@@ -135,7 +135,6 @@ TYPE make_func(PARAM_LIST, TYPE);
 EXPR_LIST expr_list_reverse(EXPR_LIST list);
 EXPR_LIST expr_prepend(EXPR_LIST list, EXPR expr);
 int process_var_decl(ID_LIST ids, TYPE type, int cur_offset);
-TYPE check_subrange(EXPR lo, EXPR hi);
 void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir);
 int enter_function(ST_ID id, TYPE type, char * global_func_name);
 EXPR make_intconst_expr(long val, TYPE type);
