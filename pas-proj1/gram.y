@@ -65,9 +65,13 @@ Josh Van Buren */
 void set_yydebug(int);
 void yyerror(const char *);
 
-/*Reference to stack variables declared in gram.y*/
+/*Stack variables*/
 int base_offset_stack[BS_DEPTH];
 int bo_top = -1;
+
+/*Function id stack variables*/
+ST_ID func_id_stack[BS_DEPTH];
+int fi_top = -1;
 
 /* Like YYERROR but do call yyerror */
 #define YYERROR1 { yyerror ("syntax error"); YYERROR; }
@@ -641,9 +645,12 @@ variable_declaration_list
 variable_declaration
     : id_list ':' type_denoter semi  { 
 					if(st_get_cur_block == 0)
-					  make_var($1,$3); 
+					{
+					  make_var($1,$3);
+					  $$ = base_offset_stack[bo_top];
+					}
 					else
-					  $$ = process_var_decl($1, $3, bo_top);
+					  $$ = process_var_decl($1, $3, base_offset_stack[bo_top]);
 
 					resolve_ptr_types(); 
 				     }
@@ -653,9 +660,9 @@ variable_declaration
     
 function_declaration
     : function_heading semi directive_list semi	{ build_func_decl($1.id, $1.type, $3); }
-    | function_heading semi 	{ check_func_decl($1); st_get_id_str($1.id); } 
+    | function_heading semi 	{ $<y_string>$ =  enter_function($1.id, $1.type, &base_offset_stack[bo_top]); } 
         any_declaration_part 	{ enter_func_body($<y_string>3, $1.type, $4); } 
-	statement_part semi	{ exit_func_body($<y_string>3, $1.type); decrementStack(); }
+	statement_part semi	{ exit_func_body($<y_string>3, $1.type); }
     ;
 
 function_heading

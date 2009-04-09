@@ -817,9 +817,92 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
 }/* End build_func_decl */
 
 /* Called when a function is entered */
-char * enter_function(ST_ID id, TYPE type, int * local_var_offset)
+int enter_function(ST_ID id, TYPE type, char * global_func_name)
 {
-	/* not implemented yet */
+  /* Variable that represents the current block number */
+  int block;
+
+  /* Symbol table data record */
+  ST_DR datRec;
+
+  /*Variables needed for funcion checking*/
+  PARAM_LIST p1, p2;
+  BOOLEAN b1, b2;
+  TYPE t1, t2;
+  
+  /* Looks for the data record in the symbol table */
+  datRec = st_lookup(id, &block);
+
+  /* If data record is not found install it in the symbol table */
+  if(datRec == NULL)
+  {
+    /* Allocates memory for the new data record */
+    datRec = stdr_alloc();
+
+    /* Sets the attributes of the data record */
+    datRec->tag = FDECL;
+    datRec->u.decl.type = type;
+    datRec->u.decl.sc = NO_SC;
+    datRec->u.decl.is_ref = FALSE;
+    datRec->u.decl.v.global_func_name = st_get_id_str(id);
+
+    /* Installs the data record */
+    st_install(datRec, id);
+  }
+  /* If data record is found check the record */
+  else
+  {
+    /* Checks the tag and storage class */
+    if(datRec->tag != GDECL || datRec->u.decl.sc != NO_SC)
+    {
+      /* Error, duplicate delcaration */
+      error("Duplicate function declaration");
+
+      /* Return */
+      return;
+    }
+    /* Else, check the return type */
+    else
+    {
+      /*Gets the return type of the function*/
+      t1 = ty_query_func(type, &p1, &b1);
+      t2 = ty_query_func(datRec->u.decl.type, &p2, &b2);
+
+      /*Checks the return type*/
+      if(ty_test_equality(t1, t2) == TRUE)
+      {
+	/* Changes the tag, sets func name */
+	datRec->tag = FDECL;
+	datRec->u.decl.v.global_func_name = st_get_id_str(id);
+      }
+      /*Else error*/
+      else
+      {
+	/*Error, return*/
+	error("Incorrect return type");
+	return;
+      }
+    }
+
+    /*Pushes the id onto the stack*/
+    fi_top++;
+    func_id_stack[fi_top] = id;
+
+    /* Function checks out, so we enter a new block */
+    st_enter_block();
+
+    /*Increments the stack pointer*/
+    bo_top++;
+
+    /* Installs the parameters */
+    install_local_params(p2);
+
+    /*Gets the initial off set*/
+    base_offset_stack[bo_top] = get_local_var_offset();
+
+    /*Returns the offset*/
+    base_offset_stack[bo_top];
+  }
 }/* End enter_function */
 
 /* Creates an integer constant expression node */
@@ -1081,75 +1164,6 @@ void id_list_free(ID_LIST list)
   free(list);
 }/* End id_list_free */
 
-/* Function that checks the function declaration */
-void check_func_decl(FUNC_HEAD fC)
-{
-  /* Variable that represents the current block number */
-  int block;
-
-  /* Symbol table data record */
-  ST_DR datRec;
-  
-  /* Looks for the data record in the symbol table */
-  datRec = st_lookup(fC.id, &block);
-
-  /* If data record is not found install it in the symbol table */
-  if(datRec == NULL)
-  {
-    /* Allocates memory for the new data record */
-    datRec = stdr_alloc();
-
-    /* Sets the attributes of the data record */
-    datRec->tag = FDECL;
-    datRec->u.decl.type = fC.type;
-    datRec->u.decl.sc = NO_SC;
-    datRec->u.decl.is_ref = FALSE;
-    datRec->u.decl.v.global_func_name = st_get_id_str(fC.id);
-
-    /* Installs the data record */
-    st_install(datRec, fC.id);
-  }
-  /* If data record is found check the record */
-  else
-  {
-    /* Checks the tag and storage class */
-    if(datRec->tag != GDECL || datRec->u.decl.sc != NO_SC)
-    {
-      /* Error, duplicate delcaration */
-      error("Duplicate variable declaration");
-
-      /* Return */
-      return;
-    }
-    /* Else change the tag */
-    else
-    {
-      /* Changes the tag */
-      datRec->tag = FDECL;
-    }
-  }
-
-  /* Function checks out, so we enter a new block */
-  st_enter_block();
-
-  /* Parameter list, type, and boolean variable for function query */
-  PARAM_LIST fParams;
-  BOOLEAN checkArgs;
-  TYPE funcRetType;
-
-  /* Gets the ret type, param list, etc */
-  funcRetType = ty_query_func(fC.type, &fParams, &checkArgs);
-
-  /* Installs the parameters */
-  install_local_params(fParams);
-
-  /*Increments the stack pointer*/
-  incrementStack();
-
-  /*Gets the initial off set*/
-  base_offset_stack[bo_top] = get_local_var_offset();
-}/* End check_func_decl */
-
 /* Function that installs local parameters */
 void install_local_params(PARAM_LIST pList)
 {
@@ -1169,7 +1183,24 @@ void install_local_params(PARAM_LIST pList)
     datRec->u.decl.sc = copy->sc;
     datRec->u.decl.is_ref = copy->is_ref;
     datRec->u.decl.err = copy->err;
-    datRec->u.decl.v.offset = getFormalParameterOffset(ty_query(copy->type));
+  
+    /*If the variable is a reference parameter*/
+    if(copy->is_ref == TRUE)
+      datRec->u.decl.v.offset = getFormalParameterOffset(TYPTR);
+    /*Else get the offset based on the type*/
+    else
+    {
+      /*If it is a subrange type, get the base type*/
+      if(ty_query(copy->type) == TYSUBRANGE)
+      {
+	/*Gets the subrange base type and sets the offset accordingly*/
+	long low, high;
+	datRec->u.decl.v.offset = getFormalParameterOffset(ty_query(ty_query_subrange(copy->type, &low, &high)));
+      }
+      /*Else, get the offset by the type*/
+      else
+	datRec->u.decl.v.offset = getFormalParameterOffset(ty_query(copy->type));
+    }
 
     /* Installs the parameter */
     st_install(datRec, copy->id);

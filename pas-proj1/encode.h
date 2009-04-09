@@ -13,8 +13,6 @@ extern int bo_top;
 void declareVariable(ST_ID, TYPE);
 int getAlignSize(TYPE);
 int getSkipSize(TYPE);
-void incrementStack();
-void decrementStack();
 int getFormalParameterOffset(TYPETAG);
 
 /*Fenner's functions*/
