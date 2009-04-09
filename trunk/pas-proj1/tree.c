@@ -759,6 +759,9 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
   /* Creates the data record */
   ST_DR p;
   BOOLEAN resolved;
+  PARAM_LIST params;
+  TYPE returntype;
+  BOOLEAN check;
     
   /* Return if the type does not exist */
   if(!type) 
@@ -772,16 +775,21 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
   
   p = stdr_alloc();	  
   p->tag = GDECL;
-  p->u.decl.type = type;
   p->u.decl.is_ref = FALSE;
-  p->u.decl.v.global_func_name = st_get_id_str(id);
+  p->u.decl.v.global_func_name = get_global_func_name(id);
 
   /* If directive is external, set storage class to SC_EXTERN */
   if(dir == DIR_EXTERNAL)
-    p->u.decl.sc = EXTERN_SC;
+  {  p->u.decl.sc = EXTERN_SC;
+     returntype = ty_query_func(type, &params, &check);		// change check_args to FALSE
+     p->u.decl.type = ty_build_func(returntype, params, FALSE);	// rebuild new function type
+  }
   /* Else if directive is forward set storage class to NO_SC */
   else if(dir == DIR_FORWARD)
+  {
     p->u.decl.sc = NO_SC;
+    p->u.decl.type = type;	// type is unaltered 
+  }
   /* Not external or forward, error */
   else
     error("Invalid directive: \"%s\"", dir);
@@ -800,7 +808,7 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
     {
       /* Print debugging statements */
       printf("GDECL created with type:\n");
-      ty_print_type(type);
+      ty_print_type(p->u.decl.type);
       printf("\n");
     }
   } // end else
@@ -822,6 +830,8 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   PARAM_LIST p1, p2;
   BOOLEAN b1, b2;
   TYPE t1, t2;
+
+  t1 = ty_query_func(type, &p1, &b1);
   
   /* Looks for the data record in the symbol table */
   datRec = st_lookup(id, &block);
@@ -858,7 +868,6 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
     else
     {
       /*Gets the return type of the function*/
-      t1 = ty_query_func(type, &p1, &b1);
       t2 = ty_query_func(datRec->u.decl.type, &p2, &b2);
 
       /*Checks the return type*/
@@ -866,7 +875,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
       {
 	/* Changes the tag, sets func name */
 	datRec->tag = FDECL;
-	datRec->u.decl.v.global_func_name = st_get_id_str(id);
+	datRec->u.decl.v.global_func_name = global_func_name;
       }
       /*Else error*/
       else
@@ -888,7 +897,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
     bo_top++;
 
     /* Installs the parameters */
-    install_local_params(p2);
+    install_local_params(p1);
 
     /*Gets the initial off set*/
     base_offset_stack[bo_top] = get_local_var_offset();
@@ -1202,3 +1211,9 @@ void install_local_params(PARAM_LIST pList)
     copy = copy->next;
   }
 }/* End install_local_params */
+
+char * get_global_func_name(ST_ID id)
+{
+
+	return st_get_id_str(id);
+}
