@@ -211,7 +211,7 @@ int fi_top = -1;
 %type <y_funchead> function_heading
 %type <y_dir> directive_list directive
 %type <y_cint> variable_declaration_part variable_declaration_list
-%type <y_cint> variable_declaration simple_decl any_decl any_declaration_part
+%type <y_cint> variable_declaration simple_decl any_decl any_declaration_part function_declaration
 %type <y_int> enumerator enumerated_type enum_list
 
 %%
@@ -338,15 +338,15 @@ any_declaration_part
   {};
 
 any_decl
-    : simple_decl
-  {}| function_declaration
-  {};
+    : simple_decl		// default
+    | function_declaration	// default
+    ;
 
 simple_decl
     : label_declaration_part	{}  /* Ignore */
     | constant_definition_part	{}  /* Ignore */
-    | type_definition_part	{}
-    | variable_declaration_part	{}
+    | type_definition_part	{ $$ = 0; }
+    | variable_declaration_part	// default
     ;
 
 /* Label declaration part */
@@ -631,13 +631,13 @@ one_case_constant
 /* Variable declaration part */
 
 variable_declaration_part
-    : LEX_VAR variable_declaration_list  { resolve_ptr_types(); }
+    : LEX_VAR variable_declaration_list  { $$ = $2; resolve_ptr_types(); }
     ;
 
 variable_declaration_list
-    : variable_declaration
-  {}| variable_declaration_list variable_declaration
-  {};
+    : variable_declaration				// default
+    | variable_declaration_list variable_declaration	{ $$ = $1 + $2; }
+    ;
 
 variable_declaration
     : id_list ':' type_denoter semi  { 
@@ -645,10 +645,13 @@ variable_declaration
 					{
 					  make_var($1,$3);
 					  $$ = base_offset_stack[bo_top];
+					  if (debug) printf("Global - base offset stack top: %d\n",bo_top);
 					}
 					else
+					{
 					  $$ = process_var_decl($1, $3, base_offset_stack[bo_top]);
-
+					  if (debug) printf("Local - base offset stack top: %d\n",bo_top);
+					}
 					resolve_ptr_types(); 
 				     }
     ;
@@ -657,9 +660,10 @@ variable_declaration
     
 function_declaration
     : function_heading semi directive_list semi	{ build_func_decl($1.id, $1.type, $3); }
-    | function_heading semi 	{ base_offset_stack[bo_top] = enter_function($1.id, $1.type, st_get_id_str($1.id) ); } 
-        any_declaration_part 	{ enter_func_body(st_get_id_str($1.id), $1.type, $4); } // where does $4 come from?
-	statement_part semi	{ exit_func_body(st_get_id_str($1.id), $1.type); }
+    | function_heading semi 	{ get_global_func_name($1.id); }	
+				{ enter_function($1.id, $1.type, $<y_string>3); } 
+        any_declaration_part 	{ enter_func_body($<y_string>3, $1.type, $5); } 
+	statement_part semi	{ $$ = $<y_cint>4; exit_func_body($<y_string>3, $1.type); }
     ;
 
 function_heading
@@ -678,14 +682,14 @@ directive
     ;
 
 functiontype
-    : /* Empty */		{ $$ = NULL; }  /* Empty function type */
+    : /* Empty */	{ $$ = NULL; }  /* Empty function type */
     | ':' typename  	{ $$ = $2; }
     ;
 
 /* Parameter specification section */
 
 optional_par_formal_parameter_list
-    : /* Empty */				{ $$ = NULL; }
+    : /* Empty */			{ $$ = NULL; }
     | '(' formal_parameter_list ')'	{ $$ = $2; }
     ;
 
