@@ -419,23 +419,22 @@ combined_string
 
 string
     : LEX_STRCONST		/* Default */
-    | string LEX_STRCONST	{}  /* Ignore */
+    | string LEX_STRCONST	{}  		/* Ignore */
     ;
 
 /* Type definition part */
 
 type_definition_part
-    : LEX_TYPE type_definition_list semi	{ resolve_ptr_types(); }
+    : LEX_TYPE type_definition_list semi	{ resolve_ptr_types; }
     ;
 
 type_definition_list
-    : type_definition				 {}  /* Default */
+    : type_definition				 {}  
     | type_definition_list semi type_definition  {}
     ;
 
-type_definition				 
-    : new_identifier '=' type_denoter 	
-	{ make_type($1,$3); }  /* Installs a new identifier in the symtab as a new TYPENAME */
+type_definition		/* Installs a new identifier in the symtab as a new TYPENAME */	 
+    : new_identifier '=' type_denoter 	{ make_type($1,$3); }  
     ;
 
 type_denoter
@@ -469,8 +468,7 @@ enumerator
     ;
 
 subrange_type				 
-    : constant LEX_RANGE constant  
-	{ $$ = make_subrange($1, $3); }  /* Builds the subrange type */
+    : constant LEX_RANGE constant	{ $$ = make_subrange($1, $3); }  /* Builds the subrange type */
     ;
 
 new_pointer_type
@@ -495,7 +493,7 @@ new_procedural_type
     ;
 
 optional_procedural_type_formal_parameter_list
-    : /* Empty */						{ $$ = NULL; }
+    : /* Empty */					{ $$ = NULL; }
     | '(' procedural_type_formal_parameter_list ')'	{ $$ = $2; }
     ;
 
@@ -514,13 +512,13 @@ procedural_type_formal_parameter
     ;
 
 new_structured_type
-    : LEX_PACKED unpacked_structured_type	{}  /* Ignore */
+    : LEX_PACKED unpacked_structured_type	{ $$ = $2;}	/* Ignore */
     | unpacked_structured_type			/* Default */
     ;
 
 unpacked_structured_type
     : array_type
-    | file_type		{}  // not configured yet
+    | file_type		{}  // not configured 
     | set_type
     | record_type	
     ;
@@ -528,8 +526,7 @@ unpacked_structured_type
 /* Array */
 
 array_type
-    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter  
-	{ $$ = make_array($3, $6); }	
+    : LEX_ARRAY '[' array_index_list ']' LEX_OF type_denoter	{ $$ = make_array($3, $6); }	
     ;
 
 array_index_list
@@ -558,7 +555,7 @@ direct_access_index_type
 set_type
     : LEX_SET LEX_OF type_denoter	{ $$ = ty_build_set($3);
 					  if (debug) {
-						printf("Building set of type: \n");
+						printf("Built set of type: \n");
 						ty_print_typetag(ty_query($3));
 						printf("\n");
 					  }
@@ -634,7 +631,7 @@ one_case_constant
 /* Variable declaration part */
 
 variable_declaration_part
-    : LEX_VAR variable_declaration_list  { resolve_ptr_types(); }
+    : LEX_VAR variable_declaration_list  { resolve_ptr_types; }
     ;
 
 variable_declaration_list
@@ -644,7 +641,7 @@ variable_declaration_list
 
 variable_declaration
     : id_list ':' type_denoter semi  { 
-					if(st_get_cur_block == 0)
+					if (st_get_cur_block() <= 1)
 					{
 					  make_var($1,$3);
 					  $$ = base_offset_stack[bo_top];
@@ -652,7 +649,7 @@ variable_declaration
 					else
 					  $$ = process_var_decl($1, $3, base_offset_stack[bo_top]);
 
-					resolve_ptr_types(); 
+					resolve_ptr_types; 
 				     }
     ;
 
@@ -707,33 +704,31 @@ formal_parameter
 
 parameter_form
     : typename		/* Default */
-    | open_array	{}  /* Ignore */
+    | open_array 	/* Ignore */
     ;
 
 conformant_array_schema
-    : packed_conformant_array_schema	{}  /* Ignore */
-    | unpacked_conformant_array_schema	{}  /* Ignore */
+    : packed_conformant_array_schema	/* Ignore */
+    | unpacked_conformant_array_schema	/* Ignore */
     ;
 
 typename_or_conformant_array_schema
-    : typename				{}  /* Ignore */
-    | packed_conformant_array_schema	{}  /* Ignore */
-    | unpacked_conformant_array_schema	{}  /* Ignore */
+    : typename				/* Ignore */
+    | packed_conformant_array_schema	/* Ignore */
+    | unpacked_conformant_array_schema	/* Ignore */
     ;
 
 packed_conformant_array_schema
-    : LEX_PACKED LEX_ARRAY '[' index_type_specification ']' LEX_OF typename_or_conformant_array_schema  
-	{}  /* Ignore */
+    : LEX_PACKED LEX_ARRAY '[' index_type_specification ']' LEX_OF typename_or_conformant_array_schema	{}  /* Ignore */
     ;
 
 unpacked_conformant_array_schema
-    : LEX_ARRAY '[' index_type_specification_list ']' LEX_OF typename_or_conformant_array_schema
-	{}  /* Ignore */
+    : LEX_ARRAY '[' index_type_specification_list ']' LEX_OF typename_or_conformant_array_schema	{}  /* Ignore */
     ;
 
 index_type_specification
-    : new_identifier LEX_RANGE new_identifier ':' typename
-  {};
+    : new_identifier LEX_RANGE new_identifier ':' typename  {}	// ignore
+    ;
 
 index_type_specification_list
     : index_type_specification
@@ -741,7 +736,7 @@ index_type_specification_list
   {};
 
 open_array
-    : LEX_ARRAY LEX_OF typename  {}  /* Ignore */
+    : LEX_ARRAY LEX_OF typename		{ $$ = ty_build_ptr(NULL, $3); }	/* Ignore */
     ;
 
 statement_part
@@ -866,15 +861,13 @@ goto_statement
 /* Function calls */
 
 optional_par_actual_parameter_list
-    : /* Empty */				{ $$ = NULL; }
+    : /* Empty */			{ $$ = NULL; }
     | '(' actual_parameter_list ')'	{ $$ = $2; }
     ;
 
 actual_parameter_list
-    : actual_parameter
-	{ $$ = expr_prepend(NULL,$1); }
-    | actual_parameter_list ',' actual_parameter	
-	{ $$ = expr_prepend($1,$3); }
+    : actual_parameter					{ $$ = expr_prepend(NULL,$1); }
+    | actual_parameter_list ',' actual_parameter	{ $$ = expr_prepend($1,$3); }
     ;
 
 actual_parameter
@@ -895,7 +888,7 @@ variable_or_function_access_maybe_assignment
 
 rest_of_statement
     : /* Empty */			{ $$ = NULL; }
-    | LEX_ASSIGN expression	{ $$ = $2; }	
+    | LEX_ASSIGN expression		{ $$ = $2; }	
     ;
 
 standard_procedure_statement
