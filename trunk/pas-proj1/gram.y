@@ -425,7 +425,7 @@ string
 /* Type definition part */
 
 type_definition_part
-    : LEX_TYPE type_definition_list semi	{ resolve_ptr_types; }
+    : LEX_TYPE type_definition_list semi	{ resolve_ptr_types(); }
     ;
 
 type_definition_list
@@ -631,7 +631,7 @@ one_case_constant
 /* Variable declaration part */
 
 variable_declaration_part
-    : LEX_VAR variable_declaration_list  { resolve_ptr_types; }
+    : LEX_VAR variable_declaration_list  { resolve_ptr_types(); }
     ;
 
 variable_declaration_list
@@ -649,7 +649,7 @@ variable_declaration
 					else
 					  $$ = process_var_decl($1, $3, base_offset_stack[bo_top]);
 
-					resolve_ptr_types; 
+					resolve_ptr_types(); 
 				     }
     ;
 
@@ -657,9 +657,9 @@ variable_declaration
     
 function_declaration
     : function_heading semi directive_list semi	{ build_func_decl($1.id, $1.type, $3); }
-    | function_heading semi 	{ $<y_string>$ =  enter_function($1.id, $1.type, &base_offset_stack[bo_top]); } 
-        any_declaration_part 	{ enter_func_body($<y_string>3, $1.type, $4); } 
-	statement_part semi	{ exit_func_body($<y_string>3, $1.type); }
+    | function_heading semi 	{ base_offset_stack[bo_top] = enter_function($1.id, $1.type, st_get_id_str($1.id) ); } 
+        any_declaration_part 	{ enter_func_body(st_get_id_str($1.id), $1.type, $4); } // where does $4 come from?
+	statement_part semi	{ exit_func_body(st_get_id_str($1.id), $1.type); }
     ;
 
 function_heading

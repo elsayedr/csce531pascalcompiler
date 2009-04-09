@@ -251,7 +251,7 @@ void exit_func_body(char * global_func_name, TYPE type)
   /* Exits the block */
   st_exit_block();
 
-  /*Decremetns the stack top*/
+  /*Decrements the stack top*/
   bo_top--;
 }/* End exit_func body */
 

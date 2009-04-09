@@ -753,12 +753,6 @@ int process_var_decl(ID_LIST ids, TYPE type, int cur_offset)
   return base_offset_stack[bo_top];
 }
 
-/* Checks subranges */
-TYPE check_subrange(EXPR lo, EXPR hi)
-{
-	/* not implemented yet */
-}/* End check_subrange */
-
 /* Builds function declarations */
 void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
 {
@@ -770,8 +764,7 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
   if(!type) 
   {
     /* Debugging information */
-    if(debug) 
-      printf("Type for function declaration does not exist\n");
+    bug("Type for function declaration does not exist");
 	
     /* Return */
     return;
@@ -844,7 +837,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
     datRec->u.decl.type = type;
     datRec->u.decl.sc = NO_SC;
     datRec->u.decl.is_ref = FALSE;
-    datRec->u.decl.v.global_func_name = st_get_id_str(id);
+    datRec->u.decl.v.global_func_name = global_func_name;
 
     /* Installs the data record */
     st_install(datRec, id);
@@ -901,7 +894,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
     base_offset_stack[bo_top] = get_local_var_offset();
 
     /*Returns the offset*/
-    base_offset_stack[bo_top];
+    return base_offset_stack[bo_top];
   }
 }/* End enter_function */
 
