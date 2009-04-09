@@ -123,7 +123,6 @@ TYPE make_array(INDEX_LIST, TYPE);
 void make_type(ST_ID, TYPE);
 void make_var(ID_LIST, TYPE);
 void resolve_ptr_types();
-void check_func_decl(FUNC_HEAD);
 void install_local_params(PARAM_LIST);
 MEMBER_LIST make_members(ID_LIST, TYPE);
 MEMBER_LIST member_concat(MEMBER_LIST, MEMBER_LIST);
@@ -138,7 +137,7 @@ EXPR_LIST expr_prepend(EXPR_LIST list, EXPR expr);
 int process_var_decl(ID_LIST ids, TYPE type, int cur_offset);
 TYPE check_subrange(EXPR lo, EXPR hi);
 void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir);
-char * enter_function(ST_ID id, TYPE type, int * local_var_offset);
+int enter_function(ST_ID id, TYPE type, char * global_func_name);
 EXPR make_intconst_expr(long val, TYPE type);
 EXPR make_realconst_expr(double val);
 EXPR make_strconst_expr(char * str);
@@ -154,6 +153,7 @@ BOOLEAN is_lval(EXPR expr);
 void expr_free(EXPR expr);
 void expr_list_free(EXPR_LIST list);
 void id_list_free(ID_LIST list);
+char * get_global_func_name(ST_ID id);
 
 #endif
 

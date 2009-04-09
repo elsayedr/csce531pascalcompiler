@@ -250,6 +250,9 @@ void exit_func_body(char * global_func_name, TYPE type)
 
   /* Exits the block */
   st_exit_block();
+
+  /*Decremetns the stack top*/
+  bo_top--;
 }/* End exit_func body */
 
 /* Function that calls backend routines to enter the main program body */
@@ -271,20 +274,6 @@ int get_local_var_offset()
 {
   /*Returns the local variable offset*/
   return b_get_local_var_offset();
-}
-
-/*Increments the stack top*/
-void incrementStack()
-{
-  /*Increments*/
-  bo_top++;
-}
-
-/*Decrements the stack top*/
-void decrementStack()
-{
-  /*Decrements*/
-  bo_top--;
 }
 
 /*Gets the formal parameter offset value for a certian type*/
