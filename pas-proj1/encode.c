@@ -201,21 +201,27 @@ int getSkipSize(TYPE type)
 /* Function that is called when a function block is entered */
 void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
 {
-  /* Type, parameter list, and boolean variables for querying functions */
+  /* Type, parameter list, boolean, and tag variables for querying functions */
   TYPE fType;
   PARAM_LIST fParams;
   BOOLEAN checkArgs;
+  TYPETAG tag;
 
   /*Offset value for each variable, block number, data record*/
   int lVarOffset;
   int blockNum;
   ST_DR dataRec;
 
-  /* Queries the function */
+  /* Queries the function, gets the tag */
   fType = ty_query_func(type, &fParams, &checkArgs);
+  tag = ty_query(fType);
 
   /* Calls encoding function */
   b_func_prologue(global_func_name);
+
+  /*Checks to see if the function is local by checking the block number*/
+  if(st_get_cur_block() >=1)
+    b_store_formal_param(TYPTR);
 
   /* While there are still elements in the list */
   while(fParams != NULL)
@@ -238,6 +244,10 @@ void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
     fParams = fParams->next;
   }
   
+  /*If it is a function, allocate space for the return value*/
+  if(tag != TYVOID)
+    b_alloc_return_value();
+
   /*Allocates space for the local variables*/
   b_alloc_local_vars(loc_var_size);
 }/* End enter_func_body */
@@ -245,6 +255,23 @@ void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
 /* Function that is called when a function block is exited */
 void exit_func_body(char * global_func_name, TYPE type)
 {
+  /* Type, parameter list, boolean, tag variables for querying functions */
+  TYPE fType;
+  PARAM_LIST fParams;
+  BOOLEAN checkArgs;
+  TYPETAG tag;
+
+  /*Pops the id off the id stack*/
+  fi_top--;
+
+  /*Queries the function, gets the tag*/
+  fType = ty_query_func(type, &fParams, &checkArgs);
+  tag = ty_query(fType);
+
+  /*Checks the return type and allocates space as needed*/
+  if(tag != TYVOID)
+    b_prepare_return(tag);
+
   /* Calls the encoding function */
   b_func_epilogue(global_func_name);
 
@@ -281,4 +308,9 @@ int getFormalParameterOffset(TYPETAG tag)
 {
   /*Returns the offset value*/
   return b_get_formal_param_offset(tag);
+}
+
+/*Function that encodes and expression*/
+void encode_expr(EXPR expr)
+{
 }
