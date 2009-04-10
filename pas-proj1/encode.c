@@ -1,6 +1,7 @@
 #include "encode.h"
 #include "backend.h"
 #include "types.h"
+#include <stdio.h>
 
 /* Function that outputs the necessary code for a global declaration */
 void declareVariable(ST_ID id, TYPE type)
@@ -218,10 +219,6 @@ void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
 
   /* Calls encoding function */
   b_func_prologue(global_func_name);
-
-  /*Checks to see if the function is local by checking the block number*/
-  if(st_get_cur_block() >=1)
-    b_store_formal_param(TYPTR);
 
   /* While there are still elements in the list */
   while(fParams != NULL)
