@@ -9,6 +9,7 @@
 #include "symtab.h"
 #include "message.h"
 #include "encode.h"
+#include "backend.h"
 
 /*   Inserts an ST_ID into a linked list */
 ID_LIST id_prepend(ID_LIST list, ST_ID newid) 
@@ -826,7 +827,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   /* Symbol table data record */
   ST_DR datRec;
 
-  /*Variables needed for funcion checking*/
+  /*Variables needed for function checking*/
   PARAM_LIST p1, p2;
   BOOLEAN b1, b2;
   TYPE t1, t2;
@@ -906,6 +907,16 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   bo_top++;
   if (debug) printf("Incremented base offset top to: %d\n",bo_top);
 
+  /* initializes formal parameter offset calculation */
+  b_init_formal_param_offset();
+
+  /*Checks to see if the function is local by checking the block number*/
+  if(st_get_cur_block() > 2)		// functions declared in block 1 are global
+  {
+    b_store_formal_param(TYPTR);	// shadow param
+    if (debug) printf("Shadow param - local block: %d\n", st_get_cur_block() );
+  }
+
   /* Installs the parameters */
   install_local_params(p1);
 
@@ -915,7 +926,8 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   if (debug) printf("Current offset on stack is: %d\n",base_offset_stack[bo_top]);
 
   /*Returns the offset*/
-  return base_offset_stack[bo_top];
+  if (t1=TYVOID) return base_offset_stack[bo_top];
+  else return (base_offset_stack[bo_top] -= 8); 		// save space for return value
   
 }/* End enter_function */
 
