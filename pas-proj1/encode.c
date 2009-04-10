@@ -313,4 +313,41 @@ int getFormalParameterOffset(TYPETAG tag)
 /*Function that encodes and expression*/
 void encode_expr(EXPR expr)
 {
+  /*Switch based on the tag of the expression*/
+  switch(expr->tag)
+  {
+    /*Intconst case*/
+    case INTCONST:
+      break;
+    /*Real constant case*/
+    case REALCONST:
+      break;
+    /*String constant case*/
+    case STRCONST:
+      break;
+    /*Global identifier case*/
+    case GID:
+      break;
+    /*Local varible case*/
+    case LVAR:
+      break;
+    /*Local function case*/
+    case LFUN:
+      break;
+    /*Null operator case*/
+    case NULLOP:
+      break;
+    /*Unary operator case*/
+    case UNOP:
+      break;
+    /*Binary operator case*/
+    case BINOP:
+      break;
+    /*Function call case*/
+    case FCALL:
+      break;
+    /*Error case*/
+    case ERROR:
+      break;
+  }
 }
