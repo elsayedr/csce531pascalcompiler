@@ -73,6 +73,8 @@ int bo_top = -1;
 ST_ID func_id_stack[BS_DEPTH];
 int fi_top = -1;
 
+int n; // used as temp variable for debugging
+
 /* Like YYERROR but do call yyerror */
 #define YYERROR1 { yyerror ("syntax error"); YYERROR; }
 
@@ -233,7 +235,7 @@ program_component
   {};
 
 main_program_declaration
-    : program_heading { enter_main_body(); } semi import_or_any_declaration_part statement_part	{ exit_main_body(); }
+    : program_heading semi import_or_any_declaration_part { enter_main_body(); } statement_part	{ exit_main_body(); }
     ;
 
 program_heading
@@ -644,13 +646,15 @@ variable_declaration
 					if (st_get_cur_block() <= 1)
 					{
 					  make_var($1,$3);
-					  $$ = base_offset_stack[bo_top];
-					  if (debug) printf("Global - base offset stack top: %d\n",bo_top);
+					  n = base_offset_stack[bo_top];
+					  $$ = n;
+					  if (debug) printf("Global - base offset stack top: %d\n", n);
 					}
 					else
 					{
-					  $$ = process_var_decl($1, $3, base_offset_stack[bo_top]);
-					  if (debug) printf("Local - base offset stack top: %d\n",bo_top);
+					  n = process_var_decl($1, $3, base_offset_stack[bo_top]);
+				  	  $$ = n;
+					  if (debug) printf("Local - base offset stack top: %d\n", n);
 					}
 					resolve_ptr_types(); 
 				     }
@@ -662,7 +666,7 @@ function_declaration
     : function_heading semi directive_list semi	{ build_func_decl($1.id, $1.type, $3); }
     | function_heading semi 	{ $<y_string>$ = get_global_func_name($1.id); }	
 				{ $<y_cint>$ = enter_function($1.id, $1.type, $<y_string>3); } 
-        any_declaration_part 	{ if (debug) printf("Any decl part size = %d\n",$5);
+        any_declaration_part 	{ if (debug) printf("Entering function body: %s\nAny decl part size = %d\n",$<y_string>3,$5);
 				  enter_func_body($<y_string>3, $1.type, $5); } 
 	statement_part semi	{ $$ = $<y_cint>4; exit_func_body($<y_string>3, $1.type); }
     ;
