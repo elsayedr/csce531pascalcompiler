@@ -895,7 +895,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
 
   /*Pushes the id onto the stack*/
   fi_top++;
-  if (debug) printf("Function ID top = %d\n",fi_top);
+  if (debug) printf("Incremented function ID top to: %d\n",fi_top);
   func_id_stack[fi_top] = id;
 
   /* Function checks out, so we enter a new block */
