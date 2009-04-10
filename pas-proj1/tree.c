@@ -911,7 +911,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   b_init_formal_param_offset();
 
   /*Checks to see if the function is local by checking the block number*/
-  if(st_get_cur_block() > 2)		// functions declared in block 1 are global
+  if(st_get_cur_block() >= 2)		// functions declared in block 1 are global
   {
     b_store_formal_param(TYPTR);	// shadow param
     if (debug) printf("Shadow param - local block: %d\n", st_get_cur_block() );

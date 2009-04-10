@@ -335,9 +335,32 @@ void encode_expr(EXPR expr)
       break;
     /*Local varible case*/
     case LVAR:
+      /*Pushes the address of the current frame pointer*/
+      b_push_loc_addr(0);
+
+      /*Count variable*/
+      int i =0;
+
+      /*For loop for the link count*/
+      for(i =0; i<expr->u.lvar.link_count; i++)
+      {
+	/*Follows the reference link, so to speak*/
+	b_offset(FUNC_LINK_OFFSET);
+	b_deref(TYPTR);
+      }
+
+      /*Final offset*/
+      b_offset(expr->u.lvar.offset);
+
+      /*If it is a reference parameter, deref*/
+      if(expr->u.lvar.is_ref == TRUE)
+	b_deref(TYPTR);
+
+      /*Break case*/
       break;
     /*Local function case*/
     case LFUN:
+      
       break;
     /*Null operator case*/
     case NULLOP:

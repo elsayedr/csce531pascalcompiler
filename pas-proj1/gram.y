@@ -637,7 +637,7 @@ variable_declaration_part
     ;
 
 variable_declaration_list
-    : variable_declaration				// default
+    : variable_declaration				
     | variable_declaration_list variable_declaration	{ $$ = $1 + $2; }
     ;
 
@@ -852,12 +852,12 @@ for_direction
   {};
 
 simple_statement
-    : empty_statement
-  {}| goto_statement
-  {}| assignment_or_call_statement
-  {}| standard_procedure_statement
-  {}| statement_extensions
-  {};
+    : empty_statement	{}
+    | goto_statement	{}
+    | assignment_or_call_statement	{ encode_expr($1); }
+    | standard_procedure_statement	{}
+    | statement_extensions	{}
+    ;
 
 empty_statement
     : /* Empty */ %prec lower_than_error
@@ -886,12 +886,12 @@ actual_parameter
 /* Assignment and procedure calls */
 
 assignment_or_call_statement
-    : variable_or_function_access_maybe_assignment rest_of_statement	{}	// $$=check_assign_or_proc_call($1.expr,$1.id,$2);
+    : variable_or_function_access_maybe_assignment rest_of_statement	{ $$ = check_assign_or_proc_call($1.expr,$1.id,$2); }	
     ;
 
 variable_or_function_access_maybe_assignment
     : identifier					{ $$.expr = NULL; $$.id = $1; }
-    | address_operator variable_or_function_access	{}	/* Iignore */
+    | address_operator variable_or_function_access	{}	/* Ignore */
     | variable_or_function_access_no_id			{}		
     ;
 
