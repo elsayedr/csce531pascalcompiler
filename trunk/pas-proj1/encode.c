@@ -315,15 +315,23 @@ void encode_expr(EXPR expr)
   {
     /*Intconst case*/
     case INTCONST:
+      /*Pushes the constant integer value on the stack*/
+      b_push_const_int(expr->u.intval);
       break;
     /*Real constant case*/
     case REALCONST:
+      /*Pushes the double constant value onto the stack*/
+      b_push_const_double(expr->u.realval);
       break;
     /*String constant case*/
     case STRCONST:
+      /*Pushes the string constant value onto the stack*/
+      b_push_const_string(expr->u.strval);
       break;
     /*Global identifier case*/
     case GID:
+      /*Pushes the address of the identifier onto the stack*/
+      b_push_ext_addr(st_get_id_str(expr->u.gid));
       break;
     /*Local varible case*/
     case LVAR:
@@ -333,6 +341,8 @@ void encode_expr(EXPR expr)
       break;
     /*Null operator case*/
     case NULLOP:
+      /*Nil operation, pushes zero onto the stack*/
+      b_push_const_int(0);
       break;
     /*Unary operator case*/
     case UNOP:
