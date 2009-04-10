@@ -832,6 +832,8 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   TYPE t1, t2;
 
   t1 = ty_query_func(type, &p1, &b1);
+
+  if (debug) printf ("Entering function %s\n", global_func_name);
   
   /* Looks for the data record in the symbol table */
   datRec = st_lookup(id, &block);
@@ -888,19 +890,24 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
 
     /*Pushes the id onto the stack*/
     fi_top++;
+    if (debug) printf("Function ID top = %d\n",fi_top);
     func_id_stack[fi_top] = id;
 
     /* Function checks out, so we enter a new block */
     st_enter_block();
+    if (debug) printf("Entering block: %d\n",st_get_cur_block() );
 
     /*Increments the stack pointer*/
     bo_top++;
+    if (debug) printf("Incremented base offset top to: %d\n",bo_top);
 
     /* Installs the parameters */
     install_local_params(p1);
 
-    /*Gets the initial off set*/
+    /*Gets the initial offset*/
     base_offset_stack[bo_top] = get_local_var_offset();
+
+    if (debug) printf("Current offset on stack is: %d\n",base_offset_stack[bo_top]);
 
     /*Returns the offset*/
     return base_offset_stack[bo_top];
