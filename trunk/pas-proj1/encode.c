@@ -200,7 +200,7 @@ int getSkipSize(TYPE type)
 }
 
 /* Function that is called when a function block is entered */
-void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
+void enter_func_body(char * global_func_name, TYPE type, int loc_var_offset)
 {
   /* Type, parameter list, boolean, and tag variables for querying functions */
   TYPE fType;
@@ -246,7 +246,7 @@ void enter_func_body(char * global_func_name, TYPE type, int loc_var_size)
     b_alloc_return_value();
 
   /*Allocates space for the local variables*/
-  b_alloc_local_vars(loc_var_size);
+  b_alloc_local_vars(get_local_var_offset() - loc_var_offset);
 }/* End enter_func_body */
 
 /* Function that is called when a function block is exited */
