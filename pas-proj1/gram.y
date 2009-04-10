@@ -661,7 +661,7 @@ variable_declaration
 function_declaration
     : function_heading semi directive_list semi	{ build_func_decl($1.id, $1.type, $3); }
     | function_heading semi 	{ $<y_string>$ = get_global_func_name($1.id); }	
-				{ enter_function($1.id, $1.type, $<y_string>3); } 
+				{ $<y_cint>$ = enter_function($1.id, $1.type, $<y_string>3); } 
         any_declaration_part 	{ enter_func_body($<y_string>3, $1.type, $5); } 
 	statement_part semi	{ $$ = $<y_cint>4; exit_func_body($<y_string>3, $1.type); }
     ;

@@ -841,6 +841,8 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   /* If data record is not found install it in the symbol table */
   if(datRec == NULL)
   {
+    if (debug) printf("Function %s not previously declared.\n",global_func_name);
+
     /* Allocates memory for the new data record */
     datRec = stdr_alloc();
 
@@ -853,9 +855,11 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
 
     /* Installs the data record */
     st_install(datRec, id);
-  }
+    if (debug) printf("Installed data record for ID: %s\n",st_get_id_str(id) );
+  } // end new function
+
   /* If data record is found check the record */
-  else
+  else	// prior decl
   {
     /* Checks the tag and storage class */
     if(datRec->tag != GDECL || datRec->u.decl.sc != NO_SC)
@@ -887,31 +891,32 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
 	return;
       }
     }
+  }	// end prior decl stuff
 
-    /*Pushes the id onto the stack*/
-    fi_top++;
-    if (debug) printf("Function ID top = %d\n",fi_top);
-    func_id_stack[fi_top] = id;
+  /*Pushes the id onto the stack*/
+  fi_top++;
+  if (debug) printf("Function ID top = %d\n",fi_top);
+  func_id_stack[fi_top] = id;
 
-    /* Function checks out, so we enter a new block */
-    st_enter_block();
-    if (debug) printf("Entering block: %d\n",st_get_cur_block() );
+  /* Function checks out, so we enter a new block */
+  st_enter_block();
+  if (debug) printf("Entering block: %d\n",st_get_cur_block() );
 
-    /*Increments the stack pointer*/
-    bo_top++;
-    if (debug) printf("Incremented base offset top to: %d\n",bo_top);
+  /*Increments the stack pointer*/
+  bo_top++;
+  if (debug) printf("Incremented base offset top to: %d\n",bo_top);
 
-    /* Installs the parameters */
-    install_local_params(p1);
+  /* Installs the parameters */
+  install_local_params(p1);
 
-    /*Gets the initial offset*/
-    base_offset_stack[bo_top] = get_local_var_offset();
+  /*Gets the initial offset*/
+  base_offset_stack[bo_top] = get_local_var_offset();
 
-    if (debug) printf("Current offset on stack is: %d\n",base_offset_stack[bo_top]);
+  if (debug) printf("Current offset on stack is: %d\n",base_offset_stack[bo_top]);
 
-    /*Returns the offset*/
-    return base_offset_stack[bo_top];
-  }
+  /*Returns the offset*/
+  return base_offset_stack[bo_top];
+  
 }/* End enter_function */
 
 /* Creates an integer constant expression node */
