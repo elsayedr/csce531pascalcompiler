@@ -942,6 +942,8 @@ EXPR make_intconst_expr(long val, TYPE type)
   eNode->tag = INTCONST;
   eNode->u.intval = val;
   eNode->type = type;
+
+  if (debug) printf("Created expr node for INTCONST: %d\n",val);
  
   /* Returns the node */
   return eNode;
@@ -959,6 +961,8 @@ EXPR make_realconst_expr(double val)
   eNode->u.realval = val;
   eNode->type = ty_build_basic(TYDOUBLE);
 
+  if (debug) printf("Created expr node for REALCONST: %f\n",val);
+
   /* Returns the node */
   return eNode;
 }/* End make_realconst_expr */
@@ -974,6 +978,8 @@ EXPR make_strconst_expr(char * str)
   eNode->tag = STRCONST;
   eNode->u.strval = str;
   eNode->type = ty_build_ptr(NULL, ty_build_basic(TYSIGNEDCHAR) );
+
+  if (debug) printf("Created expr node for STRCONST: %s\n",str);
 
   /* Returns the node */
   return eNode;
@@ -998,6 +1004,8 @@ EXPR make_id_expr(ST_ID id)
   eNode->type = record->u.decl.type;
   eNode->u.gid = id;
 
+  if (debug) printf("Created expr node for ID: %s\n", st_get_id_str(id) );
+
   /* Returns the node */
   return eNode;
 }/* End make_id_expr */
@@ -1013,6 +1021,8 @@ EXPR make_null_expr(EXPR_NULLOP op)
   eNode->tag = NULLOP;
   eNode->type = NULL;
   eNode->u.nullop.op = op;
+
+  if (debug) printf("Created expr node for NULLOP: %d\n", op);
 
   /* Returns the node */
   return eNode;
@@ -1030,6 +1040,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   eNode->type = NULL;
   eNode->u.unop.op = op;
   eNode->u.unop.operand = sub;
+
+  if (debug) printf("Created expr node for UNOP: %d\n", op);
 
   /* Returns the node */
   return eNode;
@@ -1049,6 +1061,8 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   eNode->u.binop.left = left;
   eNode->u.binop.right = right;
 
+  if (debug) printf("Created expr node for BINOP: %d\n", op);
+
   /* Returns the node */
   return eNode;
 }/* End make_bin_expr */
@@ -1066,6 +1080,8 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   eNode->u.fcall.args = args;
   eNode->u.fcall.function = func;
 
+  if (debug) printf("Created expr node for function call\n");
+
   /* Returns the node */
   return eNode;
 }/* end make_fcall_expr */
@@ -1080,6 +1096,8 @@ EXPR make_error_expr()
   /* Sets the attributes of the node */
   eNode->tag = ERROR;
   eNode->type = NULL;
+
+  if (debug) printf("Created expr node for error\n");
 
   /* Returns the node */
   return eNode;

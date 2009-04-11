@@ -247,6 +247,7 @@ void enter_func_body(char * global_func_name, TYPE type, int loc_var_offset)
 
   /*Allocates space for the local variables*/
   b_alloc_local_vars(loc_var_offset);		// this has to be loc_var_offset or it doesn't work right
+
 }/* End enter_func_body */
 
 /* Function that is called when a function block is exited */
