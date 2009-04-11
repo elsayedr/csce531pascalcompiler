@@ -1131,11 +1131,43 @@ EXPR sign_number(EXPR_UNOP op, EXPR num)
 /* Checks for assignment or procedure call */
 EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 {
-	/* not implemented yet */
+	char * idstring	= st_get_id_str(id);
+	ST_DR datarec;
+	int block;
 
-	EXPR new = NULL;
+	if (rhs) 
+	{
+		/* exception for recursive fn calls - check id with current function */
 
-	return new;
+		// add code later - how to check current fn ID?		
+
+		/* not a recursion so return assign BINOP */
+		return make_bin_expr(ASSIGN_OP, lhs, rhs);
+	}
+
+	/* if New or Dispose then return LHS */
+	else if ( (idstring=="New") || (idstring=="Dispose") ) return lhs;
+
+	/* if tag = GID or LFUN check if LHS is procedure */
+	else if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
+	{
+		datarec = st_lookup(id, &block);
+
+		/* check tagtype of data rec */
+		if (datarec->tag==FDECL) 
+
+		/* return new FCALL node with no args */
+		return make_fcall_expr(lhs, NULL);
+
+		else error("Data record type is not function");
+		return make_error_expr();
+	}
+
+	/* any other tag is an error */
+	else error("Invalid tag for LHS expression");
+
+	return make_error_expr();
+
 } /* end check_assign_or_proc_call */
 
 /* Returns whether an expr is an lval */
