@@ -311,6 +311,11 @@ int getFormalParameterOffset(TYPETAG tag)
 /*Function that encodes and expression*/
 void encode_expr(EXPR expr)
 {
+  if (!expr) {
+	bug("Encoded expression undefined");
+	return;
+  }
+
   /*Switch based on the tag of the expression*/
   switch(expr->tag)
   {
