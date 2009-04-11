@@ -390,7 +390,7 @@ constant
     ;
 
 number
-    : sign unsigned_number	{ $$ = apply_sign_to_number($1, $2); }  
+    : sign unsigned_number	{ $$ = sign_number($1, $2); }  
     | unsigned_number		/* Default */
     ;
 
@@ -1022,66 +1022,66 @@ simple_expression
     ;
 
 term
-    : signed_primary
-  {}| term multiplying_operator signed_primary
-  {}| term LEX_AND signed_primary
-  {};
+    : signed_primary				// default
+    | term multiplying_operator signed_primary	{ make_bin_expr($2,$1,$3); }
+    | term LEX_AND signed_primary
+    ;
 
 signed_primary
-    : primary
-  {}| sign signed_primary
-  {};
+    : primary			// default
+    | sign signed_primary	{ $$ = sign_number($1, $2); }
+    ;
 
 primary
-    : factor
-  {}| primary LEX_POW factor
+    : factor			// default
+    | primary LEX_POW factor
   {}| primary LEX_POWER factor
   {}| primary LEX_IS typename
   {};
 
 signed_factor
-    : factor
-  {}| sign signed_factor
-  {};
+    : factor			// default
+    | sign signed_factor	{ $$ = sign_number($1, $2); }
+    ;
 
 factor
-    : variable_or_function_access
-  {}| constant_literal
-  {}| unsigned_number
-  {}| set_constructor
-  {}| LEX_NOT signed_factor
-  {}| address_operator factor
-  {};
+    : variable_or_function_access	{}
+    | constant_literal			// default
+    | unsigned_number			// default
+    | set_constructor			{}
+    | LEX_NOT signed_factor		{}
+    | address_operator factor		{}
+    ;
 
 address_operator
     : '@'
   {};
 
 variable_or_function_access
-    : variable_or_function_access_no_as
-  {}| variable_or_function_access LEX_AS typename
-  {};
+    : variable_or_function_access_no_as			// default
+    | variable_or_function_access LEX_AS typename	{}
+    ;
 
 variable_or_function_access_no_as
-    : variable_or_function_access_no_standard_function
-  {}| standard_functions
-  {};
+    : variable_or_function_access_no_standard_function	// default
+    | standard_functions				// default
+    ;
 
 variable_or_function_access_no_standard_function
-    : identifier
-  {}| variable_or_function_access_no_id
-  {};
+    : identifier					{ $$ = make_id_expr($1); }
+    | variable_or_function_access_no_id			// default
+    ;
 
 variable_or_function_access_no_id
-    : p_OUTPUT
-  {}| p_INPUT
-  {}| variable_or_function_access_no_as '.' new_identifier
-  {}| '(' expression ')'
-  {}| variable_or_function_access pointer_char
-  {}| variable_or_function_access '[' index_expression_list ']'
-  {}| variable_or_function_access_no_standard_function '(' actual_parameter_list ')'
-  {}| p_NEW '(' variable_access_or_typename ')'
-  {};
+    : p_OUTPUT							{}
+    | p_INPUT							{}
+    | variable_or_function_access_no_as '.' new_identifier	{}
+    | '(' expression ')'					{ $$ = $2; }
+    | variable_or_function_access pointer_char			{}
+    | variable_or_function_access '[' index_expression_list ']'	{}
+    | variable_or_function_access_no_standard_function '(' actual_parameter_list ')'	{} // function call
+    | p_NEW '(' variable_access_or_typename ')'			{}
+    ;
 
 set_constructor
     : '[' ']'
@@ -1099,15 +1099,15 @@ member_designator
   {};
 
 standard_functions
-    : rts_fun_onepar '(' actual_parameter ')'
-  {}| rts_fun_optpar optional_par_actual_parameter
-  {}| rts_fun_parlist '(' actual_parameter_list ')'
-  {};
+    : rts_fun_onepar '(' actual_parameter ')'		{ make_un_expr($1,$3); }
+    | rts_fun_optpar optional_par_actual_parameter	{ make_un_expr($1,$2); }
+    | rts_fun_parlist '(' actual_parameter_list ')'	{ make_un_expr($1,$3->expr); }
+    ;
 
 optional_par_actual_parameter
-    : /* Empty */
-  {}| '(' actual_parameter ')'
-  {};
+    : /* Empty */			{ $$ = NULL; }
+    | '(' actual_parameter ')'		{ $$ = $2; }	
+    ;
 
 rts_fun_optpar
     : p_EOF	{ $$ = UN_EOF_OP; }
@@ -1141,8 +1141,8 @@ rts_fun_onepar
     ;
 
 rts_fun_parlist
-    : p_SUCC	{ /* $$ = UN_SUCC_OP -or- $$ = BIN_SUCC_OP; */ }  /* One or two args */
-    | p_PRED	{ /* $$ = UN_PRED_OP -or- $$ = BIN_PRED_OP; */ }  /* One or two args */
+    : p_SUCC	{ $$ = UN_SUCC_OP; } // -or- $$ = BIN_SUCC_OP; */ }  /* One or two args */
+    | p_PRED	{ $$ = UN_PRED_OP; } // -or- $$ = BIN_PRED_OP; */ }  /* One or two args */
     ;
 
 relational_operator
@@ -1162,8 +1162,8 @@ multiplying_operator
     ;
 
 adding_operator
-    : '-'	{ $$ = ADD_OP; }
-    | '+'	{ $$ = SUB_OP; }
+    : '-'	{ $$ = SUB_OP; }
+    | '+'	{ $$ = ADD_OP; }
     ;
 
 semi
