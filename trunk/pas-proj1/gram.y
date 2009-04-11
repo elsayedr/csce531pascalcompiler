@@ -890,7 +890,7 @@ assignment_or_call_statement
     ;
 
 variable_or_function_access_maybe_assignment
-    : identifier					{ $$.id = $1; $$.expr = NULL; }
+    : identifier					{ $$.id = $1; $$.expr = make_id_expr($1); }
     | address_operator variable_or_function_access	{}	/* Ignore */
     | variable_or_function_access_no_id			{}		
     ;
