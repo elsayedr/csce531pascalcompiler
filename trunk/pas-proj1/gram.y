@@ -890,7 +890,7 @@ assignment_or_call_statement
     ;
 
 variable_or_function_access_maybe_assignment
-    : identifier					{ $$.id = $1; $$.expr = make_id_expr($1); }
+    : identifier					{ $$.expr = make_id_expr($1); $$.id = $1; }
     | address_operator variable_or_function_access	{}	/* Ignore */
     | variable_or_function_access_no_id			{}		
     ;
@@ -1024,12 +1024,12 @@ simple_expression
 term
     : signed_primary				// default
     | term multiplying_operator signed_primary	{ make_bin_expr($2,$1,$3); }
-    | term LEX_AND signed_primary
+    | term LEX_AND signed_primary		{ make_bin_expr(AND_OP,$1,$3); }
     ;
 
 signed_primary
     : primary			// default
-    | sign signed_primary	{ $$ = sign_number($1, $2); }
+    | sign signed_primary	{ $$ = make_un_expr($1, $2); }
     ;
 
 primary
@@ -1041,7 +1041,7 @@ primary
 
 signed_factor
     : factor			// default
-    | sign signed_factor	{ $$ = sign_number($1, $2); }
+    | sign signed_factor	{ $$ = make_un_expr($1, $2); }
     ;
 
 factor

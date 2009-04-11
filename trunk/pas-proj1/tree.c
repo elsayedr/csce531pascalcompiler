@@ -911,7 +911,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   b_init_formal_param_offset();
 
   /*Checks to see if the function is local by checking the block number*/
-  if(st_get_cur_block() >= 2)		// functions declared in block 1 are global
+  if(st_get_cur_block() > 2)		// functions declared in block 1 are global
   {
     b_store_formal_param(TYPTR);	// shadow param
     if (debug) printf("Shadow param - local block: %d\n", st_get_cur_block() );
@@ -992,17 +992,55 @@ EXPR make_id_expr(ST_ID id)
   ST_DR record;
   int blockNum;
 
-  /* Gets the ST_DR for the type */
-  record = st_lookup(id, &blockNum);
-
   /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
+    /* Gets the ST_DR for the type */
+  record = st_lookup(id, &blockNum);
+
+  if (debug) {
+	printf("Looked up data record for ID: %s\n", st_get_id_str(id) );
+	printf("Block number is: %d\n",blockNum);
+	printf("Typetag for ID is: ");
+	ty_print_typetag(record->tag);
+  }
+
+  /* check if ID is installed as a Typename */
+  if (record->tag==TYPENAME) {
+    error("Identifier installed as a Typename");
+    return make_error_expr();
+  }
+
   /* Sets the values of the node */
-  eNode->tag = GID;
   eNode->type = record->u.decl.type;
-  eNode->u.gid = id;
+ 
+  if (record->tag==GDECL)
+  {
+    eNode->tag = GID;
+    eNode->u.gid = id;
+  }
+
+  else if ( (record->tag==LDECL) || (record->tag==LDECL) )
+  {
+    eNode->tag = LVAR;
+    eNode->u.lvar.is_ref = record->u.decl.is_ref;
+    eNode->u.lvar.link_count = st_get_cur_block() - blockNum;
+    eNode->u.lvar.offset = record->u.decl.v.offset;
+  }
+
+  else if (record->tag==FDECL) 
+  {
+    if (blockNum<=1) {
+    	eNode->tag = GID;
+    	eNode->u.gid = id;
+    }
+    else {
+	eNode->tag = LFUN;
+	eNode->u.lfun.global_name = record->u.decl.v.global_func_name;
+        eNode->u.lfun.link_count = st_get_cur_block() - blockNum;
+    }
+  }
 
   if (debug) printf("Created expr node for ID: %s\n", st_get_id_str(id) );
 
@@ -1131,9 +1169,13 @@ EXPR sign_number(EXPR_UNOP op, EXPR num)
 /* Checks for assignment or procedure call */
 EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 {
-	char * idstring;
+	char * idstring = NULL;
 	int block;
-	ST_DR DR = st_lookup(id, &block);
+	ST_DR DR;
+
+	if (debug) printf("Entering check assign or proc call\n");
+
+	DR = st_lookup(id, &block);
 	
 	if (rhs) 
 	{
@@ -1151,8 +1193,10 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 		return make_error_expr();
 	}
 	
+	/* global ID's have .gid field */
+	if (lhs->tag==GID) idstring = st_get_id_str(lhs->u.gid);
+
 	/* if New or Dispose then return LHS */
-	idstring = st_get_id_str(lhs->u.gid);
 	if (debug) printf("Checking function type for: %s\n",idstring);
 	if ( (idstring=="New") || (idstring=="Dispose") ) return lhs;
 
