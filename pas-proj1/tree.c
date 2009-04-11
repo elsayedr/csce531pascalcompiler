@@ -1104,7 +1104,7 @@ EXPR make_error_expr()
 }/* End make_err_expr */
 
 /* Negates a number if its sign op is negative */
-EXPR apply_sign_to_number(EXPR_UNOP op, EXPR num)  
+EXPR sign_number(EXPR_UNOP op, EXPR num)  
 {
 	/* Checks the tag, if intconst */
 	if(num->tag == INTCONST)
