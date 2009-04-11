@@ -1131,10 +1131,10 @@ EXPR sign_number(EXPR_UNOP op, EXPR num)
 /* Checks for assignment or procedure call */
 EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 {
-	char * idstring	= st_get_id_str(id);
-	ST_DR datarec;
+	char * idstring;
 	int block;
-
+	ST_DR DR = st_lookup(id, &block);
+	
 	if (rhs) 
 	{
 		/* exception for recursive fn calls - check id with current function */
@@ -1144,17 +1144,23 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 		/* not a recursion so return assign BINOP */
 		return make_bin_expr(ASSIGN_OP, lhs, rhs);
 	}
-
+	
+	/* check for NULL pointer */
+	if (!lhs) {
+		bug("NULL LHS expression");
+		return make_error_expr();
+	}
+	
 	/* if New or Dispose then return LHS */
-	else if ( (idstring=="New") || (idstring=="Dispose") ) return lhs;
+	idstring = st_get_id_str(lhs->u.gid);
+	if (debug) printf("Checking function type for: %s\n",idstring);
+	if ( (idstring=="New") || (idstring=="Dispose") ) return lhs;
 
 	/* if tag = GID or LFUN check if LHS is procedure */
-	else if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
+	if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
 	{
-		datarec = st_lookup(id, &block);
-
 		/* check tagtype of data rec */
-		if (datarec->tag==FDECL) 
+		if ( ty_query(DR->u.decl.type) == TYFUNC) 
 
 		/* return new FCALL node with no args */
 		return make_fcall_expr(lhs, NULL);
