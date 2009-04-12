@@ -855,8 +855,20 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
     datRec->u.decl.v.global_func_name = global_func_name;
 
     /* Installs the data record */
-    st_install(datRec, id);
-    if (debug) printf("Installed data record for ID: %s\n",st_get_id_str(id) );
+    BOOLEAN install = st_install(datRec, id);
+
+    /*Debugging*/
+    if(debug)
+    {
+      if(install == TRUE)
+	printf("Installed data record for ID: %s\n",st_get_id_str(id) );
+
+      int block;
+      ST_DR rec = st_lookup(id, &block);
+
+      if(rec == NULL)
+	printf("...Data Record not found\n");
+    }
   } // end new function
 
   /* If data record is found check the record */
@@ -943,7 +955,7 @@ EXPR make_intconst_expr(long val, TYPE type)
   eNode->u.intval = val;
   eNode->type = type;
 
-  if (debug) printf("Created expr node for INTCONST: %d\n",val);
+  if (debug) printf("Created expr node for INTCONST: %d\n",(int)val);
  
   /* Returns the node */
   return eNode;
@@ -1340,6 +1352,5 @@ void install_local_params(PARAM_LIST pList)
 
 char * get_global_func_name(ST_ID id)
 {
-
 	return st_get_id_str(id);
 }
