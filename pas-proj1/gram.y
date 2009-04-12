@@ -763,13 +763,13 @@ statement_sequence
 
 statement
     : label ':' unlabelled_statement
-  {}| unlabelled_statement
-  {};
+  {}| unlabelled_statement	// default
+    ;
 
 unlabelled_statement
     : structured_statement
-  {}| simple_statement
-  {};
+  {}| simple_statement		// default
+    ;
 
 structured_statement
     : compound_statement
@@ -855,7 +855,7 @@ simple_statement
     : empty_statement	{}
     | goto_statement	{}
     | assignment_or_call_statement	{ encode_expr($1); }
-    | standard_procedure_statement	{}
+    | standard_procedure_statement	{ encode_expr($1); }
     | statement_extensions	{}
     ;
 

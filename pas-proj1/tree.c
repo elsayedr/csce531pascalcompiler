@@ -1221,8 +1221,8 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	/* if New or Dispose then return LHS */
 	if (lhs->tag==UNOP)
 	{ 
-		if( (lhs->u.unop.op=NEW_OP) || (lhs->u.unop.op=DISPOSE_OP) ) {
-			if (debug) printf("Returning New/Dispose call as LHS\n");
+		if ( (lhs->u.unop.op==NEW_OP) || (lhs->u.unop.op==DISPOSE_OP) ) {
+			if (debug) printf("Returning New function call as LHS\n");
 		}	return lhs;
 	}
 
