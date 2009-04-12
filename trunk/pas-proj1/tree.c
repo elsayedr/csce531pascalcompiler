@@ -855,7 +855,7 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
     datRec->u.decl.v.global_func_name = global_func_name;
 
     /* Installs the data record */
-    BOOLEAN install = st_install(datRec, id);
+    BOOLEAN install = st_install(id, datRec);
 
     /*Debugging*/
     if(debug)
@@ -1198,12 +1198,21 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	
 	if (rhs) 
 	{
-		/* exception for recursive fn calls - check id with current function */
+		/* exception for function return value - check id with current function */
+		if (0) // add code later - how to check current fn ID?		
+		{
+			/* if return type non-VOID return unop expr */
+			if ( ty_query(lhs->type) != TYVOID ) {
+				return make_un_expr(SET_RETURN_OP,rhs);
+			}
+			else {
+				error("VOID return type");
+				return make_error_expr();
+			}
+		}
 
-		// add code later - how to check current fn ID?		
-
-		/* not a recursion so return assign BINOP */
-		return make_bin_expr(ASSIGN_OP, lhs, rhs);
+		/* not a return value so return assign BINOP */
+		else return make_bin_expr(ASSIGN_OP, lhs, rhs);
 	}
 	
 	/* check for NULL pointer */
