@@ -1190,18 +1190,9 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 {
 	char * idstring = NULL;
 	int block;
-	ST_DR DR;
 
 	if (debug) printf("Entering check assign or proc call\n");
 
-	DR = st_lookup(id, &block);
-
-	/* check for NULL pointer */
-	if (!DR) {
-		error("NULL data record");
-		return make_error_expr();
-	}
-	
 	if (rhs) 
 	{
 		/* exception for function return value - check id with current function */
@@ -1223,7 +1214,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	
 	/* check for NULL pointer */
 	if (!lhs) {
-		error("NULL LHS expression");
+		bug("NULL LHS expression");
 		return make_error_expr();
 	}
 	
@@ -1244,7 +1235,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
 	{
 		/* check tagtype of data rec */
-		if ( ty_query(DR->u.decl.type) == TYFUNC) 
+		if ( ty_query(lhs->type) == TYFUNC) 
 
 		/* return new FCALL node with no args */
 		return make_fcall_expr(lhs, NULL);
@@ -1369,7 +1360,7 @@ void install_local_params(PARAM_LIST pList)
     }
 
     /* Installs the parameter */
-    st_install(datRec, copy->id);
+    st_install(copy->id, datRec);
 
     /* Moves on to the next element */
     copy = copy->next;
