@@ -991,7 +991,7 @@ EXPR make_strconst_expr(char * str)
   eNode->u.strval = str;
   eNode->type = ty_build_ptr(NULL, ty_build_basic(TYSIGNEDCHAR) );
 
-  if (debug) printf("Created expr node for STRCONST: %s\n",str);
+  if (debug) printf("Created expr node for STRCONST: \"%s\"\n",str);
 
   /* Returns the node */
   return eNode;
@@ -1061,7 +1061,7 @@ EXPR make_id_expr(ST_ID id)
     }
   }
 
-  if (debug) printf("Created expr node for ID: %s\n", st_get_id_str(id) );
+  if (debug) printf("Created expr node for ID: \"%s\"\n", st_get_id_str(id) );
 
   /* Returns the node */
   return eNode;
@@ -1195,6 +1195,12 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	if (debug) printf("Entering check assign or proc call\n");
 
 	DR = st_lookup(id, &block);
+
+	/* check for NULL pointer */
+	if (!DR) {
+		error("NULL data record");
+		return make_error_expr();
+	}
 	
 	if (rhs) 
 	{
@@ -1217,7 +1223,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	
 	/* check for NULL pointer */
 	if (!lhs) {
-		bug("NULL LHS expression");
+		error("NULL LHS expression");
 		return make_error_expr();
 	}
 	
@@ -1226,7 +1232,13 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 
 	/* if New or Dispose then return LHS */
 	if (debug) printf("Checking function type for: %s\n",idstring);
-	if ( (idstring=="New") || (idstring=="Dispose") ) return lhs;
+
+	if ( (idstring=="New") || (idstring=="Dispose") ) {
+		if (debug) printf("Returning LHS for function %s\n",idstring);
+		return lhs;
+	}
+
+	if (debug) printf("LHS tag = %d\n", lhs->tag);
 
 	/* if tag = GID or LFUN check if LHS is procedure */
 	if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
