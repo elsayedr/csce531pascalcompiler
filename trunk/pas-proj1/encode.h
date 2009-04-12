@@ -14,6 +14,9 @@ void declareVariable(ST_ID, TYPE);
 int getAlignSize(TYPE);
 int getSkipSize(TYPE);
 int getFormalParameterOffset(TYPETAG);
+void encodeUnop(EXPR_UNOP, EXPR);
+void encodeBinop(EXPR_BINOP, EXPR, EXPR);
+void encodeFCall(EXPR, EXPR_LIST);
 
 /*Fenner's functions*/
 void enter_func_body(char * global_func_name, TYPE type, int loc_var_offset);
