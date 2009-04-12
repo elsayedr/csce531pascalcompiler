@@ -1196,8 +1196,10 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	if (rhs) 
 	{
 		/* exception for function return value - check id with current function */
-		if (0) // add code later - how to check current fn ID?		
+		if (id == func_id_stack[fi_top])
 		{
+			if (debug) printf("Setting return value\n");
+
 			/* if return type non-VOID return unop expr */
 			if ( ty_query(lhs->type) != TYVOID ) {
 				return make_un_expr(SET_RETURN_OP,rhs);
