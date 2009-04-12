@@ -1011,6 +1011,11 @@ EXPR make_id_expr(ST_ID id)
     /* Gets the ST_DR for the type */
   record = st_lookup(id, &blockNum);
 
+  if (!record) {
+	error("Data record is NULL");
+	return make_error_expr();
+  }
+
   if (debug) {
 	printf("Looked up data record for ID: %s\n", st_get_id_str(id) );
 	printf("Block number is: %d\n",blockNum);
