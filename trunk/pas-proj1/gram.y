@@ -892,7 +892,7 @@ assignment_or_call_statement
 variable_or_function_access_maybe_assignment
     : identifier					{ $$.expr = make_id_expr($1); $$.id = $1; }
     | address_operator variable_or_function_access	{}	/* Ignore */
-    | variable_or_function_access_no_id			{}		
+    | variable_or_function_access_no_id			{ $$.expr = $1; $$.id = NULL; }		
     ;
 
 rest_of_statement
@@ -909,9 +909,9 @@ standard_procedure_statement
   {}| p_READLN optional_par_actual_parameter_list
   {}| p_PAGE optional_par_actual_parameter_list
   {}| ucsd_STR '(' write_actual_parameter_list ')'
-  {}| p_DISPOSE '(' actual_parameter ')'
-  {}| p_DISPOSE '(' actual_parameter ',' actual_parameter_list ')'
-  {};
+  {}| p_DISPOSE '(' actual_parameter ')'				{ $$ = make_un_expr(DISPOSE_OP, $3); }
+    | p_DISPOSE '(' actual_parameter ',' actual_parameter_list ')'	{ $$ = make_un_expr(DISPOSE_OP, $3); }
+    ;
 
 optional_par_write_parameter_list
     : /* Empty */
@@ -983,9 +983,9 @@ continue_statement
   {};
 
 variable_access_or_typename
-    : variable_or_function_access_no_id
-  {}| LEX_ID
-  {};
+    : variable_or_function_access_no_id		// default	
+    | LEX_ID					{ $$ = (ST_ID)st_enter_id($1); if (debug) printf("ID: %s\n",$1); }
+    ;
 
 index_expression_list
     : index_expression_item
@@ -1080,7 +1080,7 @@ variable_or_function_access_no_id
     | variable_or_function_access pointer_char			{}
     | variable_or_function_access '[' index_expression_list ']'	{}
     | variable_or_function_access_no_standard_function '(' actual_parameter_list ')'	{} // function call
-    | p_NEW '(' variable_access_or_typename ')'			{}
+    | p_NEW '(' variable_access_or_typename ')'			{ $$ = make_un_expr(NEW_OP, $3); }
     ;
 
 set_constructor
