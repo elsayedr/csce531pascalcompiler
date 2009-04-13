@@ -1046,7 +1046,7 @@ signed_factor
 
 factor
     : variable_or_function_access	{ if (ty_query($1->type)==TYFUNC) $$=make_fcall_expr($1, NULL);
-					  $$ = $1; }
+					  else $$ = $1; }
     | constant_literal			// default
     | unsigned_number			// default
     | set_constructor			{}
