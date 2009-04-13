@@ -58,9 +58,9 @@ message.o: message.c message.h defs.h
 
 utils.o: utils.c types.h message.h
 
-tree.o: tree.c tree.h types.h defs.h encode.h
+tree.o: tree.c tree.h types.h defs.h list.h encode.h
 
-encode.o: encode.c encode.h 
+encode.o: encode.c encode.h defs.h
 
 gram.o : gram.y $(PPC3H)
 	$(YACC) $(YFLAGS) gram.y
