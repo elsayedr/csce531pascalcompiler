@@ -425,7 +425,7 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
     /*Multiplication*/
     case MUL_OP:
       /*Multiplication*/
-      b_arith_rel_op(B_MUL, ty_query(leftArg->type));
+      b_arith_rel_op(B_MULT, ty_query(leftArg->type));
       break;
     /*Division*/
     case DIV_OP:
@@ -445,22 +445,32 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
     /*Is equal*/
     case EQ_OP:
       /*Tests equality*/
-      b_arith_rel_op(B_ADD, ty_query(leftArg->type));
+      b_arith_rel_op(B_EQ, ty_query(leftArg->type));
       break;
     /*Is less than*/
     case LESS_OP:
+      /*Less than*/
+      b_arith_rel_op(B_LT, ty_query(leftArg->type));
       break;
    /*Is less than or equal*/
    case LE_OP:
+      /*Less than or equal to*/
+      b_arith_rel_op(B_LE, ty_query(leftArg->type));
       break;
   /*Not equal*/
   case NE_OP:
+      /*Not equal*/
+      b_arith_rel_op(B_NE, ty_query(leftArg->type));
     break;
   /*Greater than or equal*/
   case GE_OP:
+      /*Greater than or equal*/
+      b_arith_rel_op(B_GE, ty_query(leftArg->type));
     break;
   /*Greater than*/
   case GREATER_OP:
+      /*Greater than*/
+      b_arith_rel_op(B_GT, ty_query(leftArg->type));
     break;
   /*Symbdiff*/
   case SYMDIFF_OP:
@@ -476,6 +486,9 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
     break;
   /*Assignment*/
   case ASSIGN_OP:
+    /*Assigns*/
+    b_assign(ty_query(leftArg->type));
+    b_pop();
     break;
   }
 }
