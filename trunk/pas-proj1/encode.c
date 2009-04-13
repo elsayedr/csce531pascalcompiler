@@ -321,6 +321,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
   TYPETAG tag;
   ST_ID s1;
   TYPE t1;
+  BOOLEAN isConverted = FALSE;
 
   /*Switch based on the operator*/
   switch(op)
@@ -373,9 +374,39 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*Succ operator*/
     case UN_SUCC_OP:
+      /*Gets the tag of the expression, convert if not long int*/
+      tag = ty_query(arg->type);
+      if(tag != TYSIGNEDLONGINT)
+      {
+	/*Converts to integer*/
+	b_convert(tag, TYSIGNEDLONGINT);
+	isConverted == TRUE;
+      }
+      /*Pushes the constant integer, adds it*/
+      b_push_const_int(1);
+      b_arith_rel_op(B_ADD, TYSIGNEDLONGINT);
+
+      /*If the expression has been converted, convert back*/
+      if(isConverted == TRUE)
+	b_convert(TYSIGNEDLONGINT, tag);
      break;
     /*Pred operator*/
     case UN_PRED_OP:
+      /*Gets the tag of the expression, convert if not long int*/
+      tag = ty_query(arg->type);
+      if(tag != TYSIGNEDLONGINT)
+      {
+	/*Converts to integer*/
+	b_convert(tag, TYSIGNEDLONGINT);
+	isConverted == TRUE;
+      }
+      /*Pushes the constant integer, adds it*/
+      b_push_const_int(-1);
+      b_arith_rel_op(B_ADD, TYSIGNEDLONGINT);
+
+      /*If the expression has been converted, convert back*/
+      if(isConverted == TRUE)
+	b_convert(TYSIGNEDLONGINT, tag);
      break;
     /*Indirection operator*/
     case INDIR_OP:
