@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "string.h"
 #include "defs.h"
 #include "types.h"
 #include "tree.h"
@@ -1380,7 +1381,34 @@ void install_local_params(PARAM_LIST pList)
   }
 }/* End install_local_params */
 
+/*Function that gets the global function name of a function*/
 char * get_global_func_name(ST_ID id)
 {
-	return st_get_id_str(id);
+  /*Looks up the function in the symbol table*/
+  ST_DR funcRec;
+  int block;
+  funcRec = st_lookup(id, &block);
+
+  /*If the function is global, just return the name*/
+  if(block <= 1)
+    return st_get_id_str(id);
+  /*Else return the global assembly name*/
+  else
+  {
+    /*Gets the id of the function, ., block number*/
+    char * idName = st_get_id_str(id);
+    char * dot = malloc(2 * sizeof(char));
+    *dot = '.';
+    char * blockNum = malloc(sizeof(char));
+    *blockNum = block;
+
+    /*Concats the  dot onto the block number, then that onto the end of the string*/
+    char * globalFunc = malloc((strlen(idName) + 2) * sizeof(char));
+    globalFunc = idName;
+    strncat(dot, blockNum, 1);
+    strncat(globalFunc, dot, 2);
+
+    /*Returns the function name*/
+    return globalFunc;
+  }
 }
