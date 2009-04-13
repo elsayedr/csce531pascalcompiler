@@ -395,6 +395,9 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
       b_push_ext_addr(st_get_id_str(arg->u.gid));
 
+      /*Allocates size for the argument list*/
+      b_alloc_arglist(4);
+
       /*Calls the external C function malloc*/
       b_funcall_by_name("free", TYPTR);
     break;
