@@ -392,6 +392,11 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
    /*Dispose operator*/
   case DISPOSE_OP:
+      /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
+      b_push_ext_addr(st_get_id_str(arg->u.gid));
+
+      /*Calls the external C function malloc*/
+      b_funcall_by_name("free", TYPTR);
     break;
   /*Deref opeator*/
   case DEREF_OP:
