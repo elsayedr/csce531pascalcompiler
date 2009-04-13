@@ -356,10 +356,21 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
      break;
     /*Ord operator*/
     case ORD_OP:
-     break;
+      /*Gets the tag of the expression, convert if not long int*/
+      tag = ty_query(arg->type);
+      if(tag != TYSIGNEDLONGINT)
+	b_convert(tag, TYSIGNEDLONGINT);
+      break;
     /*Chr operator*/
     case CHR_OP:
-     break;
+      /*Gets the tag of the expression, convert if not long int*/
+      tag = ty_query(arg->type);
+      if(tag == TYSIGNEDLONGINT)
+	b_convert(tag, TYUNSIGNEDCHAR);
+      /*Else, some type of bug or error*/
+      else
+	bug("Incorrect type for CHR function");
+      break;
     /*Succ operator*/
     case UN_SUCC_OP:
      break;
