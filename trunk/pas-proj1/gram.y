@@ -1045,7 +1045,8 @@ signed_factor
     ;
 
 factor
-    : variable_or_function_access	{}
+    : variable_or_function_access	{ if (ty_query($1->type)==TYFUNC) make_fcall_expr($1, NULL);
+					  else make_id_expr($1); }
     | constant_literal			// default
     | unsigned_number			// default
     | set_constructor			{}
@@ -1068,7 +1069,7 @@ variable_or_function_access_no_as
     ;
 
 variable_or_function_access_no_standard_function
-    : identifier					{ $$ = make_id_expr($1); }
+    : identifier					{ make_id_expr($1); }
     | variable_or_function_access_no_id			// default
     ;
 
