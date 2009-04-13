@@ -557,8 +557,31 @@ void encodeFCall(EXPR func, EXPR_LIST args)
 
   if (debug) printf("Encoding function call\n");
 
-  encode_expr(func);  
-
+  /* 
+   Encoding an FCALL varies somewhat depending on whether the function is
+   global (GID) or local (LFUN).
+   1. Finds the global name of the function: if GID, then this is the same
+      as the function name itself; if LFUN, this is its global_name.
+   2. Calculates the size of the argument list: each argument besides double
+      adds 4 bytes to the size, and double adds 8 bytes.  If LFUN, then
+      a reference link is passed as the first actual argument (shadow
+      parameter), which counts for 4 additional bytes (for a pointer).
+   3. Calls b_alloc_arglist() with the size calculated in (2).
+   4. For each actual argument, calls encode_expr() recursively to push its
+      value onto the stack.
+      a) For VAR parameters: an l-value is expected and the types must match.
+         If so, load the l-value (a pointer) with b_load_arg(TYPTR),
+         regardless of the TYPE of the argument.
+      b) For non-VAR (i.e., VALUE) parameters: an r-value is expected.  Call
+         b_deref() if necessary to convert an l-value into an r-value, then
+         promote chars (signed or unsigned) to signed longs and floats to
+         doubles, then call b_load_arg() with the resulting type tag.
+      In either case, b_load_arg() moves the value on top of the stack to
+      is proper location based on the gcc calling conventions.
+   5. Calls b_funcall_by_name() with the name and return type tag of the
+      function.
+ */
+  
 }
 
 /*Function that encodes and expression*/
