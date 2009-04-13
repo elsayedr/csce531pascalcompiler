@@ -1,3 +1,4 @@
+#include "defs.h"
 #include "encode.h"
 #include "backend.h"
 #include "types.h"
@@ -552,7 +553,13 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
 
 /*Helper function to encode a function call*/
 void encodeFCall(EXPR func, EXPR_LIST args)
-{}
+{
+
+  if (debug) printf("Encoding function call\n");
+
+  encode_expr(func);  
+
+}
 
 /*Function that encodes and expression*/
 void encode_expr(EXPR expr)
