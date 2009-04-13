@@ -984,7 +984,7 @@ continue_statement
 
 variable_access_or_typename
     : variable_or_function_access_no_id		// default	
-    | LEX_ID					{ $$ = (ST_ID)st_enter_id($1); if (debug) printf("ID: %s\n",$1); }
+    | LEX_ID					{ $$ = make_id_expr(st_enter_id($1)); if (debug) printf("ID: %s\n",$1); }
     ;
 
 index_expression_list
