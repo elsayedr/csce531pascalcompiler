@@ -1124,6 +1124,20 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 /* Makes a function call expression node */
 EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 {
+  /*Checks to determine if the expr is a function*/
+  if(ty_query(func->type) != TYFUNC)
+  {
+     /*Bug, return*/
+     bug("Not a function sent to make_fcall_expr");
+     return;
+  }
+
+  /*Queries the function*/
+  TYPE funcRetType;
+  PARAM_LIST fParams;
+  BOOLEAN checkArgs;
+  funcRetType = ty_query_func(func->type, &fParams, &checkArgs);
+
   /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
