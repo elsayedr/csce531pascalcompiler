@@ -308,6 +308,120 @@ int getFormalParameterOffset(TYPETAG tag)
   return b_get_formal_param_offset(tag);
 }
 
+/*Helper function to encode a unary operator node*/
+void encodeUnop(EXPR_UNOP op, EXPR arg)
+{
+  if (debug) printf("Encoding unary operator: %d\n",op);
+
+  /*Recursive call on the argument to encode_Expr*/
+  encode_expr(arg);
+
+  /*Switch based on the operator*/
+  switch(op)
+  {
+    /*Unary plus case*/
+    case UPLUS_OP:
+     break;
+    /*Unary minus*/
+    case NEG_OP:
+     break;
+    /*Ord operator*/
+    case ORD_OP:
+     break;
+    /*Chr operator*/
+    case CHR_OP:
+     break;
+    /*Succ operator*/
+    case UN_SUCC_OP:
+     break;
+    /*Pred operator*/
+    case UN_PRED_OP:
+     break;
+    /*Indirection operator*/
+    case INDIR_OP:
+     break;
+    /*New operator*/
+    case NEW_OP:
+     break;
+    /*Dispose operator*/
+    case DISPOSE_OP:
+     break;
+    /*Deref opeator*/
+    case DEREF_OP:
+    break;
+  }
+}
+
+/*Helper function to encode a binary operator node*/
+void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
+{
+  if (debug) printf("Encoding binary operator: %d\n",op);
+
+  /*Recursive calls on the arguments to encode_Expr*/
+  encode_expr(leftArg);
+  encode_expr(rightArg);
+
+  /*Switch based on the operator*/
+  switch(op)
+  {
+    /*Addition*/
+    case ADD_OP:
+     break;
+    /*Subtraction*/
+    case SUB_OP:
+     break;
+    /*Multiplication*/
+    case MUL_OP:
+     break;
+    /*Division*/
+    case DIV_OP:
+     break;
+    /*Modulus*/
+    case MOD_OP:
+     break;
+    /*Real division*/
+    case REALDIV_OP:
+     break;
+    /*Is equal*/
+    case EQ_OP:
+     break;
+    /*Is less than*/
+    case LESS_OP:
+     break;
+   /*Is less than or equal*/
+   case LE_OP:
+    break;
+  /*Not equal*/
+  case NE_OP:
+   break;
+  /*Greater than or equal*/
+  case GE_OP:
+   break;
+  /*Greater than*/
+  case GREATER_OP:
+   break;
+  /*Symbdiff*/
+  case SYMDIFF_OP:
+   break;
+  /*Or*/
+  case OR_OP:
+   break;
+  /*XOR*/
+  case XOR_OP:
+   break;
+  /*And*/
+  case AND_OP:
+   break;
+  /*Assignment*/
+  case ASSIGN_OP:
+   break;
+  }
+}
+
+/*Helper function to encode a function call*/
+void encodeFCall(EXPR func, EXPR_LIST args)
+{}
+
 /*Function that encodes and expression*/
 void encode_expr(EXPR expr)
 {
@@ -393,112 +507,3 @@ void encode_expr(EXPR expr)
   }
 }
 
-/*Helper function to encode a unary operator node*/
-void encodeUnop(EXPR_UNOP op, EXPR arg)
-{
-  /*Recursive call on the argument to encode_Expr*/
-  encode_expr(arg);
-
-  /*Switch based on the operator*/
-  switch(op)
-  {
-    /*Unary plus case*/
-    case UPLUS_OP:
-     break;
-    /*Unary minus*/
-    case NEG_OP:
-     break;
-    /*Ord operator*/
-    case ORD_OP:
-     break;
-    /*Chr operator*/
-    case CHR_OP:
-     break;
-    /*Succ operator*/
-    case UN_SUCC_OP:
-     break;
-    /*Pred operator*/
-    case UN_PRED_OP:
-     break;
-    /*Indirection operator*/
-    case INDIR_OP:
-     break;
-    /*New operator*/
-    case NEW_OP:
-     break;
-   /*Dispose operator*/
-   case DISPOSE_OP:
-    break;
-  /*Deref opeator*/
-  case DEREF_OP:
-   break;
-  }
-}
-
-/*Helper function to encode a binary operator node*/
-void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
-{
-  /*Recursive calls on the arguments to encode_Expr*/
-  encode_expr(leftArg);
-  encode_expr(rightArg);
-
-  /*Switch based on the operator*/
-  switch(op)
-  {
-    /*Addition*/
-    case ADD_OP:
-     break;
-    /*Subtraction*/
-    case SUB_OP:
-     break;
-    /*Multiplication*/
-    case MUL_OP:
-     break;
-    /*Division*/
-    case DIV_OP:
-     break;
-    /*Modulus*/
-    case MOD_OP:
-     break;
-    /*Real division*/
-    case REALDIV_OP:
-     break;
-    /*Is equal*/
-    case EQ_OP:
-     break;
-    /*Is less than*/
-    case LESS_OP:
-     break;
-   /*Is less than or equal*/
-   case LE_OP:
-    break;
-  /*Not equal*/
-  case NE_OP:
-   break;
-  /*Greater than or equal*/
-  case GE_OP:
-   break;
-  /*Greater than*/
-  case GREATER_OP:
-   break;
-  /*Symbdiff*/
-  case SYMDIFF_OP:
-   break;
-  /*Or*/
-  case OR_OP:
-   break;
-  /*XOR*/
-  case XOR_OP:
-   break;
-  /*And*/
-  case AND_OP:
-   break;
-  /*Assignment*/
-  case ASSIGN_OP:
-   break;
-  }
-}
-
-/*Helper function to encode a function call*/
-void encodeFCall(EXPR func, EXPR_LIST args)
-{}
