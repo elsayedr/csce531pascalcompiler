@@ -390,7 +390,7 @@ constant
     ;
 
 number
-    : sign unsigned_number	{ $$ = make_un_expr($1, $2); }  
+    : sign unsigned_number	{ $$ = sign_number($1, $2); }  
     | unsigned_number		/* Default */
     ;
 
