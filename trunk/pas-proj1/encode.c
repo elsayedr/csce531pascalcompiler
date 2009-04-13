@@ -311,19 +311,45 @@ int getFormalParameterOffset(TYPETAG tag)
 /*Helper function to encode a unary operator node*/
 void encodeUnop(EXPR_UNOP op, EXPR arg)
 {
-  if (debug) printf("Encoding unary operator: %d\n",op);
-
   /*Recursive call on the argument to encode_Expr*/
   encode_expr(arg);
+
+  /*Variables needed in the switch*/
+  TYPETAG tag;
+  ST_ID s1;
+  TYPE t1;
 
   /*Switch based on the operator*/
   switch(op)
   {
+    /*Convert operator*/
+    case CONVERT_OP:
+      /*Gets the tag of the argument*/
+      tag = ty_query(arg->type);
+      /*Checks the type of the argument*/
+      if(tag == TYSIGNEDLONGINT)
+      {
+	/*Single to Real*/
+	b_convert(TYSIGNEDLONGINT, TYDOUBLE);
+      }
+      /*If subrange type, get base type*/
+      else if(tag == TYSUBRANGE)
+      {
+	/*Gets the base type*/
+	long low, high;
+	TYPE baseT = ty_query_subrange(arg->type, &low, &high);
+	
+	/*Converts subrange to base type*/
+	b_convert(TYSUBRANGE, ty_query(baseT));
+      }
+      break;
     /*Unary plus case*/
     case UPLUS_OP:
      break;
     /*Unary minus*/
     case NEG_OP:
+     /*Calls the backend routine*/
+     b_negate(ty_query(arg->type));
      break;
     /*Ord operator*/
     case ORD_OP:
@@ -342,13 +368,32 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
      break;
     /*New operator*/
     case NEW_OP:
-     break;
-    /*Dispose operator*/
-    case DISPOSE_OP:
-     break;
-    /*Deref opeator*/
-    case DEREF_OP:
+      /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
+      b_push_ext_addr(st_get_id_str(arg->u.gid));
+      
+      /*Allocates size for the argument list*/
+      b_alloc_arglist(4);
+
+      /*Pushes an intconst the size of the type the pointer points to*/
+      b_push_const_int(getSkipSize(ty_query_ptr(arg->type, &s1, &t1)));
+
+      /*Loads an argument*/
+      b_load_arg(ty_query(ty_query_ptr(arg->type, &s1, &t1)));
+
+      /*Calls the external C function malloc*/
+      b_funcall_by_name("malloc", TYPTR);
+
+      /*Assigns the pointer and pops the top value off the stack*/
+      b_assign(TYPTR);
+      b_pop();
+      break;
+   /*Dispose operator*/
+  case DISPOSE_OP:
     break;
+  /*Deref opeator*/
+  case DEREF_OP:
+   b_deref(ty_query(arg->type));
+   break;
   }
 }
 
