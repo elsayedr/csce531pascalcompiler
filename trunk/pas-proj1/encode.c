@@ -406,63 +406,77 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
   if (debug) printf("Encoding binary operator: %d\n",op);
 
   /*Recursive calls on the arguments to encode_Expr*/
-  encode_expr(leftArg);
   encode_expr(rightArg);
+  encode_expr(leftArg);
 
   /*Switch based on the operator*/
   switch(op)
   {
     /*Addition*/
     case ADD_OP:
-     break;
+      /*Addition*/
+      b_arith_rel_op(B_ADD, ty_query(leftArg->type));
+      break;
     /*Subtraction*/
     case SUB_OP:
-     break;
+      /*Subtraction*/
+      b_arith_rel_op(B_SUB, ty_query(leftArg->type));
+      break;
     /*Multiplication*/
     case MUL_OP:
-     break;
+      /*Multiplication*/
+      b_arith_rel_op(B_MUL, ty_query(leftArg->type));
+      break;
     /*Division*/
     case DIV_OP:
-     break;
+      /*Division*/
+      b_arith_rel_op(B_DIV, ty_query(leftArg->type));
+      break;
     /*Modulus*/
     case MOD_OP:
-     break;
+      /*Modulus*/
+      b_arith_rel_op(B_MOD, ty_query(leftArg->type));
+      break;
     /*Real division*/
     case REALDIV_OP:
-     break;
+      /*Real division*/
+      b_arith_rel_op(B_DIV, ty_query(leftArg->type));
+      break;
     /*Is equal*/
     case EQ_OP:
-     break;
+      /*Tests equality*/
+      b_arith_rel_op(B_ADD, ty_query(leftArg->type));
+      break;
     /*Is less than*/
     case LESS_OP:
-     break;
+      break;
    /*Is less than or equal*/
    case LE_OP:
-    break;
+      break;
   /*Not equal*/
   case NE_OP:
-   break;
+    break;
   /*Greater than or equal*/
   case GE_OP:
-   break;
+    break;
   /*Greater than*/
   case GREATER_OP:
-   break;
+    break;
   /*Symbdiff*/
   case SYMDIFF_OP:
-   break;
+    break;
   /*Or*/
   case OR_OP:
-   break;
+    break;
   /*XOR*/
   case XOR_OP:
-   break;
+    break;
   /*And*/
   case AND_OP:
-   break;
+    break;
   /*Assignment*/
   case ASSIGN_OP:
-   break;
+    break;
   }
 }
 
