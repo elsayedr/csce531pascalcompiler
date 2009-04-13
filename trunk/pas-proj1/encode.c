@@ -486,7 +486,14 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
     break;
   /*Assignment*/
   case ASSIGN_OP:
-    /*Assigns*/
+     /*Checks tag to see if local variable*/
+     if(leftArg->tag == LVAR)
+     {
+	/*Pushes the address of the local variable*/
+	b_push_loc_addr(leftArg->u.lvar.offset);
+     }
+     
+    /*Assigns, then pops*/
     b_assign(ty_query(leftArg->type));
     b_pop();
     break;
