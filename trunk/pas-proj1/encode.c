@@ -554,8 +554,55 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
 /*Helper function to encode a function call*/
 void encodeFCall(EXPR func, EXPR_LIST args)
 {
-
+  /*Debugging*/
   if (debug) printf("Encoding function call\n");
+
+  /*Size of the argument list*/
+  int argListSize;
+
+  /*Global name of the function*/
+  char * fGlobalName;
+
+  /*Cheecks to see if the function is a gid or lfun*/
+  if(func->tag == GID)
+  {
+    /*Gets the function name*/
+    fGlobalName = st_get_id_str(func->u.gid);
+  }
+  /*Else if, local function*/
+  else if(func->tag == LFUN)
+  {
+    /*Gets the function name, adds to size enough room for shadow pointer*/
+    fGlobalName = func->u.lfun.global_name;
+    argListSize = 4;
+  }
+  /*Else bug*/
+  else
+  {
+    /*Bug, return*/
+    bug("Function sent to encodeFCall not GID or LFUN");
+    return;
+  }
+
+  /*Copies the arg list*/
+  EXPR_LIST copy = args;
+
+  /*While loop that runs through the list*/
+  while(copy != NULL)
+  {
+    /*If the argument is a double add eight*/
+    if(ty_query(copy->expr->type) == TYDOUBLE)
+      argListSize = argListSize + 8;
+    /*Else, add four*/
+    else
+      argListSize = argListSize + 4;
+
+    /*Moves on to the next item*/
+    copy = copy->next;
+  }
+
+  /*Allocates the size for the argument list*/
+  b_alloc_arglist(argListSize);
 
   /* 
    Encoding an FCALL varies somewhat depending on whether the function is
