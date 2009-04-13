@@ -308,9 +308,13 @@ int getFormalParameterOffset(TYPETAG tag)
   return b_get_formal_param_offset(tag);
 }
 
-/*Helper function to encode a unary operator node*/
+/*Helper function to 
+ a unary operator node*/
 void encodeUnop(EXPR_UNOP op, EXPR arg)
 {
+
+  if (debug) printf("Encoding unary operator: %d\n",op);
+
   /*Recursive call on the argument to encode_Expr*/
   encode_expr(arg);
 
