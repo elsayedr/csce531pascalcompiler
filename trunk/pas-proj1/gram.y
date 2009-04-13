@@ -390,7 +390,7 @@ constant
     ;
 
 number
-    : sign unsigned_number	{ $$ = sign_number($1, $2); }  
+    : sign unsigned_number	{ $$ = make_un_expr($1, $2); }  
     | unsigned_number		/* Default */
     ;
 
@@ -1099,9 +1099,9 @@ member_designator
   {};
 
 standard_functions
-    : rts_fun_onepar '(' actual_parameter ')'		{ make_un_expr($1,$3); }
-    | rts_fun_optpar optional_par_actual_parameter	{ make_un_expr($1,$2); }
-    | rts_fun_parlist '(' actual_parameter_list ')'	{ make_un_expr($1,$3->expr); }
+    : rts_fun_onepar '(' actual_parameter ')'		{ $$ = make_un_expr($1,$3); }
+    | rts_fun_optpar optional_par_actual_parameter	{ $$ = make_un_expr($1,$2); }
+    | rts_fun_parlist '(' actual_parameter_list ')'	{ $$ = make_un_expr($1,$3->expr); }
     ;
 
 optional_par_actual_parameter

@@ -475,6 +475,8 @@ void encode_expr(EXPR expr)
 	return;
   }
 
+  if (debug) printf("Encoding expression tag: %d\n",expr->tag);
+
   /*Switch based on the tag of the expression*/
   switch(expr->tag)
   {
