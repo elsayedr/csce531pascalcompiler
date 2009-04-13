@@ -1019,10 +1019,7 @@ EXPR make_id_expr(ST_ID id)
   if (debug) {
 	printf("Looked up data record for ID: %s\n", st_get_id_str(id) );
 	printf("Block number is: %d\n",blockNum);
-	printf("Typetag for ID is:\n");
-	ty_print_typetag(record->tag);
-	printf("\n");
-
+	printf("STDR tag is: %d\n",record->tag);
   }
 
   /* check if ID is installed as a Typename */
