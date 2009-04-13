@@ -1069,7 +1069,7 @@ variable_or_function_access_no_as
     ;
 
 variable_or_function_access_no_standard_function
-    : identifier					{ make_id_expr($1); }
+    : identifier					{ $$ = make_id_expr($1); }
     | variable_or_function_access_no_id			// default
     ;
 
