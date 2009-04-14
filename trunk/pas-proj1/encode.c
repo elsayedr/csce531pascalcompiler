@@ -448,7 +448,12 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
   case DEREF_OP:
    b_deref(ty_query(arg->type));
    break;
+  /* set return op */
+  case SET_RETURN_OP:
+   b_set_return(ty_query(arg->type));
+   break;
   }
+
 }
 
 /*Helper function to encode a binary operator node*/
