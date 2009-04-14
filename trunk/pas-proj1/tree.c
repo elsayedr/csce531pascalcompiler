@@ -584,7 +584,7 @@ void check_params(PARAM_LIST list)  // internal
 }/* End check_params */
 
 /* Creates a function type */
-TYPE make_func(PARAM_LIST list, TYPE newtype)  
+TYPE make_func(PARAM_LIST list, TYPE return_type)  
 {
    /* Checks to see if the parameter list exists */
    if(!list)
@@ -594,12 +594,12 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
    }
 
   /* Gets the type tag of the return type */
-  TYPETAG tag = ty_query(newtype);
+  TYPETAG tag = ty_query(return_type);
 
   /* Checks the return type */
   if(tag == TYUNION || tag == TYENUM || tag == TYSTRUCT || tag == TYARRAY || tag == TYSET || tag == TYFUNC || tag == TYBITFIELD || tag == TYSUBRANGE || tag == TYERROR)
   {
-    /* Error, function must reutrn simple type */
+    /* Error, function must return simple type */
     error("Function return type must be simple type");
   }
   /* Else check the parameters */
@@ -622,6 +622,7 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
       {
 	/* Parameter not simple type error, returns NULL */
 	error("Parameter type must be a simple type");
+        return NULL;
       }
 
       /* check for duplicate params */
@@ -632,7 +633,7 @@ TYPE make_func(PARAM_LIST list, TYPE newtype)
     }
 
     /* Create the function and return it */
-    return ty_build_func(newtype, list, TRUE);
+    return ty_build_func(return_type, list, TRUE);
   }
 }/* End make_function */
 
@@ -756,25 +757,16 @@ int process_var_decl(ID_LIST ids, TYPE type, int cur_offset)
 }
 
 /* Builds function declarations */
-void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
+void build_func_decl(ST_ID id, TYPE return_type, DIRECTIVE dir)
 {
   /* Creates the data record */
   ST_DR p;
   BOOLEAN resolved;
-  PARAM_LIST params;
-  TYPE returntype;
   BOOLEAN check;
     
   /* Return if the type does not exist */
-  if(!type) 
-  {
-    /* Debugging information */
-    bug("Type for function declaration does not exist");
+  if (!return_type) bug("Return type for function declaration is NULL");
 	
-    /* Return */
-    return;
-  }
-  
   p = stdr_alloc();	  
   p->tag = GDECL;
   p->u.decl.is_ref = FALSE;
@@ -783,14 +775,13 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
   /* If directive is external, set storage class to SC_EXTERN */
   if(dir == DIR_EXTERNAL)
   {  p->u.decl.sc = EXTERN_SC;
-     returntype = ty_query_func(type, &params, &check);		// change check_args to FALSE
-     p->u.decl.type = ty_build_func(returntype, params, FALSE);	// rebuild new function type
+     p->u.decl.type = ty_build_func(return_type, NULL, FALSE);	// build new function type
   }
   /* Else if directive is forward set storage class to NO_SC */
   else if(dir == DIR_FORWARD)
   {
     p->u.decl.sc = NO_SC;
-    p->u.decl.type = type;	// type is unaltered 
+    p->u.decl.type = ty_build_func(return_type, NULL, TRUE);	// build new function type
   }
   /* Not external or forward, error */
   else
@@ -1157,7 +1148,7 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 
   /* Sets the attributes of the node */
   eNode->tag = FCALL;
-  eNode->type = NULL;
+  eNode->type = func->type;
   eNode->u.fcall.args = args;
   eNode->u.fcall.function = func;
 
@@ -1176,7 +1167,7 @@ EXPR make_error_expr()
 
   /* Sets the attributes of the node */
   eNode->tag = ERROR;
-  eNode->type = NULL;
+  eNode->type = ty_build_basic(TYVOID);
 
   if (debug) printf("Created expr node for error\n");
 
@@ -1280,10 +1271,6 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 /* Returns whether an expr is an lval */
 BOOLEAN is_lval(EXPR expr)
 {
-	/* If expr is empty, bug */
-	if (!expr)
-		bug("Empty expr sent to is_lval");
-	
 	/* Gets the expr_tag and type of the expr */
 	EXPR_TAG eTag = expr->tag;
 	TYPE eType = expr->type;
