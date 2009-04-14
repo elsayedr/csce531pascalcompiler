@@ -660,6 +660,12 @@ void encodeFCall(EXPR func, EXPR_LIST args)
 	b_convert(tag, TYDOUBLE);
 	b_load_arg(TYDOUBLE);
       }
+      /*Else, load arg*/
+      else
+      {
+	/*Load arg*/
+	b_load_arg(tag);
+      }
     }
 
     /*Moves on to the next item*/
