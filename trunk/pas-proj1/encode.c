@@ -381,7 +381,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       {
 	/*Converts to integer*/
 	b_convert(tag, TYSIGNEDLONGINT);
-	isConverted == TRUE;
+	isConverted = TRUE;
       }
       /*Pushes the constant integer, adds it*/
       b_push_const_int(1);
@@ -399,7 +399,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       {
 	/*Converts to integer*/
 	b_convert(tag, TYSIGNEDLONGINT);
-	isConverted == TRUE;
+	isConverted = TRUE;
       }
       /*Pushes the constant integer, adds it*/
       b_push_const_int(-1);
