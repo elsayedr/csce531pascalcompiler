@@ -415,7 +415,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
     /*New operator*/
     case NEW_OP:
       /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
-      b_push_ext_addr(st_get_id_str(arg->u.gid));
+//    b_push_ext_addr(st_get_id_str(arg->u.gid)); not needed
       
       /*Allocates size for the argument list*/
       b_alloc_arglist(4);
@@ -436,7 +436,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
    /*Dispose operator*/
   case DISPOSE_OP:
       /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
-      b_push_ext_addr(st_get_id_str(arg->u.gid));
+//      b_push_ext_addr(st_get_id_str(arg->u.gid)); done recursively
 
       /*Allocates size for the argument list*/
       b_alloc_arglist(4);
