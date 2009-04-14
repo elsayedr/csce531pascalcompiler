@@ -1150,7 +1150,7 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 
   /* Sets the attributes of the node */
   eNode->tag = FCALL;
-  eNode->type = NULL;
+  eNode->type = funcRetType;
   eNode->u.fcall.args = args;
   eNode->u.fcall.function = func;
 
@@ -1169,7 +1169,7 @@ EXPR make_error_expr()
 
   /* Sets the attributes of the node */
   eNode->tag = ERROR;
-  eNode->type = NULL;
+  eNode->type = ty_build_basic(TYVOID);
 
   if (debug) printf("Created expr node for error\n");
 
@@ -1298,8 +1298,7 @@ BOOLEAN is_lval(EXPR expr)
 		EXPR_UNOP eOp = expr->u.unop.op;
 		
 		/* If operator is the indirection operator (^), expr is an lval */
-		if (eOp == DEREF_OP)
-			return TRUE;
+		if (eOp == DEREF_OP) return TRUE;
 	}
 	
 	/* Expr is not an lval */
