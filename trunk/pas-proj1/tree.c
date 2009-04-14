@@ -1177,7 +1177,11 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   eNode->u.fcall.args = args;
   eNode->u.fcall.function = func;
 
-  if (debug) printf("Created expr node for function call\n");
+  if (debug) {
+    printf("Created expr node for function call with return type:\n");
+    ty_print_type(funcRetType);
+    printf("\n");
+  }
 
   /* Returns the node */
   return eNode;
