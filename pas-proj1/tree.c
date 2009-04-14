@@ -1074,7 +1074,7 @@ EXPR make_null_expr(EXPR_NULLOP op)
 
   /* Sets the attributes of the node */
   eNode->tag = NULLOP;
-  eNode->type = NULL;
+  eNode->type = ty_build_basic(TYVOID);
   eNode->u.nullop.op = op;
 
   if (debug) printf("Created expr node for NULLOP: %d\n", op);
@@ -1092,7 +1092,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 
   /* Sets the attributes of the node */
   eNode->tag = UNOP;
-  eNode->type = NULL;
+  eNode->type = sub->type;	// need to add implicit type conversion
   eNode->u.unop.op = op;
   eNode->u.unop.operand = sub;
 
@@ -1111,7 +1111,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 
   /* Sets the attributes of the node */
   eNode->tag = BINOP;
-  eNode->type = NULL;
+  eNode->type = left->type;	// need to add implicit type conversion
   eNode->u.binop.op = op;
   eNode->u.binop.left = left;
   eNode->u.binop.right = right;
