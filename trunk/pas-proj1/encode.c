@@ -324,13 +324,14 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
   TYPE t1;
   BOOLEAN isConverted = FALSE;
 
+  /*Gets the tag of the argument*/
+  tag = ty_query(arg->type);
+  
   /*Switch based on the operator*/
   switch(op)
   {
     /*Convert operator*/
     case CONVERT_OP:
-      /*Gets the tag of the argument*/
-      tag = ty_query(arg->type);
       /*Checks the type of the argument*/
       if(tag == TYSIGNEDLONGINT)
       {
@@ -346,37 +347,44 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 	
 	/*Converts subrange to base type*/
 	b_convert(TYSUBRANGE, ty_query(baseT));
+	
+	/* What's the use of calling ty_query_subrange?  If I understand how this works correctly, 
+	     couldn't subranges be converted simply by using:
+
+	     b_convert(TYSUBRANGE, tag);
+	     
+	     since low and high are not used? */
       }
       break;
     /*Unary plus case*/
     case UPLUS_OP:
-     break;
+      break;
     /*Unary minus*/
     case NEG_OP:
-     /*Calls the backend routine*/
-     b_negate(ty_query(arg->type));
-     break;
+      /*Calls the backend routine*/
+      b_negate(tag);
+      break;
     /*Ord operator*/
     case ORD_OP:
-      /*Gets the tag of the expression, convert if not long int*/
-      tag = ty_query(arg->type);
-      if(tag != TYSIGNEDLONGINT)
+      /*If tag is unsigned char, conver to signed long int*/
+      if(tag == TYUNSIGNEDCHAR)
 	b_convert(tag, TYSIGNEDLONGINT);
+      /*Else, bug*/
+      else
+	bug("Incorrect type for CHR function");
       break;
     /*Chr operator*/
     case CHR_OP:
-      /*Gets the tag of the expression, convert if not long int*/
-      tag = ty_query(arg->type);
+      /*If tag is signed long int, convert to unsigned char*/
       if(tag == TYSIGNEDLONGINT)
 	b_convert(tag, TYUNSIGNEDCHAR);
-      /*Else, some type of bug or error*/
+      /*Else, bug*/
       else
 	bug("Incorrect type for CHR function");
       break;
     /*Succ operator*/
     case UN_SUCC_OP:
-      /*Gets the tag of the expression, convert if not long int*/
-      tag = ty_query(arg->type);
+      /*If tag is not signed long int, convert*/
       if(tag != TYSIGNEDLONGINT)
       {
 	/*Converts to integer*/
@@ -390,11 +398,10 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       /*If the expression has been converted, convert back*/
       if(isConverted == TRUE)
 	b_convert(TYSIGNEDLONGINT, tag);
-     break;
+      break;
     /*Pred operator*/
     case UN_PRED_OP:
-      /*Gets the tag of the expression, convert if not long int*/
-      tag = ty_query(arg->type);
+      /*If tag is not signed long int, convert*/
       if(tag != TYSIGNEDLONGINT)
       {
 	/*Converts to integer*/
@@ -408,10 +415,10 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       /*If the expression has been converted, convert back*/
       if(isConverted == TRUE)
 	b_convert(TYSIGNEDLONGINT, tag);
-     break;
+      break;
     /*Indirection operator*/
     case INDIR_OP:
-     break;
+      break;
     /*New operator*/
     case NEW_OP:
       /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
@@ -422,10 +429,16 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 
       /*Pushes an intconst the size of the type the pointer points to*/
       b_push_const_int(getSkipSize(ty_query_ptr(arg->type, &s1, &t1)));
+      /* Why can't we use:
+	b_push_const_int(getSkipSize(arg->type)); 
+	? */
 
       /*Loads an argument*/
       b_load_arg(ty_query(ty_query_ptr(arg->type, &s1, &t1)));
-
+      /* Why can't we use:
+	b_load_arg(tag); 
+	? */
+      
       /*Calls the external C function malloc*/
       b_funcall_by_name("malloc", TYPTR);
 
@@ -433,21 +446,21 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       b_assign(TYPTR);
       b_pop();
       break;
-   /*Dispose operator*/
-  case DISPOSE_OP:
+    /*Dispose operator*/
+    case DISPOSE_OP:
       /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
 //      b_push_ext_addr(st_get_id_str(arg->u.gid)); done recursively
 
       /*Allocates size for the argument list*/
       b_alloc_arglist(4);
 
-      /*Calls the external C function malloc*/
+      /*Calls the external C function free*/
       b_funcall_by_name("free", TYPTR);
-    break;
-  /*Deref opeator*/
-  case DEREF_OP:
-   b_deref(ty_query(arg->type));
-   break;
+      break;
+    /*Deref opeator*/
+    case DEREF_OP:
+      b_deref(tag);
+      break;
   /* set return op */
   case SET_RETURN_OP:
    b_set_return(ty_query(arg->type));

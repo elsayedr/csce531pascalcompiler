@@ -1108,7 +1108,7 @@ standard_functions
 
 optional_par_actual_parameter
     : /* Empty */			{ $$ = NULL; }
-    | '(' actual_parameter ')'		{ $$ = $2; }	
+    | '(' actual_parameter ')'	{ $$ = $2; }	
     ;
 
 rts_fun_optpar
@@ -1143,8 +1143,8 @@ rts_fun_onepar
     ;
 
 rts_fun_parlist
-    : p_SUCC	{ $$ = UN_SUCC_OP; } // -or- $$ = BIN_SUCC_OP; */ }  /* One or two args */
-    | p_PRED	{ $$ = UN_PRED_OP; } // -or- $$ = BIN_PRED_OP; */ }  /* One or two args */
+    : p_SUCC	{ $$ = UN_SUCC_OP; } /* -or- $$ = BIN_SUCC_OP; */   /* One or two args */
+    | p_PRED	{ $$ = UN_PRED_OP; } /* -or- $$ = BIN_PRED_OP; */   /* One or two args */
     ;
 
 relational_operator
