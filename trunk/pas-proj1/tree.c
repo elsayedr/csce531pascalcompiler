@@ -1268,7 +1268,13 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	if (debug) printf("LHS tag = %d\n", lhs->tag);
 
 	/* lhs is already func call */
-	if (lhs->tag==FCALL) return lhs;
+	if (lhs->tag==FCALL) {
+		PARAM_LIST params;
+		BOOLEAN check;
+		if (ty_query_func(lhs->type, &params, &check)==TYVOID) return lhs;
+		else error("Procedure call to non-void function");
+		return make_error_expr();
+	}
 
 	/* if tag = GID or LFUN check if LHS is procedure */
 	if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
