@@ -1079,7 +1079,7 @@ variable_or_function_access_no_id
     | p_INPUT							{}
     | variable_or_function_access_no_as '.' new_identifier	{}
     | '(' expression ')'					{ $$ = $2; }
-    | variable_or_function_access pointer_char			{}
+    | variable_or_function_access pointer_char			{ $$ = make_un_expr(INDIR_OP,$1); }
     | variable_or_function_access '[' index_expression_list ']'	{}
     | variable_or_function_access_no_standard_function '(' actual_parameter_list ')'	{ $$ = make_fcall_expr($1, $3); } 
     | p_NEW '(' variable_access_or_typename ')'			{ $$ = make_un_expr(NEW_OP, $3); }
