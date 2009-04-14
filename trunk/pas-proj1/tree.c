@@ -1092,6 +1092,15 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   /* Sets the attributes of the node */
   eNode->tag = UNOP;
   eNode->type = sub->type;	// need to add implicit type conversion
+
+  /* change type for INDIR node */
+  if (op==INDIR_OP) {
+    if (debug) printf("Setting type for INDIR node\n");
+    ST_ID id;
+    TYPE next;
+    eNode->type = ty_query_ptr(sub->type, &id, &next);
+  }
+
   eNode->u.unop.op = op;
   eNode->u.unop.operand = sub;
 
@@ -1134,7 +1143,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   /* check op to see if lval is needed */
   if (op==ASSIGN_OP) {
     if (is_lval(left)) {
-      if (is_lval(right)) right = make_un_expr(DEREF_OP, right);
+      if (is_lval(right)) eNode->u.binop.right = make_un_expr(DEREF_OP, right);
       return eNode;    
     }
     else error("Lefthand L-value expected for assign operator");
@@ -1398,7 +1407,7 @@ BOOLEAN is_lval(EXPR expr)
 		EXPR_UNOP eOp = expr->u.unop.op;
 		
 		/* If operator is the indirection operator (^), expr is an lval */
-		if (eOp == DEREF_OP) return TRUE;
+		if (eOp == INDIR_OP) return TRUE;
 	}
 	
 	/* Expr is not an lval */
