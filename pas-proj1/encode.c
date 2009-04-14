@@ -312,7 +312,7 @@ int getFormalParameterOffset(TYPETAG tag)
 /*Helper function to encode a unary operator node*/
 void encodeUnop(EXPR_UNOP op, EXPR arg)
 {
-
+  /*Debugging*/
   if (debug) printf("Encoding unary operator: %d\n",op);
 
   /*Recursive call on the argument to encode_Expr*/
@@ -347,13 +347,6 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 	
 	/*Converts subrange to base type*/
 	b_convert(TYSUBRANGE, ty_query(baseT));
-	
-	/* What's the use of calling ty_query_subrange?  If I understand how this works correctly, 
-	     couldn't subranges be converted simply by using:
-
-	     b_convert(TYSUBRANGE, tag);
-	     
-	     since low and high are not used? */
       }
       break;
     /*Unary plus case*/
@@ -421,23 +414,14 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*New operator*/
     case NEW_OP:
-      /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
-//    b_push_ext_addr(st_get_id_str(arg->u.gid)); not needed
-      
       /*Allocates size for the argument list*/
       b_alloc_arglist(4);
 
       /*Pushes an intconst the size of the type the pointer points to*/
       b_push_const_int(getSkipSize(ty_query_ptr(arg->type, &s1, &t1)));
-      /* Why can't we use:
-	b_push_const_int(getSkipSize(arg->type)); 
-	? */
 
       /*Loads an argument*/
       b_load_arg(ty_query(ty_query_ptr(arg->type, &s1, &t1)));
-      /* Why can't we use:
-	b_load_arg(tag); 
-	? */
       
       /*Calls the external C function malloc*/
       b_funcall_by_name("malloc", TYPTR);
@@ -726,7 +710,7 @@ void encode_expr(EXPR expr)
       break;
     /*Global identifier case*/
     case GID:
-      /*Pushes the address of the identifier onto the stack*/
+      /*Pushes the address of the identifier onto the stack, dereferences*/
       b_push_ext_addr(st_get_id_str(expr->u.gid));
       break;
     /*Local varible case*/
