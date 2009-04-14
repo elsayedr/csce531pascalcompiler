@@ -1,3 +1,4 @@
+
 /* Build 15
 Change summary:
 Edited production types to conform with Fenner's.  
@@ -672,8 +673,8 @@ function_declaration
     ;
 
 function_heading
-    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list	{ $$.id = $2; $$.type = ty_build_basic(TYVOID); }
-    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype	{ $$.id = $2; $$.type = $4; }
+    : LEX_PROCEDURE new_identifier optional_par_formal_parameter_list	{ $$.id = $2; $$.type = make_func($3, ty_build_basic(TYVOID)); }
+    | LEX_FUNCTION new_identifier optional_par_formal_parameter_list functiontype	{ $$.id = $2; $$.type = make_func($3, $4); }
     ;
 
 directive_list
