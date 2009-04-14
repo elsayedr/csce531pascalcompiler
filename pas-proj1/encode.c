@@ -585,7 +585,7 @@ void encodeFCall(EXPR func, EXPR_LIST args)
   }
 
   /*Copies the arg list*/
-  EXPR_LIST copy = args;
+  EXPR_LIST copy, copy2 = args;
 
   /*While loop that runs through the list*/
   while(copy != NULL)
@@ -604,31 +604,71 @@ void encodeFCall(EXPR func, EXPR_LIST args)
   /*Allocates the size for the argument list*/
   b_alloc_arglist(argListSize);
 
-  /* 
-   Encoding an FCALL varies somewhat depending on whether the function is
-   global (GID) or local (LFUN).
-   1. Finds the global name of the function: if GID, then this is the same
-      as the function name itself; if LFUN, this is its global_name.
-   2. Calculates the size of the argument list: each argument besides double
-      adds 4 bytes to the size, and double adds 8 bytes.  If LFUN, then
-      a reference link is passed as the first actual argument (shadow
-      parameter), which counts for 4 additional bytes (for a pointer).
-   3. Calls b_alloc_arglist() with the size calculated in (2).
-   4. For each actual argument, calls encode_expr() recursively to push its
-      value onto the stack.
-      a) For VAR parameters: an l-value is expected and the types must match.
-         If so, load the l-value (a pointer) with b_load_arg(TYPTR),
-         regardless of the TYPE of the argument.
-      b) For non-VAR (i.e., VALUE) parameters: an r-value is expected.  Call
-         b_deref() if necessary to convert an l-value into an r-value, then
-         promote chars (signed or unsigned) to signed longs and floats to
-         doubles, then call b_load_arg() with the resulting type tag.
-      In either case, b_load_arg() moves the value on top of the stack to
-      is proper location based on the gcc calling conventions.
-   5. Calls b_funcall_by_name() with the name and return type tag of the
-      function.
- */
-  
+  /*Queries the function*/
+  TYPE funcRetType;
+  PARAM_LIST fParams;
+  BOOLEAN checkArgs;
+  funcRetType = ty_query_func(func->type, &fParams, &checkArgs);
+
+  /*While loop that runs through the list to do encoding*/
+  while(copy2 != NULL)
+  {
+    /*Calls encode_expr to encode the argument*/
+    encode_expr(copy2->expr);
+
+    /*If the paramater is a reference parameter*/
+    if(fParams->is_ref == TRUE)
+    {
+      /*If not an lval, bug*/
+      if(is_lval(copy2->expr) == FALSE)
+	bug("Function argument expected to be L-val");
+      /*Else, check types, load pointer*/
+      else
+      {
+	/*If types are not compatible, error*/
+	if(ty_test_equality(copy->expr->type, fParams->type) == FALSE)
+	{
+	  /*Error*/
+	  error("Parameter types do not match");
+	}
+	/*Loads the pointer*/
+	b_load_arg(TYPTR);
+      }
+    }
+    /*Else, value parameter*/
+    else
+    {
+      /*Gets the tag*/
+      TYPETAG tag;
+      tag = ty_query(copy2->expr->type);
+
+      /*If it is a lval, deref*/
+      if(is_lval(copy2->expr) == TRUE)
+	b_deref(tag);
+
+      /*If chars, promote to longs, load arg*/
+      if(tag == TYSIGNEDCHAR || tag == TYUNSIGNEDCHAR)
+      {
+	/*Convert, load arg*/
+	b_convert(tag, TYSIGNEDLONGINT);
+	b_load_arg(TYSIGNEDLONGINT);
+      }
+      /*If float, promote to double, load arg*/
+      else if(tag == TYFLOAT)
+      {
+	/*Convert, load arg*/
+	b_convert(tag, TYDOUBLE);
+	b_load_arg(TYDOUBLE);
+      }
+    }
+
+    /*Moves on to the next item*/
+    copy2 = copy2->next;
+    fParams = fParams->next;
+  }
+
+  /*Calls the function*/
+  b_funcall_by_name(fGlobalName, ty_query(funcRetType));
 }
 
 /*Function that encodes and expression*/
