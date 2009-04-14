@@ -457,8 +457,8 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
   if (debug) printf("Encoding binary operator: %d\n",op);
 
   /*Recursive calls on the arguments to encode_Expr*/
-  encode_expr(rightArg);
   encode_expr(leftArg);
+  encode_expr(rightArg);
 
   /*Switch based on the operator*/
   switch(op)
