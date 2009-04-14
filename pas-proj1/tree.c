@@ -1250,7 +1250,7 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 
   if (debug)
   {
-    printf("Created expr node for function call\n");
+    printf("Created expr node for function call with return type:\n");
     ty_print_type(funcRetType);
     printf("\n");
   }
@@ -1344,13 +1344,17 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	if (debug) printf("LHS tag = %d\n", lhs->tag);
 
 	/* lhs is already func call */
-	if (lhs->tag==FCALL) return lhs;
+	if (lhs->tag==FCALL) {
+		if ( ty_query(lhs->type) == TYVOID ) return lhs;
+		else error("Procedure call to non-void function");
+		return make_error_expr();
+	}
 
 	/* if tag = GID or LFUN check if LHS is procedure */
 	if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
 	{
 		/* check tagtype of data rec */
-		if ( ty_query(lhs->type) == TYFUNC) 
+		if ( ty_query(lhs->type) == TYFUNC ) 
 
 		/* return new FCALL node with no args */
 		return make_fcall_expr(lhs, NULL);
