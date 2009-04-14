@@ -1097,6 +1097,9 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 
   if (debug) printf("Created expr node for UNOP: %d\n", op);
 
+  /* if deref prevent loop */
+  if (op==DEREF_OP) return eNode;
+
   /* check op to see if lval is needed */
   if ( (op==NEW_OP) || (op==ADDRESS_OP) ) {
     if (is_lval(sub)) return eNode;
@@ -1111,6 +1114,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   }
 
 } /* End make_un_expr */
+
 /* Makes a binary operator expression node */
 EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)  
 {
@@ -1127,8 +1131,23 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 
   if (debug) printf("Created expr node for BINOP: %d\n", op);
 
-  /* Returns the node */
-  return eNode;
+  /* check op to see if lval is needed */
+  if (op==ASSIGN_OP) {
+    if (is_lval(left)) {
+      if (is_lval(right)) right = make_un_expr(DEREF_OP, right);
+      return eNode;    
+    }
+    else error("Lefthand L-value expected for assign operator");
+    return make_error_expr();
+  }  
+
+  /* add deref as necessary */
+  else {
+    if (is_lval(left)) left = make_un_expr(DEREF_OP, left);
+    if (is_lval(right)) right = make_un_expr(DEREF_OP, right);
+    return eNode;
+  }
+
 }/* End make_bin_expr */
 
 /* Makes a function call expression node */
