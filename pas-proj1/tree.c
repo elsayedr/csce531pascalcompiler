@@ -1109,8 +1109,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 
   /* add deref as necessary */
   else {
-    if (is_lval(sub)) return make_un_expr(DEREF_OP, eNode);
-    else return eNode;
+    if (is_lval(sub)) eNode->u.unop.operand = make_un_expr(DEREF_OP, sub);
+    return eNode;
   }
 
 } /* End make_un_expr */
@@ -1143,8 +1143,8 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 
   /* add deref as necessary */
   else {
-    if (is_lval(left)) left = make_un_expr(DEREF_OP, left);
-    if (is_lval(right)) right = make_un_expr(DEREF_OP, right);
+    if (is_lval(left)) eNode->u.binop.left = make_un_expr(DEREF_OP, left);
+    if (is_lval(right)) eNode->u.binop.right = make_un_expr(DEREF_OP, right);
     return eNode;
   }
 
