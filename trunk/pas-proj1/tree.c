@@ -1074,9 +1074,11 @@ EXPR make_null_expr(EXPR_NULLOP op)
 
   /* Sets the attributes of the node */
   eNode->tag = NULLOP;
-  eNode->type = ty_build_basic(TYVOID);
   eNode->u.nullop.op = op;
 
+  if (op==NIL_OP) eNode->type = ty_build_basic(TYVOID);
+  else eNode->type = ty_build_basic(TYSIGNEDCHAR);
+ 
   if (debug) printf("Created expr node for NULLOP: %d\n", op);
 
   /* Returns the node */
@@ -1098,10 +1100,20 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 
   if (debug) printf("Created expr node for UNOP: %d\n", op);
 
-  /* Returns the node */
-  return eNode;
-} /* End make_un_expr */
+  /* check op to see if lval is needed */
+  if ( (op==NEW_OP) || (op==ADDRESS_OP) ) {
+    if (is_lval(sub)) return eNode;
+    else error("L-value expected for unary operator");
+    return make_error_expr();
+  }  
 
+  /* add deref as necessary */
+  else {
+    if (is_lval(sub)) return make_un_expr(DEREF_OP, eNode);
+    else return eNode;
+  }
+
+} /* End make_un_expr */
 /* Makes a binary operator expression node */
 EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)  
 {
@@ -1268,7 +1280,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 /* Returns whether an expr is an lval */
 BOOLEAN is_lval(EXPR expr)
 {
-	/* not implemented yet */
+	return 0;
 }/* End is_val */
 
 /* Frees an expression */
