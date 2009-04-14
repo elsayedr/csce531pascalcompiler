@@ -1173,8 +1173,10 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   /*Copies the args list*/
   EXPR_LIST copy, copy2 = args;
 
+  /*If the arguments list is empty */
+
   /*If check args is false, make r vals of all arguments and unary convert*/
-  if(checkArgs == FALSE)
+  if(checkArgs == FALSE && args != NULL)
   {
     /*Cycles through the arguments and unary converts them*/
     while(copy != NULL)
@@ -1187,7 +1189,7 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
     }
   }
   /*Else, check the arguments*/
-  else
+  else if(args != NULL)
   {
      /*While loop to check all of the parameters*/
      while(copy2 != NULL & c1 != NULL)
