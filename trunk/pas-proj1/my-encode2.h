@@ -73,7 +73,7 @@ void enter_main_body();
    Calls b_func_epilogue("main"). */
 void exit_main_body();
 
-/* gram: simple_statement (3rd production)
+/* gram: simple_statement (3rd and 4th productions)
    Emits assembly code to evaluate an expression.  The net result of the
    evaluation is that the value of the expression is pushed onto the control
    stack (%sp decreases by 8 bytes; it is always 8-byte aligned).  There are
