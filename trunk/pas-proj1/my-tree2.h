@@ -401,7 +401,11 @@ EXPR make_error_expr();
       a) If GID or LFUN, then check that lhs is a Pascal procedure
          (else error), whence this is a procedure call without arguments;
          return a new FCALL node.
-      b) Any other tag is an error.
+      b) If FCALL, then this should be a procedure call (with arguments).
+         Check that the type (the return type of the function) tag is void;
+	 else error (a Pascal function call cannot stand alone as a
+	 statement).  If ok, then return the FCALL node.
+      c) Any other tag is an error.
 */
 EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs);
 
