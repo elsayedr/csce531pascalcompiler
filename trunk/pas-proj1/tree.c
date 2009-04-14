@@ -868,6 +868,8 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
   /* If data record is found check the record */
   else	// prior decl
   {
+    if (debug) printf("Function %s previously declared.\n",global_func_name);
+
     /* Checks the tag and storage class */
     if(datRec->tag != GDECL || datRec->u.decl.sc != NO_SC)
     {
@@ -886,6 +888,8 @@ int enter_function(ST_ID id, TYPE type, char * global_func_name)
       /*Checks the return type*/
       if(ty_test_equality(t1, t2) == TRUE)
       {
+	if (debug) printf("Function %s current and previous DECL match.\n",global_func_name);
+
 	/* Changes the tag, sets func name */
 	datRec->tag = FDECL;
 	datRec->u.decl.v.global_func_name = global_func_name;
@@ -1423,24 +1427,27 @@ char * get_global_func_name(ST_ID id)
   int block;
   funcRec = st_lookup(id, &block);
 
-  /*If the function is global, just return the name*/
-  if(block <= 1)
-    return st_get_id_str(id);
+  /*If the function is undefined or global, just return the name*/
+  if ( (!funcRec) || (block <= 1) ) return st_get_id_str(id);
+
   /*Else return the global assembly name*/
   else
   {
+    if (debug) printf("Creating local function name in block %d\n",block);
+
     /*Gets the id of the function, ., block number*/
     char * idName = st_get_id_str(id);
     char * dot = malloc(2 * sizeof(char));
     *dot = '.';
     char * blockNum = malloc(sizeof(char));
-    *blockNum = block;
+    *blockNum = block + '0';
+    
 
     /*Concats the  dot onto the block number, then that onto the end of the string*/
     char * globalFunc = malloc((strlen(idName) + 2) * sizeof(char));
     globalFunc = idName;
-    strncat(dot, blockNum, 1);
-    strncat(globalFunc, dot, 2);
+    strcat(dot, blockNum);
+    strcat(globalFunc, dot);
 
     /*Returns the function name*/
     return globalFunc;
