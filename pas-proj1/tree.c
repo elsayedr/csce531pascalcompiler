@@ -1167,6 +1167,75 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   BOOLEAN checkArgs;
   funcRetType = ty_query_func(func->type, &fParams, &checkArgs);
 
+  /*Copies the param list*/
+  PARAM_LIST c1 = fParams;
+
+  /*Copies the args list*/
+  EXPR_LIST copy, copy2 = args;
+
+  /*If check args is false, make r vals of all arguments and unary convert*/
+  if(checkArgs == FALSE)
+  {
+    /*Cycles through the arguments and unary converts them*/
+    while(copy != NULL)
+    {
+      /*Makes conversion nodes*/
+      copy->expr = make_un_expr(CONVERT_OP,copy->expr);
+
+      /*Moves onto the next element in the list*/
+      copy = copy->next;
+    }
+  }
+  /*Else, check the arguments*/
+  else
+  {
+     /*While loop to check all of the parameters*/
+     while(copy2 != NULL & c1 != NULL)
+     {
+	/*If reference parameter, make sure lval, compatible type*/
+	if(c1->is_ref == TRUE)
+	{
+	  /*If lval, error*/
+	  if(is_lval(copy2->expr) == FALSE)
+	  {
+	    /*Error, return*/
+	    error("Reference parameter is not an l-value");
+	    return;
+	  }
+
+	  /*Type check*/
+	  if(ty_test_equality(copy2->expr->type, c1->type) == FALSE)
+	  {
+	    /*Error, return*/
+	    error("Reference argument has incompatible type");
+	    return;
+	  }
+	}
+	/*Else, deal with value parameters*/
+	else
+	{
+	}
+
+	/*Moves on to the next argument*/
+	copy2 = copy2->next;
+	c1 = c1->next;
+
+	/*If statements to check the number of arguments*/
+	if(copy2 == NULL && c1 != NULL)
+	{
+	  /*Error, return*/
+	  error("Wrong number of arguments to procedure or function call");
+	  return;
+	}
+	else if(c1 == NULL && copy2 != NULL)
+	{
+	  /*Error, return*/
+	  error("Wrong number of arguments to procedure or function call");
+	  return;
+	}
+     }
+  }
+
   /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
@@ -1177,8 +1246,9 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   eNode->u.fcall.args = args;
   eNode->u.fcall.function = func;
 
-  if (debug) {
-    printf("Created expr node for function call with return type:\n");
+  if (debug)
+  {
+    printf("Created expr node for function call\n");
     ty_print_type(funcRetType);
     printf("\n");
   }
@@ -1272,17 +1342,13 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	if (debug) printf("LHS tag = %d\n", lhs->tag);
 
 	/* lhs is already func call */
-	if (lhs->tag==FCALL) {
-		if ( ty_query(lhs->type) == TYVOID ) return lhs;
-		else error("Procedure call to non-void function");
-		return make_error_expr();
-	}
+	if (lhs->tag==FCALL) return lhs;
 
 	/* if tag = GID or LFUN check if LHS is procedure */
 	if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
 	{
 		/* check tagtype of data rec */
-		if ( ty_query(lhs->type) == TYFUNC ) 
+		if ( ty_query(lhs->type) == TYFUNC) 
 
 		/* return new FCALL node with no args */
 		return make_fcall_expr(lhs, NULL);
