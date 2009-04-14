@@ -585,7 +585,8 @@ void encodeFCall(EXPR func, EXPR_LIST args)
   }
 
   /*Copies the arg list*/
-  EXPR_LIST copy, copy2 = args;
+  EXPR_LIST copy = args;
+  EXPR_LIST copy2 = args;
 
   /*While loop that runs through the list*/
   while(copy != NULL)
@@ -626,7 +627,7 @@ void encodeFCall(EXPR func, EXPR_LIST args)
       else
       {
 	/*If types are not compatible, error*/
-	if(ty_test_equality(copy->expr->type, fParams->type) == FALSE)
+	if(ty_test_equality(copy2->expr->type, fParams->type) == FALSE)
 	{
 	  /*Error*/
 	  error("Parameter types do not match");
