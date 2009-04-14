@@ -985,7 +985,7 @@ EXPR make_strconst_expr(char * str)
   eNode->u.strval = str;
   eNode->type = ty_build_ptr(NULL, ty_build_basic(TYSIGNEDCHAR) );
 
-  if (debug) printf("Created expr node for STRCONST: \"%s\"\n",str);
+  if (debug) printf("Created expr node for STRCONST: '%s'\n",str);
 
   /* Returns the node */
   return eNode;
@@ -1052,7 +1052,7 @@ EXPR make_id_expr(ST_ID id)
     }
   }
 
-  if (debug) printf("Created expr node for ID: \"%s\"\n", st_get_id_str(id) );
+  if (debug) printf("Created expr node for ID: '%s'\n", st_get_id_str(id) );
 
   /* Returns the node */
   return eNode;
@@ -1169,7 +1169,7 @@ EXPR make_error_expr()
 
   /* Sets the attributes of the node */
   eNode->tag = ERROR;
-  eNode->type = ty_build_basic(TYVOID);
+  eNode->type = NULL;
 
   if (debug) printf("Created expr node for error\n");
 
