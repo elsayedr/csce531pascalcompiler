@@ -348,6 +348,11 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 	/*Converts subrange to base type*/
 	b_convert(TYSUBRANGE, ty_query(baseT));
       }
+      /*Else, pointer to void converted to pointer not of void*/
+      else if(tag == TYPTR)
+      {
+	/*Not implemented yet*/
+      }
       break;
     /*Unary plus case*/
     case UPLUS_OP:
