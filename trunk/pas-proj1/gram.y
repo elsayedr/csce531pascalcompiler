@@ -1009,23 +1009,23 @@ boolean_expression
     ;
 
 expression  
-    : expression relational_operator simple_expression	{ make_bin_expr($2,$1,$3); }
+    : expression relational_operator simple_expression	{ $$ = make_bin_expr($2,$1,$3); }
     | expression LEX_IN simple_expression		{}	// what do we do with IN operator?
     | simple_expression					/* Default */
     ;
 
 simple_expression
     : term					/* Default */
-    | simple_expression adding_operator term	{ make_bin_expr($2,$1,$3); }
-    | simple_expression LEX_SYMDIFF term	{ make_bin_expr(SYMDIFF_OP,$1,$3); }
-    | simple_expression LEX_OR term		{ make_bin_expr(OR_OP,$1,$3); }
-    | simple_expression LEX_XOR term		{ make_bin_expr(XOR_OP,$1,$3); }
+    | simple_expression adding_operator term	{ $$ = make_bin_expr($2,$1,$3); }
+    | simple_expression LEX_SYMDIFF term	{ $$ = make_bin_expr(SYMDIFF_OP,$1,$3); }
+    | simple_expression LEX_OR term		{ $$ = make_bin_expr(OR_OP,$1,$3); }
+    | simple_expression LEX_XOR term		{ $$ = make_bin_expr(XOR_OP,$1,$3); }
     ;
 
 term
     : signed_primary				// default
-    | term multiplying_operator signed_primary	{ make_bin_expr($2,$1,$3); }
-    | term LEX_AND signed_primary		{ make_bin_expr(AND_OP,$1,$3); }
+    | term multiplying_operator signed_primary	{ $$ = make_bin_expr($2,$1,$3); }
+    | term LEX_AND signed_primary		{ $$ = make_bin_expr(AND_OP,$1,$3); }
     ;
 
 signed_primary
