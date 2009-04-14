@@ -1269,7 +1269,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 
 	/* lhs is already func call */
 	if (lhs->tag==FCALL) {
-		if (lhs->type==TYVOID) return lhs;
+		if ( ty_query(lhs->type) == TYVOID ) return lhs;
 		else error("Procedure call to non-void function");
 		return make_error_expr();
 	}
@@ -1278,7 +1278,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
 	{
 		/* check tagtype of data rec */
-		if ( ty_query(lhs->type) == TYFUNC) 
+		if ( ty_query(lhs->type) == TYFUNC ) 
 
 		/* return new FCALL node with no args */
 		return make_fcall_expr(lhs, NULL);
