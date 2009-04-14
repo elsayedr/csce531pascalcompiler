@@ -558,7 +558,7 @@ void encodeFCall(EXPR func, EXPR_LIST args)
   if (debug) printf("Encoding function call\n");
 
   /*Size of the argument list*/
-  int argListSize;
+  int argListSize = 0;
 
   /*Global name of the function*/
   char * fGlobalName;
