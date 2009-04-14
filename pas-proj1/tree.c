@@ -1280,7 +1280,34 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 /* Returns whether an expr is an lval */
 BOOLEAN is_lval(EXPR expr)
 {
-	return 0;
+	/* Gets the expr_tag and type of the expr */
+	EXPR_TAG eTag = expr->tag;
+	TYPE eType = expr->type;
+	
+	/* Retrieves expr's typetag using its type */
+	TYPETAG eTypeTag = ty_query(eType);
+	
+	/* If tag is LVAR, expr is an lval */
+	if (eTag == LVAR)
+		return TRUE;
+	
+	/* If tag is GID and typetag is a data type (not TYFUNC or TYERROR), expr is an lval */
+	else if (eTag == GID && eTypeTag != TYFUNC && eTypeTag != TYERROR)
+		return TRUE;
+	
+	/* If tag is UNOP, check the operator */
+	else if (eTag == UNOP)
+	{
+		/* Retrieve unop operator */
+		EXPR_UNOP eOp = expr->u.unop.op;
+		
+		/* If operator is the indirection operator (^), expr is an lval */
+		if (eOp == DEREF_OP)
+			return TRUE;
+	}
+	
+	/* Expr is not an lval */
+	return FALSE;
 }/* End is_val */
 
 /* Frees an expression */
