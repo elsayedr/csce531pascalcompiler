@@ -1280,6 +1280,10 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 /* Returns whether an expr is an lval */
 BOOLEAN is_lval(EXPR expr)
 {
+	/* If expr is empty, bug */
+	if (!expr)
+		bug("Empty expr sent to is_lval");
+	
 	/* Gets the expr_tag and type of the expr */
 	EXPR_TAG eTag = expr->tag;
 	TYPE eType = expr->type;
