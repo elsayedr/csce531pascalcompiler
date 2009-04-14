@@ -1238,9 +1238,6 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	/* check for NULL pointer */
 	if (!lhs) bug("NULL LHS expression");
 	
-	/* global ID's have .gid field */
-	if (lhs->tag==GID) idstring = st_get_id_str(lhs->u.gid);
-
 	/* if New or Dispose then return LHS */
 	if (lhs->tag==UNOP)
 	{ 
@@ -1249,10 +1246,10 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 		}	return lhs;
 	}
 
-	if (debug) {
-		printf("Checking function type for: %s\n",idstring);
-		printf("LHS tag = %d\n", lhs->tag);
-	}
+	if (debug) printf("LHS tag = %d\n", lhs->tag);
+
+	/* lhs is already func call */
+	if (lhs->tag==FCALL) return lhs;
 
 	/* if tag = GID or LFUN check if LHS is procedure */
 	if ( (lhs->tag==GID) || (lhs->tag==LFUN) )
