@@ -1167,7 +1167,7 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   {
      /*Bug, return*/
      bug("Not a function sent to make_fcall_expr");
-     return;
+     return make_error_expr();
   }
 
   /*Queries the function*/
@@ -1182,15 +1182,14 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   /*Copies the args list*/
   EXPR_LIST copy, copy2 = args;
 
-  /*If the arguments list is empty */
-
   /*If check args is false, make r vals of all arguments and unary convert*/
   if(checkArgs == FALSE && args != NULL)
   {
     /*Cycles through the arguments and unary converts them*/
     while(copy != NULL)
     {
-      /*Makes conversion nodes*/
+      /*Makes r values, Makes conversion nodes*/
+      copy->expr = make_un_expr(DEREF_OP, copy->expr);
       copy->expr = make_un_expr(CONVERT_OP,copy->expr);
 
       /*Moves onto the next element in the list*/
@@ -1211,7 +1210,7 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 	  {
 	    /*Error, return*/
 	    error("Reference parameter is not an l-value");
-	    return;
+	    return make_error_expr();
 	  }
 
 	  /*Type check*/
@@ -1219,12 +1218,15 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 	  {
 	    /*Error, return*/
 	    error("Reference argument has incompatible type");
-	    return;
+	    return make_error_expr();
 	  }
 	}
 	/*Else, deal with value parameters*/
 	else
 	{
+	  /*Makes r values, Makes conversion nodes*/
+	  copy2->expr = make_un_expr(DEREF_OP, copy2->expr);
+	  copy2->expr = make_un_expr(CONVERT_OP,copy2->expr);
 	}
 
 	/*Moves on to the next argument*/
@@ -1236,13 +1238,13 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
 	{
 	  /*Error, return*/
 	  error("Wrong number of arguments to procedure or function call");
-	  return;
+	  return make_error_expr();
 	}
 	else if(c1 == NULL && copy2 != NULL)
 	{
 	  /*Error, return*/
 	  error("Wrong number of arguments to procedure or function call");
-	  return;
+	  return make_error_expr();
 	}
      }
   }
