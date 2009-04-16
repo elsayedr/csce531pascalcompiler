@@ -541,7 +541,7 @@ void encodeBinop(EXPR_BINOP op, EXPR exp)
      }
      
     /*Assigns, then pops*/
-    b_assign(ty_query(exp->type));
+    b_assign(ty_query(exp->u.binop.left->type));
     b_pop();
     break;
   }
