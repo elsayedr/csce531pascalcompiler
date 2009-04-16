@@ -316,7 +316,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
   if (debug) printf("Encoding unary operator: %d\n",op);
 
   /*Recursive call on the argument to encode_Expr*/
-  encode_expr(arg);
+  encode_expr(arg->u.unop.operand);
 
   /*Variables needed in the switch*/
   TYPETAG tag;
@@ -366,19 +366,15 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
     case ORD_OP:
       /*If tag is unsigned char, conver to signed long int*/
       if(tag == TYUNSIGNEDCHAR)
+      {
 	b_convert(tag, TYSIGNEDLONGINT);
-      /*Else, bug*/
-      else
-	bug("Incorrect type for CHR function");
+      }
       break;
     /*Chr operator*/
     case CHR_OP:
       /*If tag is signed long int, convert to unsigned char*/
       if(tag == TYSIGNEDLONGINT)
 	b_convert(tag, TYUNSIGNEDCHAR);
-      /*Else, bug*/
-      else
-	bug("Incorrect type for CHR function");
       break;
     /*Succ operator*/
     case UN_SUCC_OP:
@@ -437,9 +433,6 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*Dispose operator*/
     case DISPOSE_OP:
-      /*Gets the address of the argument and pushes it onto the stack, assumes argument is identifier*/
-//      b_push_ext_addr(st_get_id_str(arg->u.gid)); done recursively
-
       /*Allocates size for the argument list*/
       b_alloc_arglist(4);
 
@@ -459,13 +452,13 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 }
 
 /*Helper function to encode a binary operator node*/
-void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
+void encodeBinop(EXPR_BINOP op, EXPR exp)
 {
   if (debug) printf("Encoding binary operator: %d\n",op);
 
   /*Recursive calls on the arguments to encode_Expr*/
-  encode_expr(leftArg);
-  encode_expr(rightArg);
+  encode_expr(exp->u.binop.left);
+  encode_expr(exp->u.binop.right);
 
   /*Switch based on the operator*/
   switch(op)
@@ -473,62 +466,62 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
     /*Addition*/
     case ADD_OP:
       /*Addition*/
-      b_arith_rel_op(B_ADD, ty_query(leftArg->type));
+      b_arith_rel_op(B_ADD, ty_query(exp->type));
       break;
     /*Subtraction*/
     case SUB_OP:
       /*Subtraction*/
-      b_arith_rel_op(B_SUB, ty_query(leftArg->type));
+      b_arith_rel_op(B_SUB, ty_query(exp->type));
       break;
     /*Multiplication*/
     case MUL_OP:
       /*Multiplication*/
-      b_arith_rel_op(B_MULT, ty_query(leftArg->type));
+      b_arith_rel_op(B_MULT, ty_query(exp->type));
       break;
     /*Division*/
     case DIV_OP:
       /*Division*/
-      b_arith_rel_op(B_DIV, ty_query(leftArg->type));
+      b_arith_rel_op(B_DIV, ty_query(exp->type));
       break;
     /*Modulus*/
     case MOD_OP:
       /*Modulus*/
-      b_arith_rel_op(B_MOD, ty_query(leftArg->type));
+      b_arith_rel_op(B_MOD, ty_query(exp->type));
       break;
     /*Real division*/
     case REALDIV_OP:
       /*Real division*/
-      b_arith_rel_op(B_DIV, ty_query(leftArg->type));
+      b_arith_rel_op(B_DIV, ty_query(exp->type));
       break;
     /*Is equal*/
     case EQ_OP:
       /*Tests equality*/
-      b_arith_rel_op(B_EQ, ty_query(leftArg->type));
+      b_arith_rel_op(B_EQ, ty_query(exp->type));
       break;
     /*Is less than*/
     case LESS_OP:
       /*Less than*/
-      b_arith_rel_op(B_LT, ty_query(leftArg->type));
+      b_arith_rel_op(B_LT, ty_query(exp->type));
       break;
    /*Is less than or equal*/
    case LE_OP:
       /*Less than or equal to*/
-      b_arith_rel_op(B_LE, ty_query(leftArg->type));
+      b_arith_rel_op(B_LE, ty_query(exp->type));
       break;
   /*Not equal*/
   case NE_OP:
       /*Not equal*/
-      b_arith_rel_op(B_NE, ty_query(leftArg->type));
+      b_arith_rel_op(B_NE, ty_query(exp->type));
     break;
   /*Greater than or equal*/
   case GE_OP:
       /*Greater than or equal*/
-      b_arith_rel_op(B_GE, ty_query(leftArg->type));
+      b_arith_rel_op(B_GE, ty_query(exp->type));
     break;
   /*Greater than*/
   case GREATER_OP:
       /*Greater than*/
-      b_arith_rel_op(B_GT, ty_query(leftArg->type));
+      b_arith_rel_op(B_GT, ty_query(exp->type));
     break;
   /*Symbdiff*/
   case SYMDIFF_OP:
@@ -545,14 +538,14 @@ void encodeBinop(EXPR_BINOP op, EXPR leftArg, EXPR rightArg)
   /*Assignment*/
   case ASSIGN_OP:
      /*Checks tag to see if local variable*/
-     if(leftArg->tag == LVAR)
+     if(exp->u.binop.left->tag == LVAR)
      {
 	/*Pushes the address of the local variable*/
-	b_push_loc_addr(leftArg->u.lvar.offset);
+	b_push_loc_addr(exp->u.binop.left->u.lvar.offset);
      }
      
     /*Assigns, then pops*/
-    b_assign(ty_query(leftArg->type));
+    b_assign(ty_query(exp->type));
     b_pop();
     break;
   }
@@ -754,12 +747,12 @@ void encode_expr(EXPR expr)
     /*Unary operator case*/
     case UNOP:
       /*Calls helper function*/
-      encodeUnop(expr->u.unop.op, expr->u.unop.operand);
+      encodeUnop(expr->u.unop.op, expr);
       break;
     /*Binary operator case*/
     case BINOP:
       /*Calls helper function*/
-      encodeBinop(expr->u.binop.op, expr->u.binop.left, expr->u.binop.right);
+      encodeBinop(expr->u.binop.op, expr);
       break;
     /*Function call case*/
     case FCALL:

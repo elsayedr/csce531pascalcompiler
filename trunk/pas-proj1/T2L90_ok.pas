@@ -37,7 +37,7 @@ Function abc : Integer;
 
 Function get_integer : Integer;
    begin
-      new(ip);
+      new(c);
       printf('Enter an integer:   ');
       scanf('%ld', ip);
       get_integer := ip^;
