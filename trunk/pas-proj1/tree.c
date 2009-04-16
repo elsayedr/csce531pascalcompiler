@@ -1174,7 +1174,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       }
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
+      {
 	error("Illegal type argument to unary minus");
+	return make_error_expr();
+      }
       break; 
 
     case ORD_OP:
@@ -1189,12 +1192,17 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
           eNode->u.intval = sub->u.strval[0];
           eNode->type = ty_build_basic(TYSIGNEDLONGINT);
 	}
-	else error("Illegal conversion");
+	else 
+	{
+	  error("Illegal conversion");
+	  return make_error_expr();
+	}
       }
       /*Type check, error if fails*/
       else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
-      {ty_print_typetag(subTag);
+      {
 	error("Illegal type argument to Ord");
+	return make_error_expr();
       }
       /*Sets the type*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
@@ -1203,7 +1211,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     case CHR_OP:
       /*Type check*/
       if(subTag != TYSIGNEDLONGINT)
+      {
 	error("Illegal type argument to Chr");
+	return make_error_expr();
+      }
       /*Set type*/
       eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
       break; 
@@ -1211,7 +1222,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     case UN_SUCC_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      {
 	error("Nonordinal type argument to Succ or Pred");
+	return make_error_expr();
+      }
       /*Else, check if constant folding can be done*/
       else
       {
@@ -1231,7 +1245,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     case UN_PRED_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      {
 	error("Nonordinal type argument to Succ or Pred");
+	return make_error_expr();
+      }
       /*Else, check if constant folding can be done*/
       else
       {
@@ -1263,7 +1280,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     case UPLUS_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
+      {
 	error("Illegal type argument to unary plus");
+	return make_error_expr();
+      }
       break;
 
     case NEW_OP:
@@ -1309,8 +1329,6 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   TYPETAG subTagL = ty_query(left->type);
   TYPETAG subTagR = ty_query(right->type);
 
-  if (left->tag==ERROR || right->tag==ERROR) return eNode;
-
   /* check op to see if lval is needed */
   if (op==ASSIGN_OP) 
   {
@@ -1329,7 +1347,6 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	      next = ty_query_subrange(right->type, &low, &high);
 	      eNode->u.binop.right = makeConvertNode(right, next);
 	    }
-        return checkAssign(eNode);
       }
       else if (subTagR==TYVOID) {
         error("Cannot convert between nondata types");  
@@ -1404,7 +1421,10 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
     case ADD_OP:
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
+      {
 	error("Nonnumerical type argument(s) to arithmetic op");
+	return make_error_expr();
+      }
       /*Else set node type to higher type*/
       else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
 	eNode->type = ty_build_basic(TYDOUBLE);
@@ -1416,7 +1436,10 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
     case SUB_OP:
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
+      {
 	error("Nonnumerical type argument(s) to arithmetic op");
+	return make_error_expr();
+      }
       /*Else set node type to higher type*/
       else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
 	eNode->type = ty_build_basic(TYDOUBLE);
@@ -1428,7 +1451,10 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
     case MUL_OP:
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
+      {
 	error("Nonnumerical type argument(s) to arithmetic op");
+	return make_error_expr();
+      }
       /*Else set node type to higher type*/
       else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
 	eNode->type = ty_build_basic(TYDOUBLE);
@@ -1440,7 +1466,10 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
     case DIV_OP:
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
+      {
 	error("Nonnumerical type argument(s) to arithmetic op");
+	return make_error_expr();
+      }
       /*Else set node type to higher type*/
       else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
 	eNode->type = ty_build_basic(TYDOUBLE);
@@ -1452,16 +1481,20 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
     case MOD_OP:
       /*Type check*/
       if(subTagR != TYSIGNEDLONGINT || subTagL != TYSIGNEDLONGINT)
+      {
 	error("Noninteger type argument(s) to integer arithmetic op");
-
+	return make_error_expr();
+      }
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
     case REALDIV_OP:
       /*Type check*/
       if(subTagR != TYSIGNEDLONGINT || subTagL != TYSIGNEDLONGINT)
+      {
 	error("Noninteger type argument(s) to integer arithmetic op");
-
+	return make_error_expr();
+      }
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break; 
@@ -1470,11 +1503,15 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
       {
 	if(subTagR != subTagL)
+	{
 	  error("Incompatible type arguments to comparison operator");
+	  return make_error_expr();
+	}
       }
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
@@ -1485,11 +1522,15 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
       {
 	if(subTagR != subTagL)
+	{
 	  error("Incompatible type arguments to comparison operator");
+	  return make_error_expr();
+	}
       }
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
@@ -1500,11 +1541,15 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
       {
 	if(subTagR != subTagL)
+	{
 	  error("Incompatible type arguments to comparison operator");
+	  return make_error_expr();
+	}
       }
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
@@ -1515,11 +1560,15 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
       {
 	if(subTagR != subTagL)
+	{
 	  error("Incompatible type arguments to comparison operator");
+	  return make_error_expr();
+	}
       }
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
@@ -1530,11 +1579,15 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
       {
 	if(subTagR != subTagL)
+	{
 	  error("Incompatible type arguments to comparison operator");
+	  return make_error_expr();
+	}
       }
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
@@ -1545,11 +1598,15 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
       {
 	if(subTagR != subTagL)
+	{
 	  error("Incompatible type arguments to comparison operator");
+	  return make_error_expr();
+	}
       }
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
@@ -1684,7 +1741,7 @@ EXPR make_error_expr()
 
   /* Sets the attributes of the node */
   eNode->tag = ERROR;
-  eNode->type = ty_build_basic(TYVOID);
+  eNode->type = ty_build_basic(TYERROR);
 
   if (debug) printf("Created expr node for error\n");
 
@@ -1986,6 +2043,11 @@ EXPR checkAssign(EXPR assign)
   TYPETAG leftTag = ty_query(left->type);
   TYPETAG rightTag = ty_query(right->type);
   
+   /*If error expr, return*/
+   if(rightTag == TYERROR || leftTag == TYERROR)
+   {
+    return make_error_expr();
+    }
   /*If tags equal reuturn*/
   if(leftTag == rightTag)
     return assign;
