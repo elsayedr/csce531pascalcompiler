@@ -1142,6 +1142,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       /*Set type to double if float*/
       else if(subTag == TYSUBRANGE)
 	eNode->type = ty_query_subrange(sub->type, &low, &high);
+      else if(subTag == TYUNSIGNEDCHAR)
+	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       /*Else illegal conversion, return error expression*/
       else
 	error("Illegal conversion");
@@ -1364,6 +1366,17 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
     subTagR = ty_query(eNode->u.binop.right->type);
   }
 
+  /*Queries again to check for implicit conversions*/
+  subTagR = ty_query(eNode->u.binop.right->type);
+  subTagL = ty_query(eNode->u.binop.left->type);
+
+  /*Checks for implicit conversions*/
+  if(subTagR == TYUNSIGNEDCHAR)
+    eNode->u.binop.right = make_un_expr(CONVERT_OP, eNode->u.binop.right);
+  if(subTagL == TYUNSIGNEDCHAR)
+    eNode->u.binop.left = make_un_expr(CONVERT_OP, eNode->u.binop.left);
+    
+  
   /*Switch statement based on the operation*/
   switch(op)
   {
