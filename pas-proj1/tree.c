@@ -1157,21 +1157,6 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     case DEREF_OP:
       break; 
     case NEG_OP:
-      /* constant folding */
-      if(sub->tag==INTCONST) 
-      {
-          /* Sets the values of the node */
-          eNode->tag = INTCONST;
-          eNode->u.intval = -sub->u.intval;
-          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      }
-      else if (sub->tag==REALCONST) 
-      {
-          /* Sets the values of the node */
-          eNode->tag = REALCONST;
-          eNode->u.realval = -sub->u.realval;
-          eNode->type = ty_build_basic(TYDOUBLE);
-      }
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
       {
@@ -1181,25 +1166,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       break; 
 
     case ORD_OP:
-      /* char folding */
-      if(sub->tag==STRCONST) 
-      {
-        /*If the string is length one*/
- 	if (strlen(sub->u.strval)==1)
-        {
-          /* Sets the values of the node */
-          eNode->tag = INTCONST;
-          eNode->u.intval = sub->u.strval[0];
-          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-	}
-	else 
-	{
-	  error("Illegal conversion");
-	  return make_error_expr();
-	}
-      }
       /*Type check, error if fails*/
-      else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
+      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
       {
 	error("Illegal type argument to Ord");
 	return make_error_expr();
@@ -1226,42 +1194,13 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	error("Nonordinal type argument to Succ or Pred");
 	return make_error_expr();
       }
-      /*Else, check if constant folding can be done*/
-      else
-      {
-	/*Check subexpression type*/
-	if(sub->tag == INTCONST)
-	  eNode = make_intconst_expr(sub->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
-	else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
-	{
-	  /*Makes the string constant*/
-	  char * str = malloc(sizeof(char));
-	  *str = sub->u.strval[0]++;
-	  eNode = make_strconst_expr(str);
-	}
-      }
       break;
-
     case UN_PRED_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
 	error("Nonordinal type argument to Succ or Pred");
 	return make_error_expr();
-      }
-      /*Else, check if constant folding can be done*/
-      else
-      {
-	/*Check subexpression type*/
-	if(sub->tag == INTCONST)
-	  eNode = make_intconst_expr(sub->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
-	else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
-	{
-	  /*Makes the string constant*/
-	  char * str = malloc(sizeof(char));
-	  *str = sub->u.strval[0]--;
-	  eNode = make_strconst_expr(str);
-	}
       }
       break;
 
@@ -1300,7 +1239,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   }
 
   /*Returns the node*/
-  return eNode;;
+  return constFoldUnop(eNode);
 } /* End make_un_expr */
 
 /* Makes a binary operator expression node */
@@ -1513,6 +1452,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	  return make_error_expr();
 	}
       }
+      /*If the left or right arguments are chars, promote*/
+      if(subTagL == TYUNSIGNEDCHAR || subTagL == TYSIGNEDCHAR)
+	eNode->u.binop.left = makeConvertNode(eNode->u.binop.left, ty_build_basic(TYSIGNEDLONGINT));
+      if(subTagR == TYUNSIGNEDCHAR || subTagR == TYSIGNEDCHAR)
+	eNode->u.binop.right = makeConvertNode(eNode->u.binop.right, ty_build_basic(TYSIGNEDLONGINT));
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
@@ -1532,6 +1476,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	  return make_error_expr();
 	}
       }
+      /*If the left or right arguments are chars, promote*/
+      if(subTagL == TYUNSIGNEDCHAR || subTagL == TYSIGNEDCHAR)
+	eNode->u.binop.left = makeConvertNode(eNode->u.binop.left, ty_build_basic(TYSIGNEDLONGINT));
+      if(subTagR == TYUNSIGNEDCHAR || subTagR == TYSIGNEDCHAR)
+	eNode->u.binop.right = makeConvertNode(eNode->u.binop.right, ty_build_basic(TYSIGNEDLONGINT));
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
@@ -1551,6 +1500,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	  return make_error_expr();
 	}
       }
+      /*If the left or right arguments are chars, promote*/
+      if(subTagL == TYUNSIGNEDCHAR || subTagL == TYSIGNEDCHAR)
+	eNode->u.binop.left = makeConvertNode(eNode->u.binop.left, ty_build_basic(TYSIGNEDLONGINT));
+      if(subTagR == TYUNSIGNEDCHAR || subTagR == TYSIGNEDCHAR)
+	eNode->u.binop.right = makeConvertNode(eNode->u.binop.right, ty_build_basic(TYSIGNEDLONGINT));
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
@@ -1570,6 +1524,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	  return make_error_expr();
 	}
       }
+      /*If the left or right arguments are chars, promote*/
+      if(subTagL == TYUNSIGNEDCHAR || subTagL == TYSIGNEDCHAR)
+	eNode->u.binop.left = makeConvertNode(eNode->u.binop.left, ty_build_basic(TYSIGNEDLONGINT));
+      if(subTagR == TYUNSIGNEDCHAR || subTagR == TYSIGNEDCHAR)
+	eNode->u.binop.right = makeConvertNode(eNode->u.binop.right, ty_build_basic(TYSIGNEDLONGINT));
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
@@ -1589,6 +1548,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	  return make_error_expr();
 	}
       }
+      /*If the left or right arguments are chars, promote*/
+      if(subTagL == TYUNSIGNEDCHAR || subTagL == TYSIGNEDCHAR)
+	eNode->u.binop.left = makeConvertNode(eNode->u.binop.left, ty_build_basic(TYSIGNEDLONGINT));
+      if(subTagR == TYUNSIGNEDCHAR || subTagR == TYSIGNEDCHAR)
+	eNode->u.binop.right = makeConvertNode(eNode->u.binop.right, ty_build_basic(TYSIGNEDLONGINT));
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
@@ -1608,6 +1572,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	  return make_error_expr();
 	}
       }
+      /*If the left or right arguments are chars, promote*/
+      if(subTagL == TYUNSIGNEDCHAR || subTagL == TYSIGNEDCHAR)
+	eNode->u.binop.left = makeConvertNode(eNode->u.binop.left, ty_build_basic(TYSIGNEDLONGINT));
+      if(subTagR == TYUNSIGNEDCHAR || subTagR == TYSIGNEDCHAR)
+	eNode->u.binop.right = makeConvertNode(eNode->u.binop.right, ty_build_basic(TYSIGNEDLONGINT));
       /*Type set*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
@@ -1617,7 +1586,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   }
 
   /*Returns the node*/
-  return eNode;
+  return constFoldBinop(eNode);
 
 }/* End make_bin_expr */
 
@@ -2056,7 +2025,7 @@ EXPR checkAssign(EXPR assign)
   {
     /*Type check*/
     if(rightTag == TYFLOAT || rightTag == TYSIGNEDLONGINT)
-      right = makeConvertNode(right, ty_build_basic(TYDOUBLE));
+      assign->u.binop.right = makeConvertNode(assign->u.binop.right, ty_build_basic(TYDOUBLE));
     else
       error("Illegal conversion");
   }
@@ -2065,7 +2034,7 @@ EXPR checkAssign(EXPR assign)
   {
     /*Type check*/
     if(rightTag == TYDOUBLE || rightTag == TYSIGNEDLONGINT)
-      right = makeConvertNode(right, ty_build_basic(TYFLOAT));
+      assign->u.binop.right = makeConvertNode(assign->u.binop.right, ty_build_basic(TYFLOAT));
     else
       error("Illegal conversion");
   }
@@ -2075,4 +2044,91 @@ EXPR checkAssign(EXPR assign)
 
   /*Returns the node*/
   return assign;
+}
+
+/*Function that performs constant folding on a unop expression if possible*/
+EXPR constFoldUnop(EXPR unop)
+{
+  /*Switch based on the type of the expression*/
+  switch(unop->u.unop.op)
+  {
+    case UPLUS_OP:
+      /*If the operand is an int constant*/
+      if(unop->u.unop.operand->tag == INTCONST)
+      {
+	/*Makes the int const node*/
+	unop = make_intconst_expr(unop->u.unop.operand->u.intval, ty_build_basic(TYSIGNEDLONGINT));
+      }
+      /*If the operand is an real constant*/
+      else if(unop->u.unop.operand->tag == REALCONST)
+      {
+	/*Makes the real const node*/
+	unop = make_realconst_expr(unop->u.unop.operand->u.realval);
+      }
+      break;
+    case NEG_OP:
+      /*If the operand is an int constant*/
+      if(unop->u.unop.operand->tag == INTCONST)
+      {
+	/*Makes the int const node*/
+	unop = make_intconst_expr((unop->u.unop.operand->u.intval * (-1)), ty_build_basic(TYSIGNEDLONGINT));
+      }
+      /*If the operand is an real constant*/
+      else if(unop->u.unop.operand->tag == REALCONST)
+      {
+	/*Makes the real const node*/
+	unop = make_realconst_expr((unop->u.unop.operand->u.realval * (-1)));
+      }
+      break;
+    case ORD_OP:
+      /* char folding */
+      if(unop->u.unop.operand->tag==STRCONST) 
+      {
+        /*If the string is length one*/
+ 	if (strlen(unop->u.unop.operand->u.strval)==1)
+        {
+          /* Sets the values of the node */
+          unop = make_intconst_expr(unop->u.unop.operand->u.strval[0],ty_build_basic(TYSIGNEDLONGINT));
+	}
+	else 
+	{
+	  error("Illegal conversion");
+	  return make_error_expr();
+	}
+      }
+      break;
+    case UN_SUCC_OP:
+      /*Check subexpression type*/
+      if(unop->u.unop.operand->tag == INTCONST)
+	unop = make_intconst_expr(unop->u.unop.operand->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
+      else if(unop->u.unop.operand->tag == STRCONST && strlen(unop->u.unop.operand->u.strval) == 1)
+      {
+	/*Makes the string constant*/
+	char * str = malloc(sizeof(char));
+	*str = unop->u.unop.operand->u.strval[0]++;
+	unop = make_strconst_expr(str);
+      }
+      break;
+    case UN_PRED_OP:
+      /*Check subexpression type*/
+      if(unop->u.unop.operand->tag == INTCONST)
+	unop = make_intconst_expr(unop->u.unop.operand->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
+      else if(unop->u.unop.operand->tag == STRCONST && strlen(unop->u.unop.operand->u.strval) == 1)
+      {
+	/*Makes the string constant*/
+	char * str = malloc(sizeof(char));
+	*str = unop->u.unop.operand->u.strval[0]--;
+	unop = make_strconst_expr(str);
+      }
+      break;
+      break;
+  }
+
+  /*Returns the node*/
+  return unop;
+}
+
+/*Function that performs constant folding on a binop expression if possible*/
+EXPR constFoldBinop(EXPR binop)
+{
 }
