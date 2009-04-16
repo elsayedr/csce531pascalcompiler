@@ -951,7 +951,11 @@ EXPR make_intconst_expr(long val, TYPE type)
   /* Sets the values of the node */
   eNode->tag = INTCONST;
   eNode->u.intval = val;
-  eNode->type = type;
+  eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+
+  /*Adds a convert node, if needed*/
+  if(ty_query(type) != TYSIGNEDLONGINT)
+    eNode = makeConvertNode(eNode, type);
 
   if (debug) printf("Created expr node for INTCONST: %d\n",(int)val);
  
@@ -1129,29 +1133,29 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   {
     /*Add conversion node, if not already creating conversion node*/
     if(op != CONVERT_OP)
-      eNode->u.unop.operand = make_un_expr(CONVERT_OP, sub);
+    {
+      /*Created convert node based on type needed to convert to*/
+      if(subTag == TYFLOAT)
+	eNode->u.unop.operand = makeConvertNode(sub, ty_build_basic(TYDOUBLE));
+      else
+      {
+	/*Gets the subrange type*/
+	next = ty_query_subrange(sub->type, &low, &high);
+	eNode->u.unop.operand = makeConvertNode(sub, next);
+      }
+    }
   }
+
+  /*Queries the type of the subexpression, again*/
+  subTag = ty_query(sub->type);
 
   /*Switch based on the operation*/
   switch(op)
   {
     case CONVERT_OP:
-      /*Set type to double if float*/
-      if(subTag == TYFLOAT || subTag == TYSIGNEDLONGINT)
-	eNode->type = ty_build_basic(TYDOUBLE);
-      /*Set type to double if float*/
-      else if(subTag == TYSUBRANGE)
-	eNode->type = ty_query_subrange(sub->type, &low, &high);
-      else if(subTag == TYUNSIGNEDCHAR)
-	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      /*Else illegal conversion, return error expression*/
-      else
-	error("Illegal conversion");
       break;
-
     case DEREF_OP:
       break; 
-
     case NEG_OP:
       /* constant folding */
       if(sub->tag==INTCONST) 
@@ -1169,7 +1173,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
           eNode->type = ty_build_basic(TYDOUBLE);
       }
       /*Type check, error if fails*/
-      else if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
+      if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
 	error("Illegal type argument to unary minus");
       break; 
 
@@ -1185,7 +1189,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
           eNode->u.intval = sub->u.strval[0];
           eNode->type = ty_build_basic(TYSIGNEDLONGINT);
 	}
-	else error("Illegal string pointer for ORD operator");
+	else error("Illegal conversion");
       }
       /*Type check, error if fails*/
       else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
@@ -1293,6 +1297,10 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   eNode->u.binop.left = left;
   eNode->u.binop.right = right;
 
+  /*Needed for querying subrange*/
+  TYPE next;
+  long low, high;
+
   if (debug) 
     printf("Created expr node for BINOP: %d\n", op);
 
@@ -1312,10 +1320,15 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       /*If the subexpression type is float or subrange convert*/
       if(subTagR == TYFLOAT || subTagR == TYSUBRANGE)
       {
-        /*Add conversion node, if not already creating conversion node*/
-        eNode->u.binop.right = make_un_expr(CONVERT_OP, right);
-        eNode->type = right->type;
-        subTagR = ty_query(right->type);
+	    /*Created convert node based on type needed to convert to*/
+	    if(subTagR == TYFLOAT)
+	      eNode->u.binop.right = makeConvertNode(right, ty_build_basic(TYDOUBLE));
+	    else
+	    {
+	      /*Gets the subrange type*/
+	      next = ty_query_subrange(right->type, &low, &high);
+	      eNode->u.binop.right = makeConvertNode(right, next);
+	    }
         return eNode;
       }
       else if (subTagR==TYVOID) {
@@ -1342,46 +1355,47 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   /*If the subexpression type is float or subrange convert*/
   if(subTagL == TYFLOAT || subTagL == TYSUBRANGE)
   {
-  /*Add conversion node, if not already creating conversion node*/
-    eNode->u.binop.left = make_un_expr(CONVERT_OP, left);
+    /*Created convert node based on type needed to convert to*/
+    if(subTagL == TYFLOAT)
+      eNode->u.binop.left = makeConvertNode(left, ty_build_basic(TYDOUBLE));
+    else
+    {
+      /*Gets the subrange type*/
+      next = ty_query_subrange(left->type, &low, &high);
+      eNode->u.binop.right = makeConvertNode(left, next);
+    }
     subTagL = ty_query(left->type);
   }
 
   /*If the subexpression type is float or subrange convert*/
   if(subTagR == TYFLOAT || subTagR == TYSUBRANGE)
   {
-    /*Add conversion node, if not already creating conversion node*/
-    eNode->u.binop.right = make_un_expr(CONVERT_OP, right);
-    eNode->type = right->type;
+    /*Created convert node based on type needed to convert to*/
+    if(subTagR == TYFLOAT)
+      eNode->u.binop.right = makeConvertNode(right, ty_build_basic(TYDOUBLE));
+    else
+    {
+      /*Gets the subrange type*/
+      next = ty_query_subrange(right->type, &low, &high);
+      eNode->u.binop.right = makeConvertNode(right, next);
+    }
     subTagR = ty_query(right->type);
   }
 
   /*If the subexpression type is int convert*/
   if(subTagL == TYSIGNEDLONGINT && subTagR == TYDOUBLE)
   {
-  /*Add conversion node, if not already creating conversion node*/
-    eNode->u.binop.left = make_un_expr(CONVERT_OP, eNode->u.binop.left);
+  /*Add conversion node*/
+    eNode->u.binop.left = makeConvertNode(eNode->u.binop.left, ty_build_basic(TYDOUBLE));
     subTagL = ty_query(eNode->u.binop.left->type);
   }
   /*If the subexpression type is int convert*/
   else if(subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE)
   {
-    /*Add conversion node, if not already creating conversion node*/
-    eNode->u.binop.right = make_un_expr(CONVERT_OP, eNode->u.binop.right);
-    eNode->type =  eNode->u.binop.right->type;
+    /*Add conversion node*/
+    eNode->u.binop.right = makeConvertNode(eNode->u.binop.right, ty_build_basic(TYDOUBLE));
     subTagR = ty_query(eNode->u.binop.right->type);
-  }
-
-  /*Queries again to check for implicit conversions*/
-  subTagR = ty_query(eNode->u.binop.right->type);
-  subTagL = ty_query(eNode->u.binop.left->type);
-
-  /*Checks for implicit conversions*/
-  if(subTagR == TYUNSIGNEDCHAR)
-    eNode->u.binop.right = make_un_expr(CONVERT_OP, eNode->u.binop.right);
-  if(subTagL == TYUNSIGNEDCHAR)
-    eNode->u.binop.left = make_un_expr(CONVERT_OP, eNode->u.binop.left);
-    
+  } 
   
   /*Switch statement based on the operation*/
   switch(op)
@@ -1390,25 +1404,49 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
 	error("Nonnumerical type argument(s) to arithmetic op");
-      eNode->type =  eNode->u.binop.right->type;
+      /*Else set node type to higher type*/
+      else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
+	eNode->type = ty_build_basic(TYDOUBLE);
+      else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
+	eNode->type = ty_build_basic(TYDOUBLE);
+      else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
+	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
     case SUB_OP:
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
 	error("Nonnumerical type argument(s) to arithmetic op");
-      eNode->type =  eNode->u.binop.right->type;
+      /*Else set node type to higher type*/
+      else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
+	eNode->type = ty_build_basic(TYDOUBLE);
+      else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
+	eNode->type = ty_build_basic(TYDOUBLE);
+      else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
+	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
     case MUL_OP:
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
 	error("Nonnumerical type argument(s) to arithmetic op");
-      eNode->type =  eNode->u.binop.right->type;
+      /*Else set node type to higher type*/
+      else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
+	eNode->type = ty_build_basic(TYDOUBLE);
+      else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
+	eNode->type = ty_build_basic(TYDOUBLE);
+      else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
+	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
     case DIV_OP:
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
 	error("Nonnumerical type argument(s) to arithmetic op");
-      eNode->type =  eNode->u.binop.right->type;
+      /*Else set node type to higher type*/
+      else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
+	eNode->type = ty_build_basic(TYDOUBLE);
+      else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
+	eNode->type = ty_build_basic(TYDOUBLE);
+      else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
+	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break; 
     case MOD_OP:
       /*Type check*/
@@ -1913,4 +1951,15 @@ char * get_global_func_name(ST_ID id)
     /*Returns the function name*/
     return globalFunc;
   }
+}
+
+/*Function that create a convert node*/
+EXPR makeConvertNode(EXPR sub, TYPE to)
+{
+  /*Creates the node*/
+  EXPR convertNode = make_un_expr(CONVERT_OP, sub);
+  convertNode->type = to;
+
+  /*Returns the node*/
+  return convertNode;
 }
