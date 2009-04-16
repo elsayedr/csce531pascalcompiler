@@ -319,13 +319,14 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
   encode_expr(arg->u.unop.operand);
 
   /*Variables needed in the switch*/
-  TYPETAG tag;
+  TYPETAG tag, rTag;
   ST_ID s1;
   TYPE t1;
   BOOLEAN isConverted = FALSE;
 
   /*Gets the tag of the argument*/
   tag = ty_query(arg->u.unop.operand->type);
+  rTag = ty_query(arg->type);
   
   /*Switch based on the operator*/
   switch(op)
@@ -333,13 +334,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
     /*Convert operator*/
     case CONVERT_OP:
       /*Checks the type of the argument*/
-      if(tag == TYSIGNEDLONGINT)
-      {
-	/*Single to Real*/
-	b_convert(TYSIGNEDLONGINT, TYDOUBLE);
-      }
-      /*If subrange type, get base type*/
-      else if(tag == TYSUBRANGE)
+      if(tag == TYSUBRANGE)
       {
 	/*Gets the base type*/
 	long low, high;
@@ -348,11 +343,11 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 	/*Converts subrange to base type*/
 	b_convert(TYSUBRANGE, ty_query(baseT));
       }
-      /*Else, pointer to void converted to pointer not of void*/
-      else if(tag == TYFLOAT)
+      /*Else*/
+      else
       {
 	/*Converts float to double*/
-	b_convert(TYFLOAT, TYDOUBLE);
+	b_convert(tag, rTag);
       }
       break;
     /*Unary plus case*/
