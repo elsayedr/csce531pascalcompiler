@@ -794,7 +794,7 @@ void build_func_decl(ST_ID id, TYPE type, DIRECTIVE dir)
 
   /* If the function is not resolved error */
   if(!resolved) 
-    error("Duplicate function declaration: \"%s\"", st_get_id_str(id));
+    error("Duplicate forward or external function declaration");
   /* Else function resolved */
   else 
   {	
@@ -1010,7 +1010,7 @@ EXPR make_id_expr(ST_ID id)
   record = st_lookup(id, &blockNum);
 
   if (!record) {
-	error("Data record is NULL");
+	error("Undeclared identifier \"%s\" in expression", st_get_id_str(id) );
 	return make_error_expr();
   }
 
@@ -1456,7 +1456,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	}
 
 	/* any other tag is an error */
-	else error("Invalid tag for LHS expression");
+	else if (lhs->tag!=10) error("Invalid tag for LHS expression");
 
 	return make_error_expr();
 
