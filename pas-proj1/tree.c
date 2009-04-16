@@ -1090,38 +1090,96 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   eNode = malloc(sizeof(EXPR_NODE));
 
   /* Sets the attributes of the node */
-  eNode->tag = UNOP;
-  eNode->type = sub->type;	// need to add implicit type conversion
-
-  /* change type for INDIR node */
-  if (op==INDIR_OP) {
-    if (debug) printf("Setting type for INDIR node\n");
-    ST_ID id;
-    TYPE next;
-    eNode->type = ty_query_ptr(sub->type, &id, &next);
-  }
-
+  eNode->tag = UNOP;	
   eNode->u.unop.op = op;
+  eNode->type = sub->type;
   eNode->u.unop.operand = sub;
+   
+  /*Variables needed if indirection operator, subrange conversion*/
+  ST_ID id;
+  TYPE next;
+  long low, high;
 
-  if (debug) printf("Created expr node for UNOP: %d\n", op);
+  /*Debugging*/
+  if(debug) 
+    printf("Created expr node for UNOP: %d\n", op);
 
   /* if deref prevent loop */
-  if (op==DEREF_OP) return eNode;
-
-  /* check op to see if lval is needed */
-  if ( (op==NEW_OP) || (op==ADDRESS_OP) ) {
-    if (is_lval(sub)) return eNode;
-    else error("L-value expected for unary operator");
-    return make_error_expr();
-  }  
-
-  /* add deref as necessary */
-  else {
-    if (is_lval(sub)) eNode->u.unop.operand = make_un_expr(DEREF_OP, sub);
-    return eNode;
+  if(op==DEREF_OP) 
+    return eNode; 
+  else if(op == ADDRESS_OP || op == NEW_OP)
+  {
+    if(is_lval(sub) == FALSE)
+    {
+      /*Error set node to error expression*/
+      error("L value expected for unary operator");
+      return make_error_expr();
+    }
   }
 
+  /* add deref as necessary */
+  if(is_lval(sub)) 
+    eNode->u.unop.operand = make_un_expr(DEREF_OP, sub);
+
+  /*Queries the type of the subexpression*/
+  TYPETAG subTag = ty_query(sub->type);
+
+  /*If the subexpression type is float or subrange convert*/
+  if(subTag == TYFLOAT || subTag == TYSUBRANGE)
+  {
+    /*Add conversion node, if not already creating conversion node*/
+    if(op != CONVERT_OP)
+      eNode->u.unop.operand = make_un_expr(CONVERT_OP, sub);
+  }
+
+  /*Switch based on the operation*/
+  switch(op)
+  {
+    case CONVERT_OP:
+      /*Set type to double if float*/
+      if(subTag == TYFLOAT)
+	eNode->type = ty_build_basic(TYDOUBLE);
+      /*Set type to double if float*/
+      if(subTag == TYSUBRANGE)
+	eNode->type = ty_query_subrange(sub->type, &low, &high);
+      break;
+    case DEREF_OP:
+      break; 
+    case NEG_OP:
+      break; 
+    case ORD_OP:
+      eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      break; 
+    case CHR_OP:
+      eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
+      break; 
+    case UN_SUCC_OP:
+      break;
+    case UN_PRED_OP:
+      break;
+    case UN_EOF_OP:
+      break; 
+    case UN_EOLN_OP:
+      break; 
+    case INDIR_OP:
+      eNode->type = ty_query_ptr(sub->type, &id, &next);
+      if (debug) 
+	printf("Setting type for INDIR node\n");
+      break; 
+    case UPLUS_OP:
+      break;
+    case NEW_OP:
+      break; 
+    case DISPOSE_OP:
+      break;
+    case ADDRESS_OP:
+      break;
+    case SET_RETURN_OP:
+      break;
+  }
+
+  /*Returns the node*/
+  return eNode;
 } /* End make_un_expr */
 
 /* Makes a binary operator expression node */
@@ -1133,7 +1191,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 
   /* Sets the attributes of the node */
   eNode->tag = BINOP;
-  eNode->type = left->type;	// need to add implicit type conversion
+  eNode->type = right->type;	// need to add implicit type conversion
   eNode->u.binop.op = op;
   eNode->u.binop.left = left;
   eNode->u.binop.right = right;
