@@ -1314,8 +1314,10 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
         eNode->u.binop.right = make_un_expr(CONVERT_OP, right);
         eNode->type = right->type;
         subTagR = ty_query(right->type);
+        return eNode;
       }
-      return eNode;  
+      else if (subTagR==TYVOID) error("Cannot convert between nondata types");
+      return make_error_expr();  
     }
     else 
     {
@@ -1627,7 +1629,7 @@ EXPR make_error_expr()
 
   /* Sets the attributes of the node */
   eNode->tag = ERROR;
-  eNode->type = NULL;
+  eNode->type = ty_build_basic(TYVOID);
 
   if (debug) printf("Created expr node for error\n");
 
