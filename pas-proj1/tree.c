@@ -1318,8 +1318,10 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
         subTagR = ty_query(right->type);
         return eNode;
       }
-      else if (subTagR==TYVOID) error("Cannot convert between nondata types");
-      return make_error_expr();  
+      else if (subTagR==TYVOID) {
+        error("Cannot convert between nondata types");  
+	return make_error_expr();
+      }
     }
     else 
     {
