@@ -343,7 +343,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       {
 	/*Gets the base type*/
 	long low, high;
-	TYPE baseT = ty_query_subrange(arg->type, &low, &high);
+	TYPE baseT = ty_query_subrange(arg->u.unop.operand->type, &low, &high);
 	
 	/*Converts subrange to base type*/
 	b_convert(TYSUBRANGE, ty_query(baseT));
@@ -419,10 +419,10 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       b_alloc_arglist(4);
 
       /*Pushes an intconst the size of the type the pointer points to*/
-      b_push_const_int(getSkipSize(ty_query_ptr(arg->type, &s1, &t1)));
+      b_push_const_int(getSkipSize(ty_query_ptr(arg->u.unop.operand->type, &s1, &t1)));
 
       /*Loads an argument*/
-      b_load_arg(ty_query(ty_query_ptr(arg->type, &s1, &t1)));
+      b_load_arg(ty_query(ty_query_ptr(arg->u.unop.operand->type, &s1, &t1)));
       
       /*Calls the external C function malloc*/
       b_funcall_by_name("malloc", TYPTR);
@@ -445,7 +445,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
   /* set return op */
   case SET_RETURN_OP:
-   b_set_return(ty_query(arg->type));
+   b_set_return(ty_query(arg->u.unop.operand->type));
    break;
   }
 
