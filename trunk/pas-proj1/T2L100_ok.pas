@@ -1,8 +1,8 @@
-(* test file for extra credit level of project part 2, CSCE 531, Spring 2005 *)
+(* test file for 100% level of project part 2, CSCE 531 *)
 
 (* there are no errors in this file *)
 
-program T2Lextra_ok;
+program T2L100_ok;
 
 var
    i,j,k : Integer;

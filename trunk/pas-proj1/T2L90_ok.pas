@@ -1,8 +1,8 @@
-(* test file for 100% level of project part 2, CSCE 531, Spring 2005 *)
+(* test file for 90% level of project part 2, CSCE 531 *)
 
 (* there are no errors in this file *)
 
-program T2L100;
+program T2L90_ok;
 
 var
    i,j,k : Integer;
@@ -37,7 +37,7 @@ Function abc : Integer;
 
 Function get_integer : Integer;
    begin
-      new(c);
+      new(ip);
       printf('Enter an integer:   ');
       scanf('%ld', ip);
       get_integer := ip^;
