@@ -1329,7 +1329,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	      next = ty_query_subrange(right->type, &low, &high);
 	      eNode->u.binop.right = makeConvertNode(right, next);
 	    }
-        return eNode;
+        return checkAssign(eNode);
       }
       else if (subTagR==TYVOID) {
         error("Cannot convert between nondata types");  
@@ -1362,9 +1362,9 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
     {
       /*Gets the subrange type*/
       next = ty_query_subrange(left->type, &low, &high);
-      eNode->u.binop.right = makeConvertNode(left, next);
+      eNode->u.binop.left = makeConvertNode(left, next);
     }
-    subTagL = ty_query(left->type);
+    subTagL = ty_query(eNode->u.binop.left->type);
   }
 
   /*If the subexpression type is float or subrange convert*/
@@ -1379,7 +1379,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       next = ty_query_subrange(right->type, &low, &high);
       eNode->u.binop.right = makeConvertNode(right, next);
     }
-    subTagR = ty_query(right->type);
+    subTagR = ty_query(eNode->u.binop.right->type);
   }
 
   /*If the subexpression type is int convert*/
@@ -1475,7 +1475,9 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	  error("Incompatible type arguments to comparison operator");
       }
-      eNode->type =  eNode->u.binop.right->type;
+      /*Type set*/
+      eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
       break; 
     case LESS_OP:
       /*Type check*/
@@ -1488,7 +1490,9 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	  error("Incompatible type arguments to comparison operator");
       }
-      eNode->type =  eNode->u.binop.right->type;
+      /*Type set*/
+      eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
       break; 
     case LE_OP:
       /*Type check*/
@@ -1501,7 +1505,9 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	  error("Incompatible type arguments to comparison operator");
       }
-      eNode->type =  eNode->u.binop.right->type;
+      /*Type set*/
+      eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
       break;
     case NE_OP:
       /*Type check*/
@@ -1514,7 +1520,9 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	  error("Incompatible type arguments to comparison operator");
       }
-      eNode->type =  eNode->u.binop.right->type;
+      /*Type set*/
+      eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
       break;
     case GE_OP:
       /*Type check*/
@@ -1527,7 +1535,9 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	  error("Incompatible type arguments to comparison operator");
       }
-      eNode->type =  eNode->u.binop.right->type;
+      /*Type set*/
+      eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
       break;
     case GREATER_OP:
       /*Type check*/
@@ -1540,7 +1550,9 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	  error("Incompatible type arguments to comparison operator");
       }
-      eNode->type =  eNode->u.binop.right->type;
+      /*Type set*/
+      eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      eNode = makeConvertNode(eNode, ty_build_basic(TYSIGNEDCHAR));
       break;
     case ASSIGN_OP:
       break;
@@ -1962,4 +1974,42 @@ EXPR makeConvertNode(EXPR sub, TYPE to)
 
   /*Returns the node*/
   return convertNode;
+}
+
+/*Function that checks assignments*/
+EXPR checkAssign(EXPR assign)
+{
+  /*Gets the left and right hand sides, and typetags*/
+  EXPR left = assign->u.binop.left;
+  EXPR right = assign->u.binop.right;
+  TYPETAG leftTag = ty_query(left->type);
+  TYPETAG rightTag = ty_query(right->type);
+  
+  /*If tags equal reuturn*/
+  if(leftTag == rightTag)
+    return assign;
+  /*If LHS is Double, accept all numberical types*/
+  else if(leftTag == TYDOUBLE)
+  {
+    /*Type check*/
+    if(rightTag == TYFLOAT || rightTag == TYSIGNEDLONGINT)
+      right = makeConvertNode(right, ty_build_basic(TYDOUBLE));
+    else
+      error("Illegal conversion");
+  }
+  /*If LHS is Float, accept all numerical types*/
+  else if(leftTag == TYFLOAT)
+  {
+    /*Type check*/
+    if(rightTag == TYDOUBLE || rightTag == TYSIGNEDLONGINT)
+      right = makeConvertNode(right, ty_build_basic(TYFLOAT));
+    else
+      error("Illegal conversion");
+  }
+  /*Else illegal*/
+  else
+    error("Illegal conversion");
+
+  /*Returns the node*/
+  return assign;
 }
