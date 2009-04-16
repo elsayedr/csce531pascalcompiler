@@ -1144,38 +1144,56 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	eNode->type = ty_query_subrange(sub->type, &low, &high);
       /*Else illegal conversion, return error expression*/
       else
+      {
 	error("Illegal conversion");
+	return make_error_expr();
+      }
       break;
     case DEREF_OP:
       break; 
     case NEG_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
+      {
 	error("Illegal type argument to unary minus");
+	return make_error_expr();
+      }
       break; 
     case ORD_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      {
 	error("Illegal type argument to Ord");
+	return make_error_expr();
+      }
       /*Sets the type*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break; 
     case CHR_OP:
       /*Type check*/
       if(subTag != TYSIGNEDLONGINT)
+      {
 	error("Illegal type argument to Chr");
+	return make_error_expr();
+      }
       /*Set type*/
       eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
       break; 
     case UN_SUCC_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      {
 	error("Nonordinal type argument to Succ or Pred");
+	return make_error_expr();
+      }
       break;
     case UN_PRED_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      {
 	error("Nonordinal type argument to Succ or Pred");
+	return make_error_expr();
+      }
       break;
     case UN_EOF_OP:
       break; 
@@ -1189,7 +1207,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     case UPLUS_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
+      {
 	error("Illegal type argument to unary plus");
+	return make_error_expr();
+      }
       break;
     case NEW_OP:
       break; 
@@ -1451,12 +1472,12 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 		/* return new FCALL node with no args */
 		return make_fcall_expr(lhs, NULL);
 
-		else error("Data record type is not function");
+		else error("Expected procedure name, saw data");
 		return make_error_expr();
 	}
 
 	/* any other tag is an error */
-	else if (lhs->tag!=10) error("Invalid tag for LHS expression");
+	else if (lhs->tag!=10) error("Procedure call expected");
 
 	return make_error_expr();
 
