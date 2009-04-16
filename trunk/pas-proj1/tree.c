@@ -1158,7 +1158,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       /*Type check, error if fails*/
 
       /*If the string is length one*/
-      if(subTag==STRCONST) 
+      if(sub->tag==STRCONST) 
       {
  	if (strlen(sub->u.strval)==1)
         {
@@ -1170,8 +1170,9 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	else error("Illegal string pointer for ORD operator");
       }
 
-      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
 	error("Illegal type argument to Ord");
+
       /*Sets the type*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break; 
