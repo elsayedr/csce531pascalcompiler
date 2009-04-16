@@ -1146,20 +1146,36 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       else
 	error("Illegal conversion");
       break;
+
     case DEREF_OP:
       break; 
-    case NEG_OP:
-      /*Type check, error if fails*/
-      if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
-	error("Illegal type argument to unary minus");
-      else if (subTag==TYSIGNEDLONGINT) 
-      break; 
-    case ORD_OP:
-      /*Type check, error if fails*/
 
-      /*If the string is length one*/
+    case NEG_OP:
+      /* constant folding */
+      if(sub->tag==INTCONST) 
+      {
+          /* Sets the values of the node */
+          eNode->tag = INTCONST;
+          eNode->u.intval = -sub->u.intval;
+          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      }
+      else if (sub->tag==REALCONST) 
+      {
+          /* Sets the values of the node */
+          eNode->tag = REALCONST;
+          eNode->u.realval = -sub->u.realval;
+          eNode->type = ty_build_basic(TYDOUBLE);
+      }
+      /*Type check, error if fails*/
+      else if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
+	error("Illegal type argument to unary minus");
+      break; 
+
+    case ORD_OP:
+      /* char folding */
       if(sub->tag==STRCONST) 
       {
+        /*If the string is length one*/
  	if (strlen(sub->u.strval)==1)
         {
           /* Sets the values of the node */
@@ -1169,13 +1185,14 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	}
 	else error("Illegal string pointer for ORD operator");
       }
-
+      /*Type check, error if fails*/
       else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
 	error("Illegal type argument to Ord");
 
       /*Sets the type*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break; 
+
     case CHR_OP:
       /*Type check*/
       if(subTag != TYSIGNEDLONGINT)
@@ -1183,6 +1200,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       /*Set type*/
       eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
       break; 
+
     case UN_SUCC_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
@@ -1202,6 +1220,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	}
       }
       break;
+
     case UN_PRED_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
@@ -1221,26 +1240,34 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	}
       }
       break;
+
     case UN_EOF_OP:
       break; 
+
     case UN_EOLN_OP:
       break; 
+
     case INDIR_OP:
       eNode->type = ty_query_ptr(sub->type, &id, &next);
       if (debug) 
 	printf("Setting type for INDIR node\n");
       break; 
+
     case UPLUS_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
 	error("Illegal type argument to unary plus");
       break;
+
     case NEW_OP:
       break; 
+
     case DISPOSE_OP:
       break;
+
     case ADDRESS_OP:
       break;
+
     case SET_RETURN_OP:
       break;
   }
