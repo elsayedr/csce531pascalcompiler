@@ -1186,9 +1186,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	else error("Illegal string pointer for ORD operator");
       }
       /*Type check, error if fails*/
-      else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
+      {ty_print_typetag(subTag);
 	error("Illegal type argument to Ord");
-
+      }
       /*Sets the type*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break; 
@@ -1301,8 +1302,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if (is_lval(right)) 
 	eNode->u.binop.right = make_un_expr(DEREF_OP, right);    
     }
-    else error("Assignment requires l-value on the left");
-    return make_error_expr();
+    else 
+    {
+      error("Assignment requires l-value on the left");
+      return make_error_expr();	
+    }
   }  
 
   /* add deref as necessary */
@@ -1340,16 +1344,16 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   if(subTagL == TYSIGNEDLONGINT && subTagR == TYDOUBLE)
   {
   /*Add conversion node, if not already creating conversion node*/
-    eNode->u.binop.left = make_un_expr(CONVERT_OP, left);
-    subTagL = ty_query(left->type);
+    eNode->u.binop.left = make_un_expr(CONVERT_OP, eNode->u.binop.left);
+    subTagL = ty_query(eNode->u.binop.left->type);
   }
   /*If the subexpression type is int convert*/
   else if(subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE)
   {
     /*Add conversion node, if not already creating conversion node*/
-    eNode->u.binop.right = make_un_expr(CONVERT_OP, right);
-    eNode->type =  right->type;
-    subTagR = ty_query(right->type);
+    eNode->u.binop.right = make_un_expr(CONVERT_OP, eNode->u.binop.right);
+    eNode->type =  eNode->u.binop.right->type;
+    subTagR = ty_query(eNode->u.binop.right->type);
   }
 
   /*Switch statement based on the operation*/
