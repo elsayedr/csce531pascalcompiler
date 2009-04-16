@@ -325,7 +325,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
   BOOLEAN isConverted = FALSE;
 
   /*Gets the tag of the argument*/
-  tag = ty_query(arg->type);
+  tag = ty_query(arg->u.unop.operand->type);
   
   /*Switch based on the operator*/
   switch(op)

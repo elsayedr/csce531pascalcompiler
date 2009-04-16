@@ -31,7 +31,7 @@ begin
 
    print_globals;		{ link in print_globals later }
 
-   x := i + j;
+   k := i + j;
    j := i - k * k div (i + k);
    i := k mod 7;
    b := k > j;
