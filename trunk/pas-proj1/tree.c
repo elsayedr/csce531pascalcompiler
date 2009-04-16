@@ -1248,7 +1248,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if (is_lval(right)) eNode->u.binop.right = make_un_expr(DEREF_OP, right);
       return eNode;    
     }
-    else error("Lefthand L-value expected for assign operator");
+    else error("Assignment requires l-value on the left");
     return make_error_expr();
   }  
 
@@ -1425,7 +1425,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 	if (rhs) 
 	{
 		/* exception for function return value - check id with current function */
-		if (id == func_id_stack[fi_top])
+		if (id == func_id_stack[fi_top] && fi_top>=0)
 		{
 			if (debug) printf("Setting return value\n");
 
