@@ -1245,6 +1245,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 /* Makes a binary operator expression node */
 EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)  
 {
+  /*If error, return*/
+  if(left->tag == ERROR || right->tag == ERROR)
+    return make_error_expr();
+
   /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
