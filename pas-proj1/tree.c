@@ -1301,6 +1301,8 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   TYPETAG subTagL = ty_query(left->type);
   TYPETAG subTagR = ty_query(right->type);
 
+  if (left->tag==ERROR || right->tag==ERROR) return eNode;
+
   /* check op to see if lval is needed */
   if (op==ASSIGN_OP) 
   {
