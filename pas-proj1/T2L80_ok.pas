@@ -1,8 +1,8 @@
-(* test file for 85% level of project part 2, CSCE 531, Spring 2005 *)
+(* test file for 80% level of project part 2, CSCE 531 *)
 
 (* there are no errors in this file! *)
 
-Program T1L85ok;
+Program T2L80_ok;
 
 var
    i,j,k : Integer;

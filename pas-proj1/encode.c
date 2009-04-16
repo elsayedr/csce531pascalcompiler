@@ -349,9 +349,10 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 	b_convert(TYSUBRANGE, ty_query(baseT));
       }
       /*Else, pointer to void converted to pointer not of void*/
-      else if(tag == TYPTR)
+      else if(tag == TYFLOAT)
       {
-	/*Not implemented yet*/
+	/*Converts float to double*/
+	b_convert(TYFLOAT, TYDOUBLE);
       }
       break;
     /*Unary plus case*/
