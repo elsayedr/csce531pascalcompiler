@@ -984,22 +984,10 @@ EXPR make_strconst_expr(char * str)
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /*If the string is length one*/
-  if(strlen(str) == 1)
-  {
-    /* Sets the values of the node */
-    eNode->tag = INTCONST;
-    eNode->u.intval = str[0];
-    eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-  }
-  /*Else, do it the regular way*/
-  else
-  {
-    /* Sets the values of the node */
-    eNode->tag = STRCONST;
-    eNode->u.strval = str;
-    eNode->type = ty_build_ptr(NULL, ty_build_basic(TYUNSIGNEDCHAR));
-  }
+  /* Sets the values of the node */
+  eNode->tag = STRCONST;
+  eNode->u.strval = str;
+  eNode->type = ty_build_ptr(NULL, ty_build_basic(TYUNSIGNEDCHAR));
 
   if (debug) printf("Created expr node for STRCONST: '%s'\n",str);
 
@@ -1164,9 +1152,24 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
 	error("Illegal type argument to unary minus");
+      else if (subTag==TYSIGNEDLONGINT) 
       break; 
     case ORD_OP:
       /*Type check, error if fails*/
+
+      /*If the string is length one*/
+      if(subTag==STRCONST) 
+      {
+ 	if (strlen(sub->u.strval)==1)
+        {
+          /* Sets the values of the node */
+          eNode->tag = INTCONST;
+          eNode->u.intval = sub->u.strval[0];
+          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+	}
+	else error("Illegal string pointer for ORD operator");
+      }
+
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
 	error("Illegal type argument to Ord");
       /*Sets the type*/
