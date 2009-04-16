@@ -984,10 +984,22 @@ EXPR make_strconst_expr(char * str)
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
 
-  /* Sets the values of the node */
-  eNode->tag = STRCONST;
-  eNode->u.strval = str;
-  eNode->type = ty_build_ptr(NULL, ty_build_basic(TYSIGNEDCHAR) );
+  /*If the string is length one*/
+  if(strlen(str) == 1)
+  {
+    /* Sets the values of the node */
+    eNode->tag = INTCONST;
+    eNode->u.intval = str[0];
+    eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+  }
+  /*Else, do it the regular way*/
+  else
+  {
+    /* Sets the values of the node */
+    eNode->tag = STRCONST;
+    eNode->u.strval = str;
+    eNode->type = ty_build_ptr(NULL, ty_build_basic(TYUNSIGNEDCHAR));
+  }
 
   if (debug) printf("Created expr node for STRCONST: '%s'\n",str);
 
@@ -1144,55 +1156,65 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	eNode->type = ty_query_subrange(sub->type, &low, &high);
       /*Else illegal conversion, return error expression*/
       else
-      {
 	error("Illegal conversion");
-	return make_error_expr();
-      }
       break;
     case DEREF_OP:
       break; 
     case NEG_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
-      {
 	error("Illegal type argument to unary minus");
-	return make_error_expr();
-      }
       break; 
     case ORD_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
-      {
 	error("Illegal type argument to Ord");
-	return make_error_expr();
-      }
       /*Sets the type*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break; 
     case CHR_OP:
       /*Type check*/
       if(subTag != TYSIGNEDLONGINT)
-      {
 	error("Illegal type argument to Chr");
-	return make_error_expr();
-      }
       /*Set type*/
       eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
       break; 
     case UN_SUCC_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
-      {
 	error("Nonordinal type argument to Succ or Pred");
-	return make_error_expr();
+      /*Else, check if constant folding can be done*/
+      else
+      {
+	/*Check subexpression type*/
+	if(sub->tag == INTCONST)
+	  eNode = make_intconst_expr(sub->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
+	else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
+	{
+	  /*Makes the string constant*/
+	  char * str = malloc(sizeof(char));
+	  *str = sub->u.strval[0]++;
+	  eNode = make_strconst_expr(str);
+	}
       }
       break;
     case UN_PRED_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
-      {
 	error("Nonordinal type argument to Succ or Pred");
-	return make_error_expr();
+      /*Else, check if constant folding can be done*/
+      else
+      {
+	/*Check subexpression type*/
+	if(sub->tag == INTCONST)
+	  eNode = make_intconst_expr(sub->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
+	else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
+	{
+	  /*Makes the string constant*/
+	  char * str = malloc(sizeof(char));
+	  *str = sub->u.strval[0]--;
+	  eNode = make_strconst_expr(str);
+	}
       }
       break;
     case UN_EOF_OP:
@@ -1207,10 +1229,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     case UPLUS_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
-      {
 	error("Illegal type argument to unary plus");
-	return make_error_expr();
-      }
       break;
     case NEW_OP:
       break; 
@@ -1223,7 +1242,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   }
 
   /*Returns the node*/
-  return eNode;
+  return eNode;;
 } /* End make_un_expr */
 
 /* Makes a binary operator expression node */
