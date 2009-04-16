@@ -1335,6 +1335,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
         error("Cannot convert between nondata types");  
 	return make_error_expr();
       }
+    return checkAssign(eNode);
     }
     else 
     {
@@ -2007,7 +2008,7 @@ EXPR checkAssign(EXPR assign)
       error("Illegal conversion");
   }
   /*Else illegal*/
-  else
+  else if (leftTag != rightTag)
     error("Illegal conversion");
 
   /*Returns the node*/
