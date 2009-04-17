@@ -1458,33 +1458,6 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	eNode->type = ty_build_basic(TYDOUBLE);
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      if((eNode->u.binop.left->tag == INTCONST || eNode->u.binop.left->tag == REALCONST) && (eNode->u.binop.right->tag == INTCONST || eNode->u.binop.right->tag == REALCONST))
-      {
-	/*If the expression expects a double or int*/
-	if(tag == TYDOUBLE || tag == TYFLOAT)
-	{
-	  /*Checks the tag of the left operand*/
-	  if(eNode->u.binop.left->tag == REALCONST)
-	    rRes = eNode->u.binop.left->u.realval;
-	  else
-	    rRes = eNode->u.binop.left->u.intval;
-	  /*Checks the tag of the right operand*/
-	  if(eNode->u.binop.right->tag == REALCONST)
-	    rRes = rRes + eNode->u.binop.right->u.realval;
-	  else
-	    rRes = rRes + eNode->u.binop.right->u.intval;
-
-	  /*Creates the node*/
-	  eNode = make_realconst_expr(rRes);
-	}
-	/*Else, integer*/
-	else
-	{
-	  /*Gets the int*/
-	  iRes = eNode->u.binop.left->u.intval + eNode->u.binop.right->u.intval;
-	  eNode = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
-	}
-      }
       break;
     case SUB_OP:
       /*Type check*/
@@ -1500,33 +1473,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	eNode->type = ty_build_basic(TYDOUBLE);
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      if((eNode->u.binop.left->tag == INTCONST || eNode->u.binop.left->tag == REALCONST) && (eNode->u.binop.right->tag == INTCONST || eNode->u.binop.right->tag == REALCONST))
-      {
-	/*If the expression expects a double or int*/
-	if(tag == TYDOUBLE || tag == TYFLOAT)
-	{
-	  /*Checks the tag of the left operand*/
-	  if(eNode->u.binop.left->tag == REALCONST)
-	    rRes = eNode->u.binop.left->u.realval;
-	  else
-	    rRes = eNode->u.binop.left->u.intval;
-	  /*Checks the tag of the right operand*/
-	  if(eNode->u.binop.right->tag == REALCONST)
-	    rRes = rRes - eNode->u.binop.right->u.realval;
-	  else
-	    rRes = rRes - eNode->u.binop.right->u.intval;
 
-	  /*Creates the node*/
-	  eNode = make_realconst_expr(rRes);
-	}
-	/*Else, integer*/
-	else
-	{
-	  /*Gets the int*/
-	  iRes = eNode->u.binop.left->u.intval + eNode->u.binop.right->u.intval;
-	  eNode = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
-	}
-      }
       break;
     case MUL_OP:
       /*Type check*/
@@ -1570,6 +1517,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	  eNode = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
 	}
       }
+      break;
     case DIV_OP:
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
@@ -1612,6 +1560,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	  eNode = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
 	}
       }
+      break;
     case MOD_OP:
       /*Type check*/
       if(subTagR != TYSIGNEDLONGINT || subTagL != TYSIGNEDLONGINT)
