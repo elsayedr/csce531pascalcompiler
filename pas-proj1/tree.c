@@ -1287,6 +1287,21 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 	error("Illegal type argument to unary plus");
 	return make_error_expr();
       }
+      /* constant folding */
+      else if(sub->tag==INTCONST)
+      {
+          /* Sets the values of the node */
+          eNode->tag = INTCONST;
+          eNode->u.intval = sub->u.intval;
+          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      }
+      else if (sub->tag==REALCONST)
+      {
+          /* Sets the values of the node */
+          eNode->tag = REALCONST;
+          eNode->u.realval = sub->u.realval;
+          eNode->type = ty_build_basic(TYDOUBLE);
+      }
       break;
 
     case NEW_OP:
@@ -2117,93 +2132,6 @@ EXPR checkAssign(EXPR assign)
 
   /*Returns the node*/
   return assign;
-}
-
-/*Function that performs constant folding on a unop expression if possible*/
-EXPR constFoldUnop(EXPR unop)
-{
-
-  if(unop->tag != UNOP)
-    if(unop->u.unop.op == DEREF_OP)
-      return unop;
-
-  /*Switch based on the type of the expression*/
-  switch(unop->u.unop.op)
-  {
-    case UPLUS_OP:
-      /*If the operand is an int constant*/
-      if(unop->u.unop.operand->tag == INTCONST)
-      {
-	/*Makes the int const node*/
-	unop = make_intconst_expr(unop->u.unop.operand->u.intval, ty_build_basic(TYSIGNEDLONGINT));
-      }
-      /*If the operand is an real constant*/
-      else if(unop->u.unop.operand->tag == REALCONST)
-      {
-	/*Makes the real const node*/
-	unop = make_realconst_expr(unop->u.unop.operand->u.realval);
-      }
-      break;
-    case NEG_OP:
-      /*If the operand is an int constant*/
-      if(unop->u.unop.operand->tag == INTCONST)
-      {
-	/*Makes the int const node*/
-	unop = make_intconst_expr((unop->u.unop.operand->u.intval * (-1)), ty_build_basic(TYSIGNEDLONGINT));
-      }
-      /*If the operand is an real constant*/
-      else if(unop->u.unop.operand->tag == REALCONST)
-      {
-	/*Makes the real const node*/
-	unop = make_realconst_expr((unop->u.unop.operand->u.realval * (-1)));
-      }
-      break;
-    case ORD_OP:
-      /* char folding */
-      if(unop->u.unop.operand->tag==STRCONST) 
-      {
-        /*If the string is length one*/
- 	if (strlen(unop->u.unop.operand->u.strval)==1)
-        {
-          /* Sets the values of the node */
-          unop = make_intconst_expr(unop->u.unop.operand->u.strval[0],ty_build_basic(TYSIGNEDLONGINT));
-	}
-	else 
-	{
-	  error("Illegal conversion");
-	  return make_error_expr();
-	}
-      }
-      break;
-    case UN_SUCC_OP:
-      /*Check subexpression type*/
-      if(unop->u.unop.operand->tag == INTCONST)
-	unop = make_intconst_expr(unop->u.unop.operand->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
-      else if(unop->u.unop.operand->tag == STRCONST && strlen(unop->u.unop.operand->u.strval) == 1)
-      {
-	/*Makes the string constant*/
-	char * str = malloc(sizeof(char));
-	*str = unop->u.unop.operand->u.strval[0]++;
-	unop = make_strconst_expr(str);
-      }
-      break;
-    case UN_PRED_OP:
-      /*Check subexpression type*/
-      if(unop->u.unop.operand->tag == INTCONST)
-	unop = make_intconst_expr(unop->u.unop.operand->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
-      else if(unop->u.unop.operand->tag == STRCONST && strlen(unop->u.unop.operand->u.strval) == 1)
-      {
-	/*Makes the string constant*/
-	char * str = malloc(sizeof(char));
-	*str = unop->u.unop.operand->u.strval[0]--;
-	unop = make_strconst_expr(str);
-      }
-      break;
-      break;
-  }
-
-  /*Returns the node*/
-  return unop;
 }
 
 /*Function that performs constant folding on a binop expression if possible*/
