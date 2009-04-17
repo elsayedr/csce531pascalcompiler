@@ -2122,10 +2122,11 @@ EXPR checkAssign(EXPR assign)
     else
       error("Illegal conversion");
   }
-  else if(leftTag == TYUNSIGNEDCHAR)
-    if(right->tag == STRCONST)
+  else if(leftTag == TYUNSIGNEDCHAR && right->tag == STRCONST)
       if(strlen(right->u.strval) == 1)
 	assign->u.binop.right = make_intconst_expr(right->u.strval[0], ty_build_basic(TYSIGNEDLONGINT));
+      else
+	error("Illegal conversion");
   /*Else illegal*/
   else if (leftTag != rightTag)
     error("Illegal conversion");
