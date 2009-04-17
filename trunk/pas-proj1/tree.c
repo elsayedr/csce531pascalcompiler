@@ -1120,7 +1120,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   /* if deref prevent loop */
   if(op==DEREF_OP) 
     return eNode; 
-  else if(op == ADDRESS_OP || op == NEW_OP)
+
+  if(op == ADDRESS_OP || op == NEW_OP)
   {
     if(is_lval(sub) == FALSE)
     {
@@ -1129,10 +1130,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       return make_error_expr();
     }
   }
-
   /* add deref as necessary */
-  if(is_lval(sub)) 
-    eNode->u.unop.operand = make_un_expr(DEREF_OP, sub);
+  else if(is_lval(sub)) eNode->u.unop.operand = make_un_expr(DEREF_OP, sub);
 
   /*Queries the type of the subexpression*/
   TYPETAG subTag = ty_query(sub->type);
