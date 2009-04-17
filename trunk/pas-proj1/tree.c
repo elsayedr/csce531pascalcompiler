@@ -1167,6 +1167,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
           eNode->tag = INTCONST;
           eNode->u.intval = -sub->u.intval;
           eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+
+	  printf("Origami'd NEG_OP from INTCONST to TYSIGNEDLONGINT");
       }
       else if (sub->tag==REALCONST)
       {
@@ -1174,6 +1176,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
           eNode->tag = REALCONST;
           eNode->u.realval = -sub->u.realval;
           eNode->type = ty_build_basic(TYDOUBLE);
+
+	  printf("Origami'd NEG_OP from REALCONST to TYDOUBLE");
       }
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
@@ -2082,6 +2086,8 @@ EXPR makeConvertNode(EXPR sub, TYPE to)
   /*Creates the node*/
   EXPR convertNode = make_un_expr(CONVERT_OP, sub);
   convertNode->type = to;
+
+  if (debug) printf("Created expr node for CONVERT_OP\n");
 
   /*Returns the node*/
   return convertNode;
