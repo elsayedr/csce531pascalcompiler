@@ -995,12 +995,18 @@ EXPR make_strconst_expr(char * str)
 
   if (debug) printf("Created expr node for STRCONST: '%s'\n",str);
 
+<<<<<<< .mine
+  if(strlen(str) == 1)
+    eNode = make_intconst_expr(str[0], ty_build_basic(TYUNSIGNEDCHAR));
+
+=======
   if(strlen(str) == 1)
   {
     eNode = make_intconst_expr(*str, ty_build_basic(TYSIGNEDLONGINT));
     eNode = makeConvertNode(eNode, ty_build_basic(TYUNSIGNEDCHAR));
   }
 
+>>>>>>> .r226
   /* Returns the node */
   return eNode;
 }/* End make_strconst_expr */
@@ -1133,6 +1139,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   /* add deref as necessary */
   else if(is_lval(sub)) eNode->u.unop.operand = make_un_expr(DEREF_OP, sub);
 
+
   /*Queries the type of the subexpression*/
   TYPETAG subTag = ty_query(sub->type);
 
@@ -1164,51 +1171,112 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       break;
     case DEREF_OP:
       break; 
-    case NEG_OP:
+      /* constant folding */
+      if(sub->tag==INTCONST)
+      {
+          /* Sets the values of the node */
+          eNode->tag = INTCONST;
+          eNode->u.intval = -sub->u.intval;
+          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      }
+      else if (sub->tag==REALCONST)
+      {
+          /* Sets the values of the node */
+          eNode->tag = REALCONST;
+          eNode->u.realval = -sub->u.realval;
+          eNode->type = ty_build_basic(TYDOUBLE);
+      }
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
       {
-	error("Illegal type argument to unary minus");
-	return make_error_expr();
+        error("Illegal type argument to unary minus");
+        return make_error_expr();
       }
-      break; 
+      break;
 
     case ORD_OP:
-      /*Type check, error if fails*/
-      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
+      /* char folding */
+      if(sub->tag==STRCONST)
       {
-	error("Illegal type argument to Ord");
-	return make_error_expr();
+        /*If the string is length one*/
+        if (strlen(sub->u.strval)==1)
+        {
+          /* Sets the values of the node */
+          eNode->tag = INTCONST;
+          eNode->u.intval = sub->u.strval[0];
+          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+        }
+        else
+        {
+          error("Illegal conversion");
+          return make_error_expr();
+        }
+      }
+      /*Type check, error if fails*/
+      else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
+      {
+        error("Illegal type argument to Ord");
+        return make_error_expr();
       }
       /*Sets the type*/
       eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      break; 
+      break;
 
     case CHR_OP:
       /*Type check*/
       if(subTag != TYSIGNEDLONGINT)
       {
-	error("Illegal type argument to Chr");
-	return make_error_expr();
+        error("Illegal type argument to Chr");
+        return make_error_expr();
       }
       /*Set type*/
       eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
-      break; 
+      break;
+
 
     case UN_SUCC_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
-	error("Nonordinal type argument to Succ or Pred");
-	return make_error_expr();
+        error("Nonordinal type argument to Succ or Pred");
+        return make_error_expr();
+      }
+      /*Else, check if constant folding can be done*/
+      else
+      {
+        /*Check subexpression type*/
+        if(sub->tag == INTCONST)
+          eNode = make_intconst_expr(sub->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
+        else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
+        {
+          /*Makes the string constant*/
+          char * str = malloc(sizeof(char));
+          *str = sub->u.strval[0]++;
+          eNode = make_strconst_expr(str);
+        }
       }
       break;
+
     case UN_PRED_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
-	error("Nonordinal type argument to Succ or Pred");
-	return make_error_expr();
+        error("Nonordinal type argument to Succ or Pred");
+        return make_error_expr();
+      }
+      /*Else, check if constant folding can be done*/
+      else
+      {
+        /*Check subexpression type*/
+        if(sub->tag == INTCONST)
+          eNode = make_intconst_expr(sub->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
+        else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
+        {
+          /*Makes the string constant*/
+          char * str = malloc(sizeof(char));
+          *str = sub->u.strval[0]--;
+          eNode = make_strconst_expr(str);
+        }
       }
       break;
 
@@ -1247,7 +1315,11 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   }
 
   /*Returns the node*/
+<<<<<<< .mine
+  return eNode;
+=======
   return  constFoldUnop(eNode);
+>>>>>>> .r226
 } /* End make_un_expr */
 
 /* Makes a binary operator expression node */
@@ -1373,7 +1445,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
-	error("Nonnumerical type argument(s) to arithmetic op");
+	error("Nonnumerical type argument(s) to arithmetic operation");
 	return make_error_expr();
       }
       /*Else set node type to higher type*/
@@ -1388,7 +1460,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
-	error("Nonnumerical type argument(s) to arithmetic op");
+	error("Nonnumerical type argument(s) to arithmetic operation");
 	return make_error_expr();
       }
       /*Else set node type to higher type*/
@@ -1403,7 +1475,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
-	error("Nonnumerical type argument(s) to arithmetic op");
+	error("Nonnumerical type argument(s) to arithmetic operation");
 	return make_error_expr();
       }
       /*Else set node type to higher type*/
@@ -1418,7 +1490,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
-	error("Nonnumerical type argument(s) to arithmetic op");
+	error("Nonnumerical type argument(s) to arithmetic operation");
 	return make_error_expr();
       }
       /*Else set node type to higher type*/
@@ -1433,7 +1505,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       /*Type check*/
       if(subTagR != TYSIGNEDLONGINT || subTagL != TYSIGNEDLONGINT)
       {
-	error("Noninteger type argument(s) to integer arithmetic op");
+	error("Noninteger type argument(s) to integer arithmetic operation");
 	return make_error_expr();
       }
       /*Type set*/
@@ -1443,7 +1515,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       /*Type check*/
       if(subTagR != TYSIGNEDLONGINT || subTagL != TYSIGNEDLONGINT)
       {
-	error("Noninteger type argument(s) to integer arithmetic op");
+	error("Noninteger type argument(s) to integer arithmetic operation");
 	return make_error_expr();
       }
       /*Type set*/
@@ -1598,7 +1670,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   }
 
   /*Returns the node*/
-  return constFoldBinop(eNode);
+  return eNode;
 
 }/* End make_bin_expr */
 
