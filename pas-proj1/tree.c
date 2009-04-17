@@ -995,6 +995,12 @@ EXPR make_strconst_expr(char * str)
 
   if (debug) printf("Created expr node for STRCONST: '%s'\n",str);
 
+  if(strlen(str) == 1)
+  {
+    eNode = make_intconst_expr(*str, ty_build_basic(TYSIGNEDLONGINT));
+    eNode = makeConvertNode(eNode, ty_build_basic(TYUNSIGNEDCHAR));
+  }
+
   /* Returns the node */
   return eNode;
 }/* End make_strconst_expr */
@@ -1107,6 +1113,9 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   /*Debugging*/
   if(debug) 
     printf("Created expr node for UNOP: %d\n", op);
+
+  if(eNode->tag != UNOP)
+    return eNode;
 
   /* if deref prevent loop */
   if(op==DEREF_OP) 
@@ -1239,7 +1248,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   }
 
   /*Returns the node*/
-  return constFoldUnop(eNode);
+  return  constFoldUnop(eNode);
 } /* End make_un_expr */
 
 /* Makes a binary operator expression node */
@@ -2053,6 +2062,11 @@ EXPR checkAssign(EXPR assign)
 /*Function that performs constant folding on a unop expression if possible*/
 EXPR constFoldUnop(EXPR unop)
 {
+
+  if(unop->tag != UNOP)
+    if(unop->u.unop.op == DEREF_OP)
+      return unop;
+
   /*Switch based on the type of the expression*/
   switch(unop->u.unop.op)
   {
@@ -2135,4 +2149,296 @@ EXPR constFoldUnop(EXPR unop)
 /*Function that performs constant folding on a binop expression if possible*/
 EXPR constFoldBinop(EXPR binop)
 {
+  /*Gets the type tag of the operation*/
+  double rRes = 0;
+  long iRes = 0;
+  TYPETAG tag = ty_query(binop->type);
+  EXPR_BINOP op;
+
+  if(binop->tag != BINOP)
+    return binop;
+
+  /*Switch based on the operation*/
+  switch(binop->u.binop.op)
+  {
+    case ADD_OP:
+      if((binop->u.binop.left->tag == INTCONST || binop->u.binop.left->tag == REALCONST) && (binop->u.binop.right->tag == INTCONST || binop->u.binop.right->tag == REALCONST))
+      {
+	/*If the expression expects a double or int*/
+	if(tag == TYDOUBLE || tag == TYFLOAT)
+	{
+	  /*Checks the tag of the left operand*/
+	  if(binop->u.binop.left->tag == REALCONST)
+	    rRes = rRes + binop->u.binop.left->u.realval;
+	  else
+	    rRes = rRes + binop->u.binop.left->u.intval;
+	  /*Checks the tag of the right operand*/
+	  if(binop->u.binop.right->tag == REALCONST)
+	    rRes = rRes + binop->u.binop.right->u.realval;
+	  else
+	    rRes = rRes + binop->u.binop.right->u.intval;
+
+	  /*Creates the node*/
+	  binop = make_realconst_expr(rRes);
+	}
+	/*Else, integer*/
+	else
+	{
+	  /*Gets the int*/
+	  iRes = binop->u.binop.left->u.intval + binop->u.binop.right->u.intval;
+	  binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	}
+      }
+      break;
+    case SUB_OP:
+      if((binop->u.binop.left->tag == INTCONST || binop->u.binop.left->tag == REALCONST) && (binop->u.binop.right->tag == INTCONST || binop->u.binop.right->tag == REALCONST))
+      {
+	/*If the expression expects a double or int*/
+	if(tag == TYDOUBLE || tag == TYFLOAT)
+	{
+	  /*Checks the tag of the left operand*/
+	  if(binop->u.binop.left->tag == REALCONST)
+	    rRes = binop->u.binop.left->u.realval;
+	  else
+	    rRes = binop->u.binop.left->u.intval;
+	  /*Checks the tag of the right operand*/
+	  if(binop->u.binop.right->tag == REALCONST)
+	    rRes = rRes - binop->u.binop.right->u.realval;
+	  else
+	    rRes = rRes - binop->u.binop.right->u.intval;
+
+	  /*Creates the node*/
+	  binop = make_realconst_expr(rRes);
+	}
+	/*Else, integer*/
+	else
+	{
+	  /*Gets the int*/
+	  iRes = binop->u.binop.left->u.intval + binop->u.binop.right->u.intval;
+	  binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	}
+      }
+      break; 
+    case MUL_OP:
+      if((binop->u.binop.left->tag == INTCONST || binop->u.binop.left->tag == REALCONST) && (binop->u.binop.right->tag == INTCONST || binop->u.binop.right->tag == REALCONST))
+      {
+	/*If the expression expects a double or int*/
+	if(tag == TYDOUBLE || tag == TYFLOAT)
+	{
+	  /*Checks the tag of the left operand*/
+	  if(binop->u.binop.left->tag == REALCONST)
+	    rRes = binop->u.binop.left->u.realval;
+	  else
+	    rRes = binop->u.binop.left->u.intval;
+	  /*Checks the tag of the right operand*/
+	  if(binop->u.binop.right->tag == REALCONST)
+	    rRes = rRes * binop->u.binop.right->u.realval;
+	  else
+	    rRes = rRes * binop->u.binop.right->u.intval;
+
+	  /*Creates the node*/
+	  binop = make_realconst_expr(rRes);
+	}
+	/*Else, integer*/
+	else
+	{
+	  /*Gets the int*/
+	  iRes = binop->u.binop.left->u.intval + binop->u.binop.right->u.intval;
+	  binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	}
+      }
+      break;
+    case DIV_OP:
+      if((binop->u.binop.left->tag == INTCONST || binop->u.binop.left->tag == REALCONST) && (binop->u.binop.right->tag == INTCONST || binop->u.binop.right->tag == REALCONST))
+      {
+	/*If the expression expects a double or int*/
+	if(tag == TYDOUBLE || tag == TYFLOAT)
+	{
+	  /*Checks the tag of the left operand*/
+	  if(binop->u.binop.left->tag == REALCONST)
+	    rRes = binop->u.binop.left->u.realval;
+	  else
+	    rRes = binop->u.binop.left->u.intval;
+	  /*Checks the tag of the right operand*/
+	  if(binop->u.binop.right->tag == REALCONST)
+	    rRes = rRes / binop->u.binop.right->u.realval;
+	  else
+	    rRes = rRes / binop->u.binop.right->u.intval;
+
+	  /*Creates the node*/
+	  binop = make_realconst_expr(rRes);
+	}
+	/*Else, integer*/
+	else
+	{
+	  /*Gets the int*/
+	  iRes = binop->u.binop.left->u.intval + binop->u.binop.right->u.intval;
+	  binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	}
+      }
+      break;
+    case MOD_OP:
+      if(binop->u.binop.left->tag == INTCONST && binop->u.binop.right->tag == INTCONST)
+      {
+	/*Gets the result*/
+	iRes = binop->u.binop.left->u.intval % binop->u.binop.left->u.intval;
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+      }
+      break;
+    case REALDIV_OP:
+      if(binop->u.binop.left->tag == INTCONST && binop->u.binop.right->tag == INTCONST)
+      {
+	/*Gets the result*/
+	iRes = binop->u.binop.left->u.intval % binop->u.binop.left->u.intval;
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+      }
+      break;
+    case EQ_OP:
+      if(binop->u.binop.left->tag == INTCONST && binop->u.binop.right->tag == INTCONST)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.intval == binop->u.binop.left->u.intval)
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      else if(binop->u.binop.left->tag == STRCONST && binop->u.binop.right->tag == STRCONST && strlen(binop->u.binop.left->u.strval) == 1 && strlen(binop->u.binop.right->u.strval) == 1)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.strval[0] == binop->u.binop.left->u.strval[0])
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      break;
+    case LESS_OP:
+      if(binop->u.binop.left->tag == INTCONST && binop->u.binop.right->tag == INTCONST)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.intval < binop->u.binop.left->u.intval)
+	  iRes = 1;
+	else
+	  iRes = 0;
+	
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      else if(binop->u.binop.left->tag == STRCONST && binop->u.binop.right->tag == STRCONST && strlen(binop->u.binop.left->u.strval) == 1 && strlen(binop->u.binop.right->u.strval) == 1)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.strval[0] < binop->u.binop.left->u.strval[0])
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      break;
+    case LE_OP:
+      if(binop->u.binop.left->tag == INTCONST && binop->u.binop.right->tag == INTCONST)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.intval <= binop->u.binop.left->u.intval)
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      else if(binop->u.binop.left->tag == STRCONST && binop->u.binop.right->tag == STRCONST && strlen(binop->u.binop.left->u.strval) == 1 && strlen(binop->u.binop.right->u.strval) == 1)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.strval[0] <= binop->u.binop.left->u.strval[0])
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      break;
+    case NE_OP:
+      if(binop->u.binop.left->tag == INTCONST && binop->u.binop.right->tag == INTCONST)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.intval != binop->u.binop.left->u.intval)
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      else if(binop->u.binop.left->tag == STRCONST && binop->u.binop.right->tag == STRCONST && strlen(binop->u.binop.left->u.strval) == 1 && strlen(binop->u.binop.right->u.strval) == 1)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.strval[0] != binop->u.binop.left->u.strval[0])
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      break;
+    case GE_OP:
+      if(binop->u.binop.left->tag == INTCONST && binop->u.binop.right->tag == INTCONST)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.intval >= binop->u.binop.left->u.intval)
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      else if(binop->u.binop.left->tag == STRCONST && binop->u.binop.right->tag == STRCONST && strlen(binop->u.binop.left->u.strval) == 1 && strlen(binop->u.binop.right->u.strval) == 1)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.strval[0] >= binop->u.binop.left->u.strval[0])
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      break;
+    case GREATER_OP:
+      if(binop->u.binop.left->tag == INTCONST && binop->u.binop.right->tag == INTCONST)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.intval > binop->u.binop.left->u.intval)
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      else if(binop->u.binop.left->tag == STRCONST && binop->u.binop.right->tag == STRCONST && strlen(binop->u.binop.left->u.strval) == 1 && strlen(binop->u.binop.right->u.strval) == 1)
+      {
+	/*Gets the result*/
+	if(binop->u.binop.left->u.strval[0] > binop->u.binop.left->u.strval[0])
+	  iRes = 1;
+	else
+	  iRes = 0;
+
+	binop = make_intconst_expr(iRes, ty_build_basic(TYSIGNEDLONGINT));
+	binop = makeConvertNode(binop, ty_build_basic(TYSIGNEDCHAR));
+      }
+      break;
+  }
+  
+  /*Returns the node*/
+  return binop;
 }
