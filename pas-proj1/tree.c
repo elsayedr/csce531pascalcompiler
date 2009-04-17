@@ -1159,6 +1159,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       break;
     case DEREF_OP:
       break; 
+   case NEG_OP:
       /* constant folding */
       if(sub->tag==INTCONST)
       {
@@ -1181,7 +1182,6 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
         return make_error_expr();
       }
       break;
-
     case ORD_OP:
       /* char folding */
       if(sub->tag==STRCONST)
