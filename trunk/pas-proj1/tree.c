@@ -995,18 +995,6 @@ EXPR make_strconst_expr(char * str)
 
   if (debug) printf("Created expr node for STRCONST: '%s'\n",str);
 
-<<<<<<< .mine
-  if(strlen(str) == 1)
-    eNode = make_intconst_expr(str[0], ty_build_basic(TYUNSIGNEDCHAR));
-
-=======
-  if(strlen(str) == 1)
-  {
-    eNode = make_intconst_expr(*str, ty_build_basic(TYSIGNEDLONGINT));
-    eNode = makeConvertNode(eNode, ty_build_basic(TYUNSIGNEDCHAR));
-  }
-
->>>>>>> .r226
   /* Returns the node */
   return eNode;
 }/* End make_strconst_expr */
@@ -1315,11 +1303,8 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   }
 
   /*Returns the node*/
-<<<<<<< .mine
   return eNode;
-=======
-  return  constFoldUnop(eNode);
->>>>>>> .r226
+
 } /* End make_un_expr */
 
 /* Makes a binary operator expression node */
@@ -2122,6 +2107,10 @@ EXPR checkAssign(EXPR assign)
     else
       error("Illegal conversion");
   }
+  else if(leftTag == TYUNSIGNEDCHAR)
+    if(right->tag == STRCONST)
+      if(strlen(right->u.strval) == 1)
+	assign->u.binop.right = make_intconst_expr(right->u.strval[0], ty_build_basic(TYSIGNEDLONGINT));
   /*Else illegal*/
   else if (leftTag != rightTag)
     error("Illegal conversion");
