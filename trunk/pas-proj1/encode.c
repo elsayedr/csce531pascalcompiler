@@ -550,15 +550,26 @@ void encodeBinop(EXPR_BINOP op, EXPR exp)
     /*Assignment*/
     case ASSIGN_OP:
       if (debug) printf("Encoding binary operator: ASSIGN_OP\n");
+      
       /*Checks tag to see if local variable*/
       if(exp->u.binop.left->tag == LVAR)
       {
 	/*Pushes the address of the local variable*/
 	b_push_loc_addr(exp->u.binop.left->u.lvar.offset);
       }
+      
+      /* Get typetag of left and right args */
+      TYPETAG lTag = ty_query(exp->u.binop.left->type);
+      TYPETAG rTag = ty_query(exp->u.binop.right->type);
+      
+      /* Compare typetags, convert if not equal */
+      if(lTag != rTag)
+      {
+      	b_convert(rTag, lTag);
+      }
      
       /*Assigns, then pops*/
-      b_assign(ty_query(exp->u.binop.left->type));
+      b_assign(lTag);
       b_pop();
     break;
   }
