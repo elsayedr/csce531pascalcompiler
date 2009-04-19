@@ -1089,6 +1089,8 @@ EXPR make_null_expr(EXPR_NULLOP op)
 /* Makes a unary operator expression node */
 EXPR make_un_expr(EXPR_UNOP op, EXPR sub)  
 {
+  if (debug) printf("Entering make_un_expr()\n");
+
   /*If sub is error, return it*/
   if(sub->tag == ERROR)
     return sub;
@@ -1107,10 +1109,6 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   ST_ID id;
   TYPE next;
   long low, high;
-
-  /*Debugging*/
-  if(debug) 
-    printf("Created expr node for UNOP: %d\n", op);
 
   /*Attempts constant folding*/
   eNode = cFoldUnop(eNode);
@@ -1146,9 +1144,13 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     {
       /*Created convert node based on type needed to convert to*/
       if(subTag == TYFLOAT)
+      {
+	if (debug) printf("Implicitly converting float to double");
 	eNode->u.unop.operand = makeConvertNode(sub, ty_build_basic(TYDOUBLE));
+      }
       else
       {
+	if (debug) printf("Implicitly converting subrange to its base type");
 	/*Gets the subrange type*/
 	next = ty_query_subrange(sub->type, &low, &high);
 	eNode->u.unop.operand = makeConvertNode(sub, next);
@@ -1159,29 +1161,20 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   /*Queries the type of the subexpression, again*/
   subTag = ty_query(sub->type);
 
+  /*Debugging*/
+  if(debug) printf("Created expr node for UNOP: ");
+  
   /*Switch based on the operation*/
   switch(op)
   {
     case CONVERT_OP:
+      if(debug) printf("CONVERT_OP\n");
       break;
     case DEREF_OP:
+      if(debug) printf("DEREF_OP\n");
       break; 
    case NEG_OP:
-      /* constant folding */
-      if(sub->tag==INTCONST)
-      {
-          /* Sets the values of the node */
-          eNode->tag = INTCONST;
-          eNode->u.intval = -sub->u.intval;
-          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      }
-      else if (sub->tag==REALCONST)
-      {
-          /* Sets the values of the node */
-          eNode->tag = REALCONST;
-          eNode->u.realval = -sub->u.realval;
-          eNode->type = ty_build_basic(TYDOUBLE);
-      }
+      if(debug) printf("NEG_OP\n");
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
       {
@@ -1190,23 +1183,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       }
       break;
     case ORD_OP:
-      /* char folding */
-      if(sub->tag==STRCONST)
-      {
-        /*If the string is length one*/
-        if (strlen(sub->u.strval)==1)
-        {
-          /* Sets the values of the node */
-          eNode->tag = INTCONST;
-          eNode->u.intval = sub->u.strval[0];
-          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-        }
-        else
-        {
-          error("Illegal conversion");
-          return make_error_expr();
-        }
-      }
+      if(debug) printf("ORD_OP\n");
       /*Type check, error if fails*/
       else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
       {
@@ -1218,6 +1195,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       break;
 
     case CHR_OP:
+      if(debug) printf("CHR_OP\n");
       /*Type check*/
       if(subTag != TYSIGNEDLONGINT)
       {
@@ -1228,97 +1206,62 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
       break;
     case UN_SUCC_OP:
+      if(debug) printf("UN_SUCC_OP\n");
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
         error("Nonordinal type argument to Succ or Pred");
         return make_error_expr();
-      }
-      /*Else, check if constant folding can be done*/
-      else
-      {
-        /*Check subexpression type*/
-        if(sub->tag == INTCONST)
-          eNode = make_intconst_expr(sub->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
-        else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
-        {
-          /*Makes the string constant*/
-          char * str = malloc(sizeof(char));
-          *str = sub->u.strval[0]++;
-          eNode = make_strconst_expr(str);
-        }
       }
       break;
 
     case UN_PRED_OP:
+      if(debug) printf("UN_PRED_OP\n");
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
         error("Nonordinal type argument to Succ or Pred");
         return make_error_expr();
       }
-      /*Else, check if constant folding can be done*/
-      else
-      {
-        /*Check subexpression type*/
-        if(sub->tag == INTCONST)
-          eNode = make_intconst_expr(sub->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
-        else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
-        {
-          /*Makes the string constant*/
-          char * str = malloc(sizeof(char));
-          *str = sub->u.strval[0]--;
-          eNode = make_strconst_expr(str);
-        }
-      }
       break;
 
     case UN_EOF_OP:
+      if(debug) printf("UN_EOF_OP\n");
       break; 
 
     case UN_EOLN_OP:
+      if(debug) printf("UN_EOLN_OP\n");
       break; 
 
     case INDIR_OP:
+      if (debug) printf("INDIR_OP\n");
       eNode->type = ty_query_ptr(sub->type, &id, &next);
-      if (debug) 
-	printf("Setting type for INDIR node\n");
       break; 
 
     case UPLUS_OP:
+      if(debug) printf("UPLUS_OP\n");
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
       {
 	error("Illegal type argument to unary plus");
 	return make_error_expr();
       }
-      /* constant folding */
-      else if(sub->tag==INTCONST)
-      {
-          /* Sets the values of the node */
-          eNode->tag = INTCONST;
-          eNode->u.intval = sub->u.intval;
-          eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      }
-      else if (sub->tag==REALCONST)
-      {
-          /* Sets the values of the node */
-          eNode->tag = REALCONST;
-          eNode->u.realval = sub->u.realval;
-          eNode->type = ty_build_basic(TYDOUBLE);
-      }
       break;
 
     case NEW_OP:
+      if(debug) printf("NEW_OP\n");
       break; 
 
     case DISPOSE_OP:
+      if(debug) printf("DISPOSE_OP\n");
       break;
 
     case ADDRESS_OP:
+      if(debug) printf("ADDRESS_OP\n");
       break;
 
     case SET_RETURN_OP:
+      if(debug) printf("SET_RETURN_OP\n");
       break;
   }
 
@@ -2206,6 +2149,7 @@ EXPR cFoldUnop(EXPR eNode)
       }
       break;
     case CHR_OP:
+      /* char folding */
       if(sub->tag==INTCONST && ty_query(sub->type) == TYSIGNEDLONGINT)
       {
 	/* Sets the values of the node */
@@ -2213,47 +2157,31 @@ EXPR cFoldUnop(EXPR eNode)
       }
       break;
     case UN_SUCC_OP:
-      /*Type check, error if fails*/
-      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      /* constant folding */
+      if(sub->tag == INTCONST)
       {
+      	eNode = make_intconst_expr(sub->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
       }
-      /*Else, check if constant folding can be done*/
-      else
+      else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
       {
-        /*Check subexpression type*/
-        if(sub->tag == INTCONST)
-	{
-          eNode = make_intconst_expr(sub->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
-	}
-        else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
-        {
-          /*Makes the string constant*/
-          char * str = malloc(sizeof(char));
-          *str = sub->u.strval[0]++;
-          eNode = make_strconst_expr(str);
-        }
+        /*Makes the string constant*/
+        char * str = malloc(sizeof(char));
+        *str = sub->u.strval[0]++;
+        eNode = make_strconst_expr(str);
       }
       break;
     case UN_PRED_OP:
-      /*Type check, error if fails*/
-      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
+      /* constant folding */
+      if(sub->tag == INTCONST)
       {
+        eNode = make_intconst_expr(sub->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
       }
-      /*Else, check if constant folding can be done*/
-      else
+      else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
       {
-        /*Check subexpression type*/
-        if(sub->tag == INTCONST)
-	{
-          eNode = make_intconst_expr(sub->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
-	}
-        else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
-        {
-          /*Makes the string constant*/
-          char * str = malloc(sizeof(char));
-          *str = sub->u.strval[0]--;
-          eNode = make_strconst_expr(str);
-        }
+        /*Makes the string constant*/
+        char * str = malloc(sizeof(char));
+        *str = sub->u.strval[0]--;
+        eNode = make_strconst_expr(str);
       }
       break;
     case UN_EOF_OP:
@@ -2263,12 +2191,8 @@ EXPR cFoldUnop(EXPR eNode)
     case INDIR_OP:
       break; 
     case UPLUS_OP:
-      /*Type check, error if fails*/
-      if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
-      {
-      }
       /* constant folding */
-      else if(sub->tag==INTCONST)
+      if(sub->tag==INTCONST)
       {
           /* Sets the values of the node */
           eNode->tag = INTCONST;
