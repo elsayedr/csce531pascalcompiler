@@ -3,6 +3,7 @@
 #include "backend.h"
 #include "types.h"
 #include <stdio.h>
+#include "string.h"
 
 /* Function that outputs the necessary code for a global declaration */
 void declareVariable(ST_ID id, TYPE type)
@@ -347,6 +348,8 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 	b_convert(TYSUBRANGE, ty_query(baseT));
       }
       /*Else*/
+      else if(tag == TYPTR)
+      {}
       else
       {
 	/*Converts float to double*/
@@ -751,8 +754,14 @@ void encode_expr(EXPR expr)
     /*String constant case*/
     case STRCONST:
       if (debug) printf("STRCONST\n");
+      if(strlen(expr->u.strval) == 1)
+      {
+	b_push_const_int(expr->u.strval[0]);
+	b_convert(TYSIGNEDLONGINT, TYUNSIGNEDCHAR);
+      }
       /*Pushes the string constant value onto the stack*/
-      b_push_const_string(expr->u.strval);
+      else
+	b_push_const_string(expr->u.strval);
       break;
     /*Global identifier case*/
     case GID:
