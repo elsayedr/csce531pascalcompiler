@@ -2196,8 +2196,6 @@ EXPR cFoldUnop(EXPR eNode)
           eNode->u.intval = sub->u.strval[0];
           eNode->type = ty_build_basic(TYSIGNEDLONGINT);
         }
-	/*Sets the type*/
-	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       }
       else if(sub->tag==INTCONST)
       {
