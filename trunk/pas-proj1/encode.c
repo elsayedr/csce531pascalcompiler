@@ -581,8 +581,8 @@ void encodeBinop(EXPR_BINOP op, EXPR exp)
       /* Compare typetags, convert if not equal */
       if(lTag != rTag)
       {
-      	b_convert(rTag, lTag);
-	if (debug) printf("Converted right arg's tag to left arg's tag");
+      	if (debug) printf("Converting right arg's tag to left arg's tag");
+	b_convert(rTag, lTag);
       }
      
       /*Assigns, then pops*/
