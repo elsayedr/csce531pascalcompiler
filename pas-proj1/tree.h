@@ -155,6 +155,8 @@ void expr_free(EXPR expr);
 void expr_list_free(EXPR_LIST list);
 void id_list_free(ID_LIST list);
 char * get_global_func_name(ST_ID id);
+EXPR cFoldUnop(EXPR eNode);
+EXPR cFoldBinop(EXPR eNode);
 
 #endif
 
