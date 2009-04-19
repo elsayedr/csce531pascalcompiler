@@ -691,6 +691,8 @@ void encodeFCall(EXPR func, EXPR_LIST args)
       /*If chars, promote to longs, load arg*/
       if(tag == TYSIGNEDCHAR || tag == TYUNSIGNEDCHAR)
       {
+        if (debug) printf("Converting signed or unsigned char to signed long int");
+
 	/*Convert, load arg*/
 	b_convert(tag, TYSIGNEDLONGINT);
 	b_load_arg(TYSIGNEDLONGINT);
@@ -698,6 +700,8 @@ void encodeFCall(EXPR func, EXPR_LIST args)
       /*If float, promote to double, load arg*/
       else if(tag == TYFLOAT)
       {
+	if (debug) printf("Converting float to double");
+
 	/*Convert, load arg*/
 	b_convert(tag, TYDOUBLE);
 	b_load_arg(TYDOUBLE);
