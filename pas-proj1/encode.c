@@ -710,33 +710,38 @@ void encode_expr(EXPR expr)
 	return;
   }
 
-  if (debug) printf("Encoding expression tag: %d\n",expr->tag);
+  if (debug) printf("Encoding expression tag: ");
 
   /*Switch based on the tag of the expression*/
   switch(expr->tag)
   {
     /*Intconst case*/
     case INTCONST:
+      if (debug) printf("INTCONST\n");
       /*Pushes the constant integer value on the stack*/
       b_push_const_int(expr->u.intval);
       break;
     /*Real constant case*/
     case REALCONST:
+      if (debug) printf("REALCONST\n");
       /*Pushes the double constant value onto the stack*/
       b_push_const_double(expr->u.realval);
       break;
     /*String constant case*/
     case STRCONST:
+      if (debug) printf("STRCONST\n");
       /*Pushes the string constant value onto the stack*/
       b_push_const_string(expr->u.strval);
       break;
     /*Global identifier case*/
     case GID:
+      if (debug) printf("GID\n");
       /*Pushes the address of the identifier onto the stack, dereferences*/
       b_push_ext_addr(st_get_id_str(expr->u.gid));
       break;
     /*Local varible case*/
     case LVAR:
+      if (debug) printf("LVAR\n");
       /*Pushes the address of the current frame pointer*/
       b_push_loc_addr(0);
 
@@ -762,29 +767,35 @@ void encode_expr(EXPR expr)
       break;
     /*Local function case*/
     case LFUN:
+      if (debug) printf("LFUN\n");
       break;
     /*Null operator case*/
     case NULLOP:
+      if (debug) printf("NULLOP\n");
       /*Nil operation, pushes zero onto the stack*/
       b_push_const_int(0);
       break;
     /*Unary operator case*/
     case UNOP:
+      if (debug) printf("UNOP\n");
       /*Calls helper function*/
       encodeUnop(expr->u.unop.op, expr);
       break;
     /*Binary operator case*/
     case BINOP:
+      if (debug) printf("BINOP\n");
       /*Calls helper function*/
       encodeBinop(expr->u.binop.op, expr);
       break;
     /*Function call case*/
     case FCALL:
+      if (debug) printf("FCALL\n");
       /*Calls helper function*/
       encodeFCall(expr->u.fcall.function, expr->u.fcall.args);
       break;
     /*Error case*/
     case ERROR:
+      if (debug) printf("ERROR\n");
       break;
   }
 }
