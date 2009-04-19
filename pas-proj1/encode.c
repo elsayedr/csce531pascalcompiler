@@ -470,100 +470,102 @@ void encodeBinop(EXPR_BINOP op, EXPR exp)
   encode_expr(exp->u.binop.left);
   encode_expr(exp->u.binop.right);
 
+  if (debug) printf("Encoding binary operator: ");
+
   /*Switch based on the operator*/
   switch(op)
   {
     /*Addition*/
     case ADD_OP:
-      if (debug) printf("Encoding binary operator: ADD_OP\n");
+      if (debug) printf("ADD_OP\n");
       /*Addition*/
       b_arith_rel_op(B_ADD, ty_query(exp->type));
       break;
     /*Subtraction*/
     case SUB_OP:
-      if (debug) printf("Encoding binary operator: SUB_OP\n");
+      if (debug) printf("SUB_OP\n");
       /*Subtraction*/
       b_arith_rel_op(B_SUB, ty_query(exp->type));
       break;
     /*Multiplication*/
     case MUL_OP:
-      if (debug) printf("Encoding binary operator: MUL_OP\n");
+      if (debug) printf("MUL_OP\n");
       /*Multiplication*/
       b_arith_rel_op(B_MULT, ty_query(exp->type));
       break;
     /*Division*/
     case DIV_OP:
-      if (debug) printf("Encoding binary operator: DIV_OP\n");
+      if (debug) printf("DIV_OP\n");
       /*Division*/
       b_arith_rel_op(B_DIV, ty_query(exp->type));
       break;
     /*Modulus*/
     case MOD_OP:
-      if (debug) printf("Encoding binary operator: MOD_OP\n");
+      if (debug) printf("MOD_OP\n");
       /*Modulus*/
       b_arith_rel_op(B_MOD, ty_query(exp->type));
       break;
     /*Real division*/
     case REALDIV_OP:
-      if (debug) printf("Encoding binary operator: REALDIV_OP\n");
+      if (debug) printf("REALDIV_OP\n");
       /*Real division*/
       b_arith_rel_op(B_DIV, ty_query(exp->type));
       break;
     /*Is equal*/
     case EQ_OP:
-      if (debug) printf("Encoding binary operator: EQ_OP\n");
+      if (debug) printf("EQ_OP\n");
       /*Tests equality*/
       b_arith_rel_op(B_EQ, ty_query(exp->type));
       break;
     /*Is less than*/
     case LESS_OP:
-    if (debug) printf("Encoding binary operator: LESS_OP\n");
+    if (debug) printf("LESS_OP\n");
       /*Less than*/
       b_arith_rel_op(B_LT, ty_query(exp->type));
       break;
     /*Is less than or equal*/
     case LE_OP:
-      if (debug) printf("Encoding binary operator: LE_OP\n");
+      if (debug) printf("LE_OP\n");
       /*Less than or equal to*/
       b_arith_rel_op(B_LE, ty_query(exp->type));
       break;
     /*Not equal*/
     case NE_OP:
-      if (debug) printf("Encoding binary operator: NE_OP\n");
+      if (debug) printf("NE_OP\n");
       /*Not equal*/
       b_arith_rel_op(B_NE, ty_query(exp->type));
     break;
     /*Greater than or equal*/
     case GE_OP:
-      if (debug) printf("Encoding binary operator: GE_OP\n"); 
+      if (debug) printf("GE_OP\n"); 
       /*Greater than or equal*/
       b_arith_rel_op(B_GE, ty_query(exp->type));
     break;
     /*Greater than*/
     case GREATER_OP:
-      if (debug) printf("Encoding binary operator: GREATER_OP\n");
+      if (debug) printf("GREATER_OP\n");
       /*Greater than*/
       b_arith_rel_op(B_GT, ty_query(exp->type));
     break;
     /*Symbdiff*/
     case SYMDIFF_OP:
-      if (debug) printf("Encoding binary operator: SYMDIFF_OP\n");
+      if (debug) printf("SYMDIFF_OP\n");
     break;
     /*Or*/
     case OR_OP:
-      if (debug) printf("Encoding binary operator: OR_OP\n");
+      if (debug) printf("OR_OP\n");
     break;
     /*XOR*/
     case XOR_OP:
-      if (debug) printf("Encoding binary operator: XOR_OP\n");
+      if (debug) printf("XOR_OP\n");
     break;
     /*And*/
     case AND_OP:
-      if (debug) printf("Encoding binary operator: AND_OP\n");
+      if (debug) printf("AND_OP\n");
     break;
     /*Assignment*/
     case ASSIGN_OP:
-      if (debug) printf("Encoding binary operator: ASSIGN_OP\n");
+      if (debug) printf("ASSIGN_OP\n");
       
       /*Checks tag to see if local variable*/
       if(exp->u.binop.left->tag == LVAR)
@@ -580,6 +582,7 @@ void encodeBinop(EXPR_BINOP op, EXPR exp)
       if(lTag != rTag)
       {
       	b_convert(rTag, lTag);
+	printf("Converted right arg's tag to left arg's tag");
       }
      
       /*Assigns, then pops*/
