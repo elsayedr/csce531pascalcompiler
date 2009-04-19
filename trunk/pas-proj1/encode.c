@@ -432,7 +432,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       b_push_const_int(getSkipSize(ty_query_ptr(arg->u.unop.operand->type, &s1, &t1)));
 
       /*Loads an argument*/
-      b_load_arg(ty_query(ty_query_ptr(arg->u.unop.operand->type, &s1, &t1)));
+      b_load_arg(TYSIGNEDINT);
       
       /*Calls the external C function malloc*/
       b_funcall_by_name("malloc", TYPTR);
