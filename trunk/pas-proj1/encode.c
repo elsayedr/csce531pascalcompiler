@@ -744,6 +744,8 @@ void encode_expr(EXPR expr)
       if (debug) printf("INTCONST\n");
       /*Pushes the constant integer value on the stack*/
       b_push_const_int(expr->u.intval);
+      if(ty_query(expr->type) == TYUNSIGNEDCHAR)
+	b_convert(TYSIGNEDLONGINT, TYUNSIGNEDCHAR);
       break;
     /*Real constant case*/
     case REALCONST:
