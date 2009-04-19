@@ -313,7 +313,7 @@ int getFormalParameterOffset(TYPETAG tag)
 void encodeUnop(EXPR_UNOP op, EXPR arg)
 {
   /*Debugging*/
-  if (debug) printf("Encoding unary operator: %d\n",op);
+  if (debug) printf("Entering encodeUnop()\n");
 
   /*Recursive call on the argument to encode_Expr*/
   encode_expr(arg->u.unop.operand);
@@ -327,12 +327,15 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
   /*Gets the tag of the argument*/
   tag = ty_query(arg->u.unop.operand->type);
   rTag = ty_query(arg->type);
+
+  if(debug) printf("Encoding unary operator: ");
   
   /*Switch based on the operator*/
   switch(op)
   {
     /*Convert operator*/
     case CONVERT_OP:
+      if (debug) printf("CONVERT_OP\n");
       /*Checks the type of the argument*/
       if(tag == TYSUBRANGE)
       {
@@ -352,14 +355,17 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*Unary plus case*/
     case UPLUS_OP:
+      if (debug) printf("UPLUS_OP\n");
       break;
     /*Unary minus*/
     case NEG_OP:
+      if (debug) printf("NEG_OP\n");
       /*Calls the backend routine*/
       b_negate(tag);
       break;
     /*Ord operator*/
     case ORD_OP:
+      if (debug) printf("ORD_OP\n");
       /*If tag is unsigned char, conver to signed long int*/
       if(tag == TYUNSIGNEDCHAR)
       {
@@ -368,12 +374,14 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*Chr operator*/
     case CHR_OP:
+      if (debug) printf("CHR_OP\n");
       /*If tag is signed long int, convert to unsigned char*/
       if(tag == TYSIGNEDLONGINT)
 	b_convert(tag, TYUNSIGNEDCHAR);
       break;
     /*Succ operator*/
     case UN_SUCC_OP:
+      if (debug) printf("UN_SUCC_OP\n");
       /*If tag is not signed long int, convert*/
       if(tag != TYSIGNEDLONGINT)
       {
@@ -391,6 +399,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*Pred operator*/
     case UN_PRED_OP:
+      if (debug) printf("UN_PRED_OP\n");
       /*If tag is not signed long int, convert*/
       if(tag != TYSIGNEDLONGINT)
       {
@@ -408,9 +417,11 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*Indirection operator*/
     case INDIR_OP:
+      if (debug) printf("INDIR_OP\n");
       break;
     /*New operator*/
     case NEW_OP:
+      if (debug) printf("NEW_OP\n");
       /*Allocates size for the argument list*/
       b_alloc_arglist(4);
 
@@ -429,6 +440,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*Dispose operator*/
     case DISPOSE_OP:
+      if (debug) printf("DISPOSE_OP\n");
       /*Allocates size for the argument list*/
       b_alloc_arglist(4);
 
@@ -437,12 +449,14 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
       break;
     /*Deref opeator*/
     case DEREF_OP:
+      if (debug) printf("DEREF_OP\n");
       b_deref(tag);
       break;
-  /* set return op */
-  case SET_RETURN_OP:
-   b_set_return(ty_query(arg->u.unop.operand->type));
-   break;
+    /* set return op */
+    case SET_RETURN_OP:
+      if (debug) printf("SET_RETURN_OP\n");
+      b_set_return(ty_query(arg->u.unop.operand->type));
+      break;
   }
 
 }
@@ -450,7 +464,7 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
 /*Helper function to encode a binary operator node*/
 void encodeBinop(EXPR_BINOP op, EXPR exp)
 {
-  if (debug) printf("Entering encodeBinop\n");
+  if (debug) printf("Entering encodeBinop()\n");
 
   /*Recursive calls on the arguments to encode_Expr*/
   encode_expr(exp->u.binop.left);
