@@ -2128,9 +2128,10 @@ EXPR cFoldUnop(EXPR eNode)
       }
       break;
     case ORD_OP:
+      
       /* char folding */
       if(sub->tag==STRCONST)
-      {
+      {  
         /*If the string is length one*/
         if (strlen(sub->u.strval)==1)
         {
@@ -2141,47 +2142,72 @@ EXPR cFoldUnop(EXPR eNode)
         }
       }
       else if(sub->tag==INTCONST)
-      {
+      {  
 	/* Sets the values of the node */
 	eNode->tag = INTCONST;
 	eNode->u.intval = sub->u.intval;
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      }
+      } 
       break;
     case CHR_OP:
-      /* char folding */
       if(sub->tag==INTCONST && ty_query(sub->type) == TYSIGNEDLONGINT)
       {
 	/* Sets the values of the node */
-	eNode = make_intconst_expr(sub->u.intval, ty_build_basic(TYUNSIGNEDCHAR));
+	eNode->tag = INTCONST;
+	eNode->u.intval = sub->u.intval;
+	eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
       }
       break;
     case UN_SUCC_OP:
-      /* constant folding */
-      if(sub->tag == INTCONST)
+      /*Type check, error if fails*/
+      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
-      	eNode = make_intconst_expr(sub->u.intval++, ty_build_basic(TYSIGNEDLONGINT));
       }
-      else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
+      /*Else, check if constant folding can be done*/
+      else
       {
-        /*Makes the string constant*/
-        char * str = malloc(sizeof(char));
-        *str = sub->u.strval[0]++;
-        eNode = make_strconst_expr(str);
+        /*Check subexpression type*/
+        if(sub->tag == INTCONST)
+	{
+          eNode->tag = INTCONST;
+	  eNode->type = sub->type;
+	  sub->u.intval++;
+	  eNode->u.intval = sub->u.intval;
+	}
+        else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
+        {
+          /*Makes the string constant*/
+          char * str = malloc(sizeof(char));
+          sub->u.strval[0]++;
+	  str = sub->u.strval;
+          eNode = make_strconst_expr(str);
+        }
       }
       break;
     case UN_PRED_OP:
-      /* constant folding */
-      if(sub->tag == INTCONST)
+      /*Type check, error if fails*/
+      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
-        eNode = make_intconst_expr(sub->u.intval--, ty_build_basic(TYSIGNEDLONGINT));
       }
-      else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
+      /*Else, check if constant folding can be done*/
+      else
       {
-        /*Makes the string constant*/
-        char * str = malloc(sizeof(char));
-        *str = sub->u.strval[0]--;
-        eNode = make_strconst_expr(str);
+        /*Check subexpression type*/
+        if(sub->tag == INTCONST)
+	{
+          eNode->tag = INTCONST;
+	  eNode->type = sub->type;
+	  sub->u.intval--;
+	  eNode->u.intval = sub->u.intval;
+	}
+        else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
+        {
+          /*Makes the string constant*/
+          char * str = malloc(sizeof(char));
+          sub->u.strval[0]++;
+	  str = sub->u.strval;
+          eNode = make_strconst_expr(str);
+        }
       }
       break;
     case UN_EOF_OP:
@@ -2191,8 +2217,12 @@ EXPR cFoldUnop(EXPR eNode)
     case INDIR_OP:
       break; 
     case UPLUS_OP:
+      /*Type check, error if fails*/
+      if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
+      {
+      }
       /* constant folding */
-      if(sub->tag==INTCONST)
+      else if(sub->tag==INTCONST)
       {
           /* Sets the values of the node */
           eNode->tag = INTCONST;
