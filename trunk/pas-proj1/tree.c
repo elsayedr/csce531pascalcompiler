@@ -1093,7 +1093,10 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 
   /*If sub is error, return it*/
   if(sub->tag == ERROR)
+  {
+    if (debug) printf("Exiting make_un_expr()\n");
     return sub;
+  }
 
   /* Creates the node and allocates memory */
   EXPR eNode;
@@ -1114,11 +1117,17 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   eNode = cFoldUnop(eNode);
 
   if(eNode->tag != UNOP)
+  {
+    if (debug) printf("Exiting make_un_expr()\n");
     return eNode;
+  }
 
   /* if deref prevent loop */
   if(op==DEREF_OP) 
+  {
+    if (debug) printf("Exiting make_un_expr()\n");
     return eNode; 
+  }
 
   if(op == ADDRESS_OP || op == NEW_OP)
   {
@@ -1126,6 +1135,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
     {
       /*Error set node to error expression*/
       error("L value expected for unary operator");
+      if (debug) printf("Exiting make_un_expr()\n");
       return make_error_expr();
     }
   }
@@ -1179,6 +1189,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
       {
         error("Illegal type argument to unary minus");
+        if (debug) printf("Exiting make_un_expr()\n");
         return make_error_expr();
       }
       break;
@@ -1188,6 +1199,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       else if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR && subTag != TYSIGNEDCHAR)
       {
         error("Illegal type argument to Ord");
+        if (debug) printf("Exiting make_un_expr()\n");
         return make_error_expr();
       }
       /*Sets the type*/
@@ -1200,6 +1212,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       if(subTag != TYSIGNEDLONGINT)
       {
         error("Illegal type argument to Chr");
+        if (debug) printf("Exiting make_un_expr()\n");
         return make_error_expr();
       }
       /*Set type*/
@@ -1211,6 +1224,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
         error("Nonordinal type argument to Succ or Pred");
+        if (debug) printf("Exiting make_un_expr()\n");
         return make_error_expr();
       }
       break;
@@ -1221,6 +1235,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
       {
         error("Nonordinal type argument to Succ or Pred");
+        if (debug) printf("Exiting make_un_expr()\n");
         return make_error_expr();
       }
       break;
@@ -1244,6 +1259,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
       {
 	error("Illegal type argument to unary plus");
+        if (debug) printf("Exiting make_un_expr()\n");
 	return make_error_expr();
       }
       break;
@@ -1266,6 +1282,7 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
   }
 
   /*Returns the node*/
+  if (debug) printf("Exiting make_un_expr()\n");
   return eNode;
 
 } /* End make_un_expr */
@@ -1273,9 +1290,13 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
 /* Makes a binary operator expression node */
 EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)  
 {
+  if (debug) printf("Entering make_bin_expr()\n");
   /*If error, return*/
   if(left->tag == ERROR || right->tag == ERROR)
+  {
+    if (debug) printf("Exiting make_bin_expr()\n");
     return make_error_expr();
+  }
 
   /* Creates the node and allocates memory */
   EXPR eNode;
@@ -1293,7 +1314,10 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 
   /*If folded, return*/
   if(eNode->tag != BINOP)
+  {
+    if (debug) printf("Exiting make_bin_expr()\n");  
     return eNode;
+  }
 
   /*Needed for querying subrange*/
   TYPE next;
@@ -1326,15 +1350,19 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	      eNode->u.binop.right = makeConvertNode(right, next);
 	    }
       }
-      else if (subTagR==TYVOID) {
+      else if (subTagR==TYVOID) 
+      {
         error("Cannot convert between nondata types");  
+        if (debug) printf("Exiting make_bin_expr()\n");
 	return make_error_expr();
       }
+    if (debug) printf("Exiting make_bin_expr()\n");    
     return checkAssign(eNode);
     }
     else 
     {
       error("Assignment requires l-value on the left");
+      if (debug) printf("Exiting make_bin_expr()\n");
       return make_error_expr();	
     }
   }  
@@ -1401,6 +1429,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
 	error("Nonnumerical type argument(s) to arithmetic operation");
+        if (debug) printf("Exiting make_bin_expr()\n");
 	return make_error_expr();
       }
       /*Else set node type to higher type*/
@@ -1416,6 +1445,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
 	error("Nonnumerical type argument(s) to arithmetic operation");
+        if (debug) printf("Exiting make_bin_expr()\n");
 	return make_error_expr();
       }
       /*Else set node type to higher type*/
@@ -1431,6 +1461,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
 	error("Nonnumerical type argument(s) to arithmetic operation");
+        if (debug) printf("Exiting make_bin_expr()\n");
 	return make_error_expr();
       }
       /*Else set node type to higher type*/
@@ -1446,6 +1477,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
 	error("Nonnumerical type argument(s) to arithmetic operation");
+        if (debug) printf("Exiting make_bin_expr()\n");
 	return make_error_expr();
       }
       /*Else set node type to higher type*/
@@ -1461,6 +1493,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if(subTagR != TYSIGNEDLONGINT || subTagL != TYSIGNEDLONGINT)
       {
 	error("Noninteger type argument(s) to integer arithmetic operation");
+        if (debug) printf("Exiting make_bin_expr()\n");
 	return make_error_expr();
       }
       /*Type set*/
@@ -1471,6 +1504,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if(subTagR != TYSIGNEDLONGINT || subTagL != TYSIGNEDLONGINT)
       {
 	error("Noninteger type argument(s) to integer arithmetic operation");
+        if (debug) printf("Exiting make_bin_expr()\n");
 	return make_error_expr();
       }
       /*Type set*/
@@ -1481,6 +1515,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
@@ -1488,6 +1523,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	{
 	  error("Incompatible type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
 	}
       }
@@ -1505,6 +1541,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
@@ -1512,6 +1549,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	{
 	  error("Incompatible type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
 	}
       }
@@ -1529,6 +1567,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
@@ -1536,6 +1575,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	{
 	  error("Incompatible type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
 	}
       }
@@ -1553,6 +1593,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
@@ -1560,6 +1601,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	{
 	  error("Incompatible type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
 	}
       }
@@ -1577,6 +1619,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
@@ -1584,6 +1627,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	{
 	  error("Incompatible type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
 	}
       }
@@ -1601,6 +1645,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE && subTagR != TYUNSIGNEDCHAR && subTagR != TYSIGNEDCHAR) && (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE && subTagL != TYUNSIGNEDCHAR && subTagL != TYSIGNEDCHAR))
       {
 	  error("Illegal type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
       }
       else if(((subTagR != TYSIGNEDLONGINT || subTagR != TYFLOAT || subTagR != TYDOUBLE || subTagR != TYUNSIGNEDCHAR || subTagR != TYSIGNEDCHAR) || (subTagL != TYSIGNEDLONGINT || subTagL != TYFLOAT || subTagL != TYDOUBLE || subTagL != TYUNSIGNEDCHAR || subTagL != TYSIGNEDCHAR)))
@@ -1608,6 +1653,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	if(subTagR != subTagL)
 	{
 	  error("Incompatible type arguments to comparison operator");
+          if (debug) printf("Exiting make_bin_expr()\n");
 	  return make_error_expr();
 	}
       }
@@ -1625,6 +1671,7 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
   }
 
   /*Returns the node*/
+  if (debug) printf("Exiting make_bin_expr()\n");
   return eNode;
 
 }/* End make_bin_expr */
@@ -2093,6 +2140,7 @@ EXPR checkAssign(EXPR assign)
 /*Function that attempts to constant fold a unop expression*/
 EXPR cFoldUnop(EXPR eNode)
 {
+  if (debug) printf("Entering cFoldUnop()\n");
 
   /*Gets the operation*/
   EXPR_UNOP op = eNode->u.unop.op;
@@ -2103,14 +2151,19 @@ EXPR cFoldUnop(EXPR eNode)
   /*Queries the type of the subexpression, again*/
   TYPETAG subTag = ty_query(sub->type);
 
+  if (debug) printf("Folding for ");
+
   /*Switch based on the operation*/
   switch(op)
   {
     case CONVERT_OP:
+      if (debug) printf("CONVERT_OP: nothing folded\n");
       break;
     case DEREF_OP:
+      if (debug) printf("DEREF_OP: nothing folded\n");
       break; 
    case NEG_OP:
+      if (debug) printf("NEG_OP: ");
       /* constant folding */
       if(sub->tag==INTCONST)
       {
@@ -2118,6 +2171,7 @@ EXPR cFoldUnop(EXPR eNode)
           eNode->tag = INTCONST;
           eNode->u.intval = -sub->u.intval;
           eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+          if (debug) printf("negated INTCONST\n");
       }
       else if (sub->tag==REALCONST)
       {
@@ -2125,11 +2179,14 @@ EXPR cFoldUnop(EXPR eNode)
           eNode->tag = REALCONST;
           eNode->u.realval = -sub->u.realval;
           eNode->type = ty_build_basic(TYDOUBLE);
+          if (debug) printf("negated REALCONST\n");
       }
+      else
+	  if (debug) printf("nothing folded\n");
       break;
     case ORD_OP:
-      
-      /* char folding */
+      if (debug) printf("ORD_OP: ");
+      /* constant folding */
       if(sub->tag==STRCONST)
       {  
         /*If the string is length one*/
@@ -2139,7 +2196,10 @@ EXPR cFoldUnop(EXPR eNode)
           eNode->tag = INTCONST;
           eNode->u.intval = sub->u.strval[0];
           eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+          if (debug) printf("STRCONST with length 1 to signed long int INTCONST\n");
         }
+	else
+	  if (debug) printf("nothing folded\n");
       }
       else if(sub->tag==INTCONST)
       {  
@@ -2147,24 +2207,30 @@ EXPR cFoldUnop(EXPR eNode)
 	eNode->tag = INTCONST;
 	eNode->u.intval = sub->u.intval;
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      } 
+        if (debug) printf("UNOP changed to signed long int INTCONST\n");
+      }
+      else
+        if (debug) printf("nothing folded\n"); 
       break;
     case CHR_OP:
+      if (debug) printf("CHR_OP: ");
+      /*constant folding*/
       if(sub->tag==INTCONST && ty_query(sub->type) == TYSIGNEDLONGINT)
       {
 	/* Sets the values of the node */
 	eNode->tag = INTCONST;
 	eNode->u.intval = sub->u.intval;
 	eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
+        if (debug) printf("folded signed long int INTCONST to unsigned char\n");
       }
+      else
+	if (debug) printf("nothing folded\n");
       break;
     case UN_SUCC_OP:
+      if (debug) printf("UN_SUCC_OP: ");
       /*Type check, error if fails*/
-      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
-      {
-      }
-      /*Else, check if constant folding can be done*/
-      else
+      /*constant folding*/
+      if(subTag == TYSIGNEDLONGINT || subTag == TYUNSIGNEDCHAR)
       {
         /*Check subexpression type*/
         if(sub->tag == INTCONST)
@@ -2173,6 +2239,7 @@ EXPR cFoldUnop(EXPR eNode)
 	  eNode->type = sub->type;
 	  sub->u.intval++;
 	  eNode->u.intval = sub->u.intval;
+	  if (debug) printf("incremented INTCONST\n");
 	}
         else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
         {
@@ -2181,16 +2248,19 @@ EXPR cFoldUnop(EXPR eNode)
           sub->u.strval[0]++;
 	  str = sub->u.strval;
           eNode = make_strconst_expr(str);
+	  if (debug) printf("incremented STRCONST of length 1\n");
         }
+	else
+	  if (debug) printf("nothing folded\n");
       }
+      else
+        if (debug) printf("nothing folded\n");
       break;
     case UN_PRED_OP:
+      if (debug) printf("UN_PRED_OP: ");
       /*Type check, error if fails*/
-      if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
-      {
-      }
-      /*Else, check if constant folding can be done*/
-      else
+      /*constant folding*/
+      if(subTag == TYSIGNEDLONGINT || subTag == TYUNSIGNEDCHAR)
       {
         /*Check subexpression type*/
         if(sub->tag == INTCONST)
@@ -2199,6 +2269,7 @@ EXPR cFoldUnop(EXPR eNode)
 	  eNode->type = sub->type;
 	  sub->u.intval--;
 	  eNode->u.intval = sub->u.intval;
+          if (debug) printf("decremented INTCONST\n");
 	}
         else if(sub->tag == STRCONST && strlen(sub->u.strval) == 1)
         {
@@ -2207,53 +2278,73 @@ EXPR cFoldUnop(EXPR eNode)
           sub->u.strval[0]++;
 	  str = sub->u.strval;
           eNode = make_strconst_expr(str);
+          if (debug) printf("decremented STRCONST of length 1\n");
         }
+        else
+          if (debug) printf("nothing folded\n");
       }
+      else
+        if (debug) printf("nothing folded\n");
       break;
     case UN_EOF_OP:
+      if (debug) printf("UN_EOF_OP: nothing folded\n");
       break; 
     case UN_EOLN_OP:
+      if (debug) printf("UN_EOLN_OP: nothing folded\n");
       break; 
     case INDIR_OP:
+      if (debug) printf("INDIR_OP: nothing folded\n");
       break; 
     case UPLUS_OP:
+      if (debug) printf("UPLUS_OP: ");
       /*Type check, error if fails*/
-      if(subTag != TYSIGNEDLONGINT && subTag != TYFLOAT && subTag != TYDOUBLE)
-      {
-      }
       /* constant folding */
-      else if(sub->tag==INTCONST)
+      if(subTag == TYSIGNEDLONGINT || subTag == TYFLOAT || subTag == TYDOUBLE)
       {
+	if(sub->tag==INTCONST)
+        {
           /* Sets the values of the node */
           eNode->tag = INTCONST;
           eNode->u.intval = sub->u.intval;
           eNode->type = ty_build_basic(TYSIGNEDLONGINT);
-      }
-      else if (sub->tag==REALCONST)
-      {
+          if (debug) printf("UNOP changed to signed long int INTCONST\n");
+        }
+        else if (sub->tag==REALCONST)
+        {
           /* Sets the values of the node */
           eNode->tag = REALCONST;
           eNode->u.realval = sub->u.realval;
           eNode->type = ty_build_basic(TYDOUBLE);
+          if (debug) printf("UNOP changed to REALCONST\n");
+        }
+        if (debug) printf("nothing folded\n");
       }
+      else
+        if (debug) printf("nothing folded\n");
       break;
     case NEW_OP:
+      if (debug) printf("NEW_OP: nothing folded\n");
       break; 
     case DISPOSE_OP:
+      if (debug) printf("DISPOSE_OP: nothing folded\n");
       break;
     case ADDRESS_OP:
+      if (debug) printf("ADDRESS_OP: nothing folded\n");
       break;
     case SET_RETURN_OP:
+      if (debug) printf("SET_RETURN_OP: nothing folded\n");
       break;
   }
 
     /*Returns the node*/
+    if (debug) printf("Exiting cFoldUnop()\n");
     return eNode;
 }
 
 /*Function that attempts to constant fold a binop expression*/
 EXPR cFoldBinop(EXPR eNode)
 {
+  if (debug) printf("Entering cFoldBinop()\n");
   /*Gets the operation*/
   EXPR_BINOP op = eNode->u.binop.op;
 
@@ -2546,5 +2637,6 @@ EXPR cFoldBinop(EXPR eNode)
   }
 
   /*Returns the node*/
+  if (debug) printf("Exiting cFoldBinop()\n");
   return eNode;
 }
