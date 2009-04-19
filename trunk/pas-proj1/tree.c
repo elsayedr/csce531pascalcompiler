@@ -1089,6 +1089,10 @@ EXPR make_null_expr(EXPR_NULLOP op)
 /* Makes a unary operator expression node */
 EXPR make_un_expr(EXPR_UNOP op, EXPR sub)  
 {
+  /*If sub is error, return it*/
+  if(sub->tag == ERROR)
+    return sub;
+
   /* Creates the node and allocates memory */
   EXPR eNode;
   eNode = malloc(sizeof(EXPR_NODE));
@@ -1223,8 +1227,6 @@ EXPR make_un_expr(EXPR_UNOP op, EXPR sub)
       /*Set type*/
       eNode->type = ty_build_basic(TYUNSIGNEDCHAR);
       break;
-
-
     case UN_SUCC_OP:
       /*Type check, error if fails*/
       if(subTag != TYSIGNEDLONGINT && subTag != TYUNSIGNEDCHAR)
