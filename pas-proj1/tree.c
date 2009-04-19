@@ -2197,8 +2197,20 @@ EXPR cFoldUnop(EXPR eNode)
 	/*Sets the type*/
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       }
+      else if(sub->tag==INTCONST)
+      {
+	/* Sets the values of the node */
+	eNode->tag = INTCONST;
+	eNode->u.intval = sub->u.intval;
+	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
+      }
       break;
     case CHR_OP:
+      if(sub->tag==INTCONST && ty_query(sub->type) == TYSIGNEDLONGINT)
+      {
+	/* Sets the values of the node */
+	eNode = make_intconst_expr(sub->u.intval, ty_build_basic(TYUNSIGNEDCHAR));
+      }
       break;
     case UN_SUCC_OP:
       /*Type check, error if fails*/
