@@ -798,12 +798,19 @@ conditional_statement
   {};
 
 simple_if
-    : LEX_IF boolean_expression LEX_THEN statement
-  {};
+    : LEX_IF boolean_expression
+	{
+		char* startIf = ifInit($<y_expr>2);
+		$<y_string>$ = startIf;
+	} 
+	LEX_THEN statement
+  	{
+  		$<y_string>$=ifClose($<y_string>3);
+  	};
 
 if_statement
-    : simple_if LEX_ELSE statement
-  {}| simple_if %prec prec_if
+    : simple_if LEX_ELSE statement {elseClose($<y_string>1);}
+  | simple_if %prec prec_if
   {};
 
 case_statement
@@ -840,8 +847,21 @@ repeat_statement
   {};
 
 while_statement
-    : LEX_WHILE boolean_expression LEX_DO statement
-  {};
+    : LEX_WHILE boolean_expression LEX_DO 
+ {
+	char* startWhile;
+	startWhile = whileInit($<y_expr>2);
+	$<y_string>$ = startWhile;
+ }
+ {
+	char* endWhile;
+	endWhile = whileCond();
+	$<y_string>$ = endWhile;
+ }
+	statement
+ {					 					 
+	whileLoop($<y_string>4,$<y_string>5);
+ };
 
 for_statement
     : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO statement

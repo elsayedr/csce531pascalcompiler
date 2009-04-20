@@ -160,6 +160,19 @@ EXPR cFoldBinop(EXPR eNode);
 EXPR checkVariable(EXPR eNode, TYPE argType, TYPE paramType);
 EXPR promoteInt(EXPR eNode);
 
+/*Definitions for Part 3*/
+
+/*While Loop Definitions*/
+char* whileInit(EXPR eNode);
+char* whileCond();
+void whileLoop(char *start, char *end);
+
+/*If Statement Definitions*/
+char* ifInit(EXPR eNode);
+char* ifClose(char* ifend);
+void elseClose(char* elseend);
+
+
 #endif
 
 

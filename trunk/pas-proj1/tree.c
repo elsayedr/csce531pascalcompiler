@@ -2775,3 +2775,94 @@ EXPR checkVariable(EXPR eNode, TYPE argType, TYPE paramType)
   return eNode;
 
 }
+
+/*Purpose: Used for the initialization of a while loop
+  Params: EXPR eNode is the boolean expression defined in the while
+  Returns: the start label is return to be passed into whileLoop later	  
+*/
+char* whileInit(EXPR eNode)
+{
+	if(debug)
+		printf("Entered whileInit function");
+
+	/*Creates a unique labels for the start of the while*/ 
+	char* start = new_symbol();
+	
+	/*emits a code for the start label*/
+	b_label(start);
+
+	/*encodes the boolean expression passed as a parameter*/
+	encode_expr(eNode);	
+	return start;
+}
+/*Purpose:  Used to handle the ending segment of the while loop
+  Params:  none
+  Returns:  the ending label is returned to be passed into whileLoop later
+*/
+char* whileCond()
+{
+	/*Creates a unique labels for the end of the while*/
+	char* end = new_symbol();
+	/* When the condition is false it jumps to the end of the while loop*/
+	b_cond_jump(TYSIGNEDCHAR,B_ZERO,end);
+	return end;
+}
+/*Purpose:  Used to loop back to the beginning of the while
+  Params:  char* start start is the start label that corresponds to the beginning of the while, 
+           char* end is the end label that corresponds to the end of the while
+  Returns:  none
+*/
+void whileLoop(char* start, char *end)
+{
+	
+	if(debug)
+	{
+		printf("Entered whileLoop\n");
+		printf("start = %s\n",start);
+		printf("end = %s\n",end);
+	}
+	/*Jumps back to the beginning*/
+	b_jump(start);
+	/*Creates a unique label for the end of the while*/
+	b_label(end);
+}
+/*Purpose:  Starts the code for the if statement
+  Params:  EXPR eNode corresponds to the boolean statement
+  Returns:  the ending label to be used in ifClose
+*/
+char* ifInit(EXPR eNode)
+{
+	if(debug)
+		printf("Entered ifInit function");
+	/*encodes the boolean expression*/
+	encode_expr(eNode);
+	/*creates a new symbol for the end of the if block*/
+	char* ifend = new_symbol();
+	/*when thte if statement is false it jumps past that block of code*/
+	b_cond_jump(TYSIGNEDCHAR,B_ZERO,ifend);
+	return ifend;	
+}
+/*Purpose:  finishes up an if statement
+  Params:  char* ifend is the label that corresponds to the end of the if in memory
+  Returns:  the ending label of the else that may be used if elseClose is called
+*/
+char* ifClose(char *ifend)
+{
+	if(debug)
+		printf("Entered ifClose function");
+	/*emits the code for the end label*/
+	char* elseend = new_symbol();
+	/*jumps to the end of the else if the if block was true*/
+	b_jump(elseend);
+	/*creates the label for the ending of the if*/
+	b_label(ifend);
+	return elseend;
+}
+/*Purpose:  Starts the code for the else statement
+  Params:  char* elseend is the label that corresponds to the end of the else in memory
+  Returns:  nothing
+*/
+void elseClose(char* elseend)
+{
+	b_label(elseend);
+}
