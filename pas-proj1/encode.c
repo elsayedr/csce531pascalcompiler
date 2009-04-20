@@ -661,59 +661,62 @@ void encodeFCall(EXPR func, EXPR_LIST args)
     /*Calls encode_expr to encode the argument*/
     encode_expr(copy2->expr);
 
-    /*If the paramater is a reference parameter*/
-    if(fParams->is_ref == TRUE)
+    if(fParams != NULL)
     {
-      /*If not an lval, bug*/
-      if(is_lval(copy2->expr) == FALSE)
-	bug("Function argument expected to be L-val");
-      /*Else, check types, load pointer*/
-      else
+      /*If the paramater is a reference parameter*/
+      if(fParams->is_ref == TRUE)
       {
-	/*If types are not compatible, error*/
-	if(ty_test_equality(copy2->expr->type, fParams->type) == FALSE)
+	/*If not an lval, bug*/
+	if(is_lval(copy2->expr) == FALSE)
+	  bug("Function argument expected to be L-val");
+	/*Else, check types, load pointer*/
+	else
 	{
-	  /*Error*/
-	  error("Parameter types do not match");
+	  /*If types are not compatible, error*/
+	  if(ty_test_equality(copy2->expr->type, fParams->type) == FALSE)
+	  {
+	    /*Error*/
+	    error("Parameter types do not match");
+	  }
+	  /*Loads the pointer*/
+	  b_load_arg(TYPTR);
 	}
-	/*Loads the pointer*/
-	b_load_arg(TYPTR);
       }
-    }
-    /*Else, value parameter*/
-    else
-    {
-      /*Gets the tag*/
-      TYPETAG tag;
-      tag = ty_query(copy2->expr->type);
-
-      /*If it is a lval, deref*/
-      if(is_lval(copy2->expr) == TRUE)
-	b_deref(tag);
-
-      /*If chars, promote to longs, load arg*/
-      if(tag == TYSIGNEDCHAR || tag == TYUNSIGNEDCHAR)
-      {
-        if (debug) printf("Converting signed or unsigned char to signed long int");
-
-	/*Convert, load arg*/
-	b_convert(tag, TYSIGNEDLONGINT);
-	b_load_arg(TYSIGNEDLONGINT);
-      }
-      /*If float, promote to double, load arg*/
-      else if(tag == TYFLOAT)
-      {
-	if (debug) printf("Converting float to double");
-
-	/*Convert, load arg*/
-	b_convert(tag, TYDOUBLE);
-	b_load_arg(TYDOUBLE);
-      }
-      /*Else, load arg*/
+      /*Else, value parameter*/
       else
       {
-	/*Load arg*/
-	b_load_arg(tag);
+	/*Gets the tag*/
+	TYPETAG tag;
+	tag = ty_query(copy2->expr->type);
+
+	/*If it is a lval, deref*/
+	if(is_lval(copy2->expr) == TRUE)
+	  b_deref(tag);
+
+	/*If chars, promote to longs, load arg*/
+	if(tag == TYSIGNEDCHAR || tag == TYUNSIGNEDCHAR)
+	{
+	  if (debug) printf("Converting signed or unsigned char to signed long int");
+
+	  /*Convert, load arg*/
+	  b_convert(tag, TYSIGNEDLONGINT);
+	  b_load_arg(TYSIGNEDLONGINT);
+	}
+	/*If float, promote to double, load arg*/
+	else if(tag == TYFLOAT)
+	{
+	  if (debug) printf("Converting float to double");
+
+	  /*Convert, load arg*/
+	  b_convert(tag, TYDOUBLE);
+	  b_load_arg(TYDOUBLE);
+	}
+	/*Else, load arg*/
+	else
+	{
+	  /*Load arg*/
+	  b_load_arg(tag);
+	}
       }
     }
 
