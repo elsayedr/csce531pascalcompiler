@@ -1458,7 +1458,13 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       }
       /*Else set node type to higher type*/
       else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
+      {
+	if(subTagR == TYSIGNEDLONGINT)
+	  eNode->u.binop.right = promoteInt(eNode->u.binop.right);
+	else if(subTagL == TYSIGNEDLONGINT)
+	  eNode->u.binop.left = promoteInt(eNode->u.binop.left);
 	eNode->type = ty_build_basic(TYDOUBLE);
+      }
       else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
 	eNode->type = ty_build_basic(TYDOUBLE);
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
@@ -1474,13 +1480,20 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       }
       /*Else set node type to higher type*/
       else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
+      {
+	if(subTagR == TYSIGNEDLONGINT)
+	  eNode->u.binop.right = promoteInt(eNode->u.binop.right);
+	else if(subTagL == TYSIGNEDLONGINT)
+	  eNode->u.binop.left = promoteInt(eNode->u.binop.left);
 	eNode->type = ty_build_basic(TYDOUBLE);
+      }
       else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
 	eNode->type = ty_build_basic(TYDOUBLE);
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
     case MUL_OP:
+    ty_print_typetag(subTagL); ty_print_typetag(subTagR);
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
@@ -1490,7 +1503,13 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       }
       /*Else set node type to higher type*/
       else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
+      {
+	if(subTagR == TYSIGNEDLONGINT)
+	  eNode->u.binop.right = promoteInt(eNode->u.binop.right);
+	else if(subTagL == TYSIGNEDLONGINT)
+	  eNode->u.binop.left = promoteInt(eNode->u.binop.left);
 	eNode->type = ty_build_basic(TYDOUBLE);
+      }
       else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
 	eNode->type = ty_build_basic(TYDOUBLE);
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
@@ -1506,7 +1525,13 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
       }
       /*Else set node type to higher type*/
       else if((subTagR == TYSIGNEDLONGINT && subTagL == TYDOUBLE) || (subTagR == TYDOUBLE && subTagL == TYSIGNEDLONGINT))
+      {
+	if(subTagR == TYSIGNEDLONGINT)
+	  eNode->u.binop.right = promoteInt(eNode->u.binop.right);
+	else if(subTagL == TYSIGNEDLONGINT)
+	  eNode->u.binop.left = promoteInt(eNode->u.binop.left);
 	eNode->type = ty_build_basic(TYDOUBLE);
+      }
       else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
 	eNode->type = ty_build_basic(TYDOUBLE);
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
@@ -1717,7 +1742,119 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   BOOLEAN checkArgs;
   long low, high;
   funcRetType = ty_query_func(func->type, &fParams, &checkArgs);
+  EXPR_LIST eCopy = args;
+  EXPR_LIST eCopy2 = args;
+  TYPETAG subTag;
 
+  /*If check args is false make r vals and unary convert*/
+  if(checkArgs == FALSE && args != NULL)
+  {
+    /*While loop*/
+    while(eCopy != NULL)
+    {
+      if(is_lval(eCopy->expr) == TRUE)
+	eCopy->expr = make_un_expr(DEREF_OP, eCopy->expr);
+
+    /*Queries the type of the subexpression*/
+    subTag = ty_query(eCopy->expr->type);
+
+    /*If the subexpression type is float or subrange convert*/
+    if(subTag == TYFLOAT || subTag == TYSUBRANGE)
+    {
+      /*Created convert node based on type needed to convert to*/
+      if(subTag == TYFLOAT)
+      {
+	if (debug) printf("Implicitly converting float to double");
+	eCopy->expr = makeConvertNode(eCopy->expr, ty_build_basic(TYDOUBLE));
+      }
+      else
+      {
+	if (debug) printf("Implicitly converting subrange to its base type");
+	/*Gets the subrange type*/
+	next = ty_query_subrange(eCopy->expr->type, &low, &high);
+	eCopy->expr = makeConvertNode(eCopy->expr, next);
+      }
+    }
+      /*Moves on*/
+      eCopy = eCopy->next;
+    }/*End while*/
+  }/*End if*/
+
+  if(checkArgs == TRUE && args != NULL)
+  {
+    /*While loop*/
+    while(eCopy2 != NULL && fParams != NULL)
+    {
+        /*If reference parameter, make sure lval, compatible type*/
+        if(fParams->is_ref == TRUE)
+        {
+          /*If lval, error*/
+          if(is_lval(eCopy2->expr) == FALSE)
+          {
+            /*Error, return*/
+            error("Reference parameter is not an l-value");
+            return make_error_expr();
+          }
+          /*Type check*/
+          if(ty_test_equality(eCopy2->expr->type, fParams->type) == FALSE)
+          {
+            /*Error, return*/
+            error("Reference argument has incompatible type");
+            return make_error_expr();
+          }
+        }
+	/*Else value parameter*/
+	else
+	{
+          /*If lval, make r*/
+          if(is_lval(eCopy2->expr) == TRUE)
+            eCopy2->expr = make_un_expr(DEREF_OP, eCopy->expr);
+
+	  /*Queries the type of the subexpression*/
+	  subTag = ty_query(eCopy2->expr->type);
+
+	  /*If the subexpression type is float or subrange convert*/
+	  if(subTag == TYFLOAT || subTag == TYSUBRANGE)
+	  {
+	    /*Created convert node based on type needed to convert to*/
+	    if(subTag == TYFLOAT)
+	    {
+	      if (debug) printf("Implicitly converting float to double");
+	      eCopy2->expr = makeConvertNode(eCopy2->expr, ty_build_basic(TYDOUBLE));
+	    }
+	    else
+	    {
+	      if (debug) printf("Implicitly converting subrange to its base type");
+	      /*Gets the subrange type*/
+	      next = ty_query_subrange(eCopy2->expr->type, &low, &high);
+	      eCopy2->expr = makeConvertNode(eCopy2->expr, next);
+	    }
+	  }
+	}
+
+	/*Checks variable conversions*/
+	eCopy2->expr = checkVariable(eCopy2->expr, eCopy2->expr->type, fParams->type);
+
+	/*Moves on*/
+	eCopy2 = eCopy2->next;
+	fParams = fParams->next;
+    }
+
+    /*If statements to check the number of arguments*/
+    if(eCopy2 == NULL && fParams != NULL)
+    {
+      /*Error, return*/
+      error("Wrong number of arguments to procedure or function call");
+      return make_error_expr();
+    }
+    else if(fParams == NULL && eCopy2 != NULL)
+    {
+      /*Error, return*/
+      error("Wrong number of arguments to procedure or function call");
+      return make_error_expr();
+    }
+
+  }
 
   /* Creates the node and allocates memory */
   EXPR eNode;
@@ -2592,4 +2729,18 @@ EXPR cFoldBinop(EXPR eNode)
   /*Returns the node*/
   if (debug) printf("Exiting cFoldBinop()\n");
   return eNode;
+}
+
+/*Function that promotes integers to double if possible*/
+EXPR promoteInt(EXPR eNode)
+{	
+  if(eNode->tag == INTCONST)
+    eNode = make_realconst_expr(eNode->u.intval);
+  
+  return eNode;
+}
+
+/*Function that checks function arguments*/
+EXPR checkVariable(EXPR eNode, TYPE argType, TYPE paramType)
+{
 }
