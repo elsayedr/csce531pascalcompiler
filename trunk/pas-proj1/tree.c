@@ -1688,83 +1688,12 @@ EXPR make_fcall_expr(EXPR func, EXPR_LIST args)
   }
 
   /*Queries the function*/
-  TYPE funcRetType;
+  TYPE funcRetType, next;
   PARAM_LIST fParams;
   BOOLEAN checkArgs;
+  long low, high;
   funcRetType = ty_query_func(func->type, &fParams, &checkArgs);
 
-  /*Copies the param list*/
-  PARAM_LIST c1 = fParams;
-
-  /*Copies the args list*/
-  EXPR_LIST copy, copy2 = args;
-
-  /*If check args is false, make r vals of all arguments and unary convert*/
-  if(checkArgs == FALSE && args != NULL)
-  {
-    /*Cycles through the arguments and unary converts them*/
-    while(copy != NULL)
-    {
-      /*Makes r values, Makes conversion nodes*/
-      copy->expr = make_un_expr(DEREF_OP, copy->expr);
-      copy->expr = make_un_expr(CONVERT_OP,copy->expr);
-
-      /*Moves onto the next element in the list*/
-      copy = copy->next;
-    }
-  }
-  /*Else, check the arguments*/
-  else if(args != NULL)
-  {
-     /*While loop to check all of the parameters*/
-     while(copy2 != NULL & c1 != NULL)
-     {
-	/*If reference parameter, make sure lval, compatible type*/
-	if(c1->is_ref == TRUE)
-	{
-	  /*If lval, error*/
-	  if(is_lval(copy2->expr) == FALSE)
-	  {
-	    /*Error, return*/
-	    error("Reference parameter is not an l-value");
-	    return make_error_expr();
-	  }
-
-	  /*Type check*/
-	  if(ty_test_equality(copy2->expr->type, c1->type) == FALSE)
-	  {
-	    /*Error, return*/
-	    error("Reference argument has incompatible type");
-	    return make_error_expr();
-	  }
-	}
-	/*Else, deal with value parameters*/
-	else
-	{
-	  /*Makes r values, Makes conversion nodes*/
-	  copy2->expr = make_un_expr(DEREF_OP, copy2->expr);
-	  copy2->expr = make_un_expr(CONVERT_OP,copy2->expr);
-	}
-
-	/*Moves on to the next argument*/
-	copy2 = copy2->next;
-	c1 = c1->next;
-
-	/*If statements to check the number of arguments*/
-	if(copy2 == NULL && c1 != NULL)
-	{
-	  /*Error, return*/
-	  error("Wrong number of arguments to procedure or function call");
-	  return make_error_expr();
-	}
-	else if(c1 == NULL && copy2 != NULL)
-	{
-	  /*Error, return*/
-	  error("Wrong number of arguments to procedure or function call");
-	  return make_error_expr();
-	}
-     }
-  }
 
   /* Creates the node and allocates memory */
   EXPR eNode;
