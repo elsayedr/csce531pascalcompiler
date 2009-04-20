@@ -722,7 +722,9 @@ void encodeFCall(EXPR func, EXPR_LIST args)
 
     /*Moves on to the next item*/
     copy2 = copy2->next;
-    fParams = fParams->next;
+
+    if(fParams != NULL)
+      fParams = fParams->next;
   }
 
   /*Calls the function*/
