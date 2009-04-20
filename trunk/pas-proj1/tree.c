@@ -1466,7 +1466,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	eNode->type = ty_build_basic(TYDOUBLE);
       }
       else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
+      {
+	eNode->u.binop.right = promoteInt(eNode->u.binop.right);
+	eNode->u.binop.left = promoteInt(eNode->u.binop.left);
 	eNode->type = ty_build_basic(TYDOUBLE);
+      }
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
@@ -1488,7 +1492,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	eNode->type = ty_build_basic(TYDOUBLE);
       }
       else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
+      {
+	eNode->u.binop.right = promoteInt(eNode->u.binop.right);
+	eNode->u.binop.left = promoteInt(eNode->u.binop.left);
 	eNode->type = ty_build_basic(TYDOUBLE);
+      }
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
@@ -1511,7 +1519,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	eNode->type = ty_build_basic(TYDOUBLE);
       }
       else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
+      {
+	eNode->u.binop.right = promoteInt(eNode->u.binop.right);
+	eNode->u.binop.left = promoteInt(eNode->u.binop.left);
 	eNode->type = ty_build_basic(TYDOUBLE);
+      }
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
@@ -1533,7 +1545,11 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	eNode->type = ty_build_basic(TYDOUBLE);
       }
       else if(subTagR == TYDOUBLE && subTagL == TYDOUBLE)
+      {
+	eNode->u.binop.right = promoteInt(eNode->u.binop.right);
+	eNode->u.binop.left = promoteInt(eNode->u.binop.left);
 	eNode->type = ty_build_basic(TYDOUBLE);
+      }
       else if(subTagR == TYSIGNEDLONGINT && subTagR == TYSIGNEDLONGINT)
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
@@ -2736,6 +2752,11 @@ EXPR promoteInt(EXPR eNode)
 {	
   if(eNode->tag == INTCONST)
     eNode = make_realconst_expr(eNode->u.intval);
+  else if(eNode->tag == UNOP && eNode->u.unop.op == CONVERT_OP)
+  {
+    if(eNode->u.unop.operand->tag == INTCONST)
+      eNode = make_realconst_expr(eNode->u.unop.operand->u.intval);
+  }
   
   return eNode;
 }
