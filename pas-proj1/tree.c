@@ -2766,8 +2766,8 @@ EXPR promoteInt(EXPR eNode)
 /*Function that checks function arguments*/
 EXPR checkVariable(EXPR eNode, TYPE argType, TYPE paramType)
 {
-  TYPETAG aTag = ty_query(aType);
-  TYPETAG pTag = ty_query(pType);
+  TYPETAG aTag = ty_query(argType);
+  TYPETAG pTag = ty_query(paramType);
 
   if(aTag == pTag)
     return eNode;
