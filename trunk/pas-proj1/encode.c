@@ -445,10 +445,10 @@ void encodeUnop(EXPR_UNOP op, EXPR arg)
     case DISPOSE_OP:
       if (debug) printf("DISPOSE_OP\n");
       /*Allocates size for the argument list*/
-      b_alloc_arglist(4);
+      b_load_arg(TYPTR);
 
       /*Calls the external C function free*/
-      b_funcall_by_name("free", TYPTR);
+      b_funcall_by_name("free", TYVOID);
       break;
     /*Deref opeator*/
     case DEREF_OP:
@@ -636,7 +636,7 @@ void encodeFCall(EXPR func, EXPR_LIST args)
   while(copy != NULL)
   {
     /*If the argument is a double add eight*/
-    if(ty_query(copy->expr->type) == TYDOUBLE)
+    if(ty_query(copy->expr->type) == TYDOUBLE || ty_query(copy->expr->type) == TYFLOAT)
       argListSize = argListSize + 8;
     /*Else, add four*/
     else
@@ -719,6 +719,42 @@ void encodeFCall(EXPR func, EXPR_LIST args)
 	}
       }
     }
+    /*Else param list null*/
+    else
+    {
+	/*Gets the tag*/
+	TYPETAG tag;
+	tag = ty_query(copy2->expr->type);
+
+	/*If it is a lval, deref*/
+	if(is_lval(copy2->expr) == TRUE)
+	  b_deref(tag);
+
+	/*If chars, promote to longs, load arg*/
+	if(tag == TYSIGNEDCHAR || tag == TYUNSIGNEDCHAR)
+	{
+	  if (debug) printf("Converting signed or unsigned char to signed long int");
+
+	  /*Convert, load arg*/
+	  b_convert(tag, TYSIGNEDLONGINT);
+	  b_load_arg(TYSIGNEDLONGINT);
+	}
+	/*If float, promote to double, load arg*/
+	else if(tag == TYFLOAT)
+	{
+	  if (debug) printf("Converting float to double");
+
+	  /*Convert, load arg*/
+	  b_convert(tag, TYDOUBLE);
+	  b_load_arg(TYDOUBLE);
+	}
+	/*Else, load arg*/
+	else
+	{
+	  /*Load arg*/
+	  b_load_arg(tag);
+	}
+    }
 
     /*Moves on to the next item*/
     copy2 = copy2->next;
@@ -761,13 +797,6 @@ void encode_expr(EXPR expr)
     /*String constant case*/
     case STRCONST:
       if (debug) printf("STRCONST\n");
-      if(strlen(expr->u.strval) == 1)
-      {
-	b_push_const_int(expr->u.strval[0]);
-	b_convert(TYSIGNEDLONGINT, TYUNSIGNEDCHAR);
-      }
-      /*Pushes the string constant value onto the stack*/
-      else
 	b_push_const_string(expr->u.strval);
       break;
     /*Global identifier case*/
