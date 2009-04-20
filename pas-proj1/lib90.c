@@ -1,28 +1,63 @@
-#include <stdarg.h>
 
-int Printf(char *format, ...)
+Print_one()
 {
-    int ret;
-
-    va_list ap;
-    va_start(ap, format);
-    ret = vprintf(format, ap);
-    va_end(ap);
-    return ret;
+	printf("a is one\n");
 }
 
-int Scanf(char *format, ...)
+Print_two()
 {
-    int ret;
-
-    va_list ap;
-    va_start(ap, format);
-    ret = vscanf(format, ap);
-    va_end(ap);
-    return ret;
+	printf("a is two\n");
 }
 
-int Getchar()
+Print_three()
 {
-    return getchar();
+	printf("a is three\n");
+}
+
+Print_dunno()
+{
+	printf("dunno what a is\n");
+}
+
+Print_big()
+{
+	printf("a is big\n");
+
+Print_just()
+{
+	printf("c just is\n");
+}
+
+Print_isnt()
+{
+	printf("c isn't\n");
+}
+
+Print_hello()
+{
+	printf("hello\n");
+}
+
+Print_oops()
+{
+	printf("oops\n");
+}
+
+Print_712()
+{
+	printf("712 ");
+}
+
+Print_is_the()
+{
+	printf("is the ");
+}
+
+Print_grooviest()
+{
+	printf("grooviest");
+}
+Print_newline()
+{
+	printf("...\n");
 }
