@@ -1957,7 +1957,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 				return make_un_expr(SET_RETURN_OP,rhs);
 			}
 			else {
-				error("VOID return type");
+				error("Cannot set the return value of a procedure");
 				return make_error_expr();
 			}
 		}
@@ -2766,4 +2766,12 @@ EXPR promoteInt(EXPR eNode)
 /*Function that checks function arguments*/
 EXPR checkVariable(EXPR eNode, TYPE argType, TYPE paramType)
 {
+  TYPETAG aTag = ty_query(aType);
+  TYPETAG pTag = ty_query(pType);
+
+  if(aTag == pTag)
+    return eNode;
+
+  return eNode;
+
 }
