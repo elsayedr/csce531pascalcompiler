@@ -1940,6 +1940,8 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 {
 	char * idstring = NULL;
 	int block;
+	PARAM_LIST params;
+	BOOLEAN cA;
 
 	if (debug) printf("Entering check assign or proc call\n");
 
@@ -1951,7 +1953,7 @@ EXPR check_assign_or_proc_call(EXPR lhs, ST_ID id, EXPR rhs)
 			if (debug) printf("Setting return value\n");
 
 			/* if return type non-VOID return unop expr */
-			if ( ty_query(lhs->type) != TYVOID ) {
+			if ( ty_query(ty_query_func(lhs->type, &params, &cA)) != TYVOID ) {
 				return make_un_expr(SET_RETURN_OP,rhs);
 			}
 			else {
