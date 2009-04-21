@@ -2783,7 +2783,7 @@ EXPR checkVariable(EXPR eNode, TYPE argType, TYPE paramType)
 char* whileInit(EXPR eNode)
 {
 	if(debug)
-		printf("Entered whileInit function");
+		printf("Entered whileInit function\n");
 
 	/*Creates a unique labels for the start of the while*/ 
 	char* start = new_symbol();
@@ -2833,7 +2833,7 @@ void whileLoop(char* start, char *end)
 char* ifInit(EXPR eNode)
 {
 	if(debug)
-		printf("Entered ifInit function");
+		printf("Entered ifInit function\n");
 	/*encodes the boolean expression*/
 	encode_expr(eNode);
 	/*creates a new symbol for the end of the if block*/
@@ -2849,7 +2849,7 @@ char* ifInit(EXPR eNode)
 char* ifClose(char *ifend)
 {
 	if(debug)
-		printf("Entered ifClose function");
+		printf("Entered ifClose function\n");
 	/*emits the code for the end label*/
 	char* elseend = new_symbol();
 	/*jumps to the end of the else if the if block was true*/
