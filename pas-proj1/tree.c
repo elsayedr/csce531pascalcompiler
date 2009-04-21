@@ -2800,6 +2800,8 @@ char* whileInit(EXPR eNode)
 */
 char* whileCond()
 {
+	if(debug) printf("Entered whileCond function\n");
+
 	/*Creates a unique labels for the end of the while*/
 	char* end = new_symbol();
 	/* When the condition is false it jumps to the end of the while loop*/
