@@ -1501,7 +1501,6 @@ EXPR make_bin_expr(EXPR_BINOP op, EXPR left, EXPR right)
 	eNode->type = ty_build_basic(TYSIGNEDLONGINT);
       break;
     case MUL_OP:
-    ty_print_typetag(subTagL); ty_print_typetag(subTagR);
       /*Type check*/
       if((subTagR != TYSIGNEDLONGINT && subTagR != TYFLOAT && subTagR != TYDOUBLE) || (subTagL != TYSIGNEDLONGINT && subTagL != TYFLOAT && subTagL != TYDOUBLE))
       {
