@@ -639,57 +639,31 @@ TYPE make_func(PARAM_LIST list, TYPE return_type)
 /* Reverses an expr list */
 EXPR_LIST expr_list_reverse(EXPR_LIST list)
 {
-	EXPR_LIST revList, next;
-	revList, next = (EXPR_LIST) malloc(sizeof(EXPR_LIST_NODE));
-	
-	revList = NULL;	
+  /*Expr list variables*/
+  EXPR_LIST t1 = NULL;
 
-	/* Loops through list changing the order */
-	while(list != NULL ) 
-	{ 
-		next = list->next;  	/* Get the next node */
-		list->next = revList;  	/* Link current node to reversed list */
-		revList = list; 		/* Set reversed list to current node */
-		list = next; 			/* Update current node */
-	} 
+  /*While loop to reverse the list*/
+  while(list != NULL)
+  {
+    /*Moves the list elements around*/
+    EXPR_LIST t2 = list->next;
+    list->next = t1;
+    t1 = list;
+    list = t2;
+  }
 
-	/* Returns reversed list */
-	return revList;
+  /*Returns the list*/
+  return t1;
+
 } /* End expr_list_reverse */
 
 /* Inserts an ST_ID into a linked list */
 EXPR_LIST expr_prepend(EXPR_LIST list, EXPR expr)  
 {
-  EXPR_LIST toRet = list;
-  EXPR_LIST previous = NULL;
-  
-  /* Inserts the element and returns the list */
-  while(list != NULL)
-  {
-    previous = list;
-    list = list->next;
-  }
-
-  /*If the previous node is equal to null, insert at front*/
-  if(previous == NULL)
-  {
-    /*Create the node and insert it*/
-    toRet = malloc(sizeof(EXPR_LIST_NODE));
-    toRet->next = list;
-    toRet->expr = expr;
-    toRet->next = NULL;
-
-    /*Returns the list*/
-    return toRet;
-  }
-
-  /*Insert somewhere in the middle of the list*/
-  previous->next = malloc(sizeof(EXPR_LIST_NODE));
-  previous = previous->next;
-  previous->expr = expr;
-  previous->next = list;
-
-  return toRet;
+  EXPR_LIST new = malloc(sizeof(EXPR_LIST_NODE));
+  new->expr = expr;
+  new->next = list;
+  return new;
 }/* End expr_prepend */
 
 /* Processes variable declarations */
