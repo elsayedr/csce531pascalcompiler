@@ -892,7 +892,7 @@ goto_statement
 
 optional_par_actual_parameter_list
     : /* Empty */			{ $$ = NULL; }
-    | '(' actual_parameter_list ')'	{ $$ = $2; }
+    | '(' actual_parameter_list ')'	{ $$ = expr_list_reverse($2); }
     ;
 
 actual_parameter_list
@@ -1101,7 +1101,7 @@ variable_or_function_access_no_id
     | '(' expression ')'					{ $$ = $2; }
     | variable_or_function_access pointer_char			{ $$ = make_un_expr(INDIR_OP,$1); }
     | variable_or_function_access '[' index_expression_list ']'	{}
-    | variable_or_function_access_no_standard_function '(' actual_parameter_list ')'	{ $$ = make_fcall_expr($1, $3); } 
+    | variable_or_function_access_no_standard_function '(' actual_parameter_list ')'	{ $$ = make_fcall_expr($1, expr_list_reverse($3)); } 
     | p_NEW '(' variable_access_or_typename ')'			{ $$ = make_un_expr(NEW_OP, $3); }
     ;
 
