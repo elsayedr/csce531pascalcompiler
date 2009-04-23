@@ -2190,7 +2190,7 @@ EXPR checkAssign(EXPR assign)
     /*Type check*/
     if(rightTag == TYFLOAT || rightTag == TYSIGNEDLONGINT)
     {
-      /*If the element on the right is an intconst, promote*/
+      /*If the right side is intconst promote*/
       if(assign->u.binop.right->tag == INTCONST)
 	assign->u.binop.right = make_realconst_expr(assign->u.binop.right->u.intval);
       /*Else, make convert node*/

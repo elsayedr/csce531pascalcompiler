@@ -801,20 +801,24 @@ simple_if
     : LEX_IF boolean_expression
 	{
 	  /*Checks the expression*/
+	
 	  if(checkBoolean($2) == TRUE)
 	  {
 	    char* startIf = ifInit($<y_expr>2);
 	    $<y_string>$ = startIf;
 	  }
+	
 	} 
 	LEX_THEN statement
   	{
-  		$<y_string>$=ifClose($<y_string>3);
+  		$<y_string>$ = $<y_string>3;/*$<y_string>$=ifClose($<y_string>3)*/;
   	};
 
 if_statement
-    : simple_if LEX_ELSE statement {elseClose($<y_string>1);}
-  | simple_if %prec prec_if
+    : simple_if LEX_ELSE {$<y_string>$  = ifClose($<y_string>1);} 
+			statement 
+			{b_label($<y_string>3);}
+  | simple_if {b_label($<y_string>1);}%prec prec_if
   {};
 
 case_statement
