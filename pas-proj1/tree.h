@@ -40,7 +40,7 @@ typedef struct {
 
 
 /*Structures for syntax tree nodes (EXPR and EXPR_LIST)*/
-
+/*------------Added array_access to this*/
 typedef enum {
     INTCONST, REALCONST, STRCONST, GID, LVAR, LFUN, NULLOP, UNOP, BINOP,
     FCALL, ERROR, ARRAY_ACCESS
@@ -103,6 +103,10 @@ typedef struct exprnode {
 	    struct exprnode * function;
 	    EXPR_LIST args;
 	} fcall;
+	struct {
+	    struct exprnode * gid;
+	    EXPR_LIST index_list;
+	} array_access;
     } u;
 } EXPR_NODE, *EXPR;
 
@@ -162,6 +166,17 @@ EXPR promoteInt(EXPR eNode);
 
 /*Definitions for Part 3*/
 
+/*Holds endlabels in a stack
+For generality I only put the end labels for loops since a break
+statement that occurs inside of an if which is inside of a while loop
+will exit the if and the while*/
+char* endLabels[100];
+/*Current index of the end label*/
+static int endLabelCurr = 0;
+
+void pushEndLabel(char* endLabel);
+char* popEndLabel();
+
 /*While Loop Definitions*/
 char* whileInit(EXPR eNode);
 char* whileCond();
@@ -174,6 +189,9 @@ void elseClose(char* elseend);
 
 /*Checkss to make sure an expression is a boolean type*/
 BOOLEAN checkBoolean(EXPR exp);
+
+/*Array Access*/
+EXPR make_array_access_expr(EXPR arrayExpr,EXPR_LIST indexList);
 
 
 #endif
