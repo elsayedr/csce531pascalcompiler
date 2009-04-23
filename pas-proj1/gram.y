@@ -1016,12 +1016,18 @@ variable_access_or_typename
 
 index_expression_list
     : index_expression_item
-  {}| index_expression_list ',' index_expression_item
-  {};
+  {	/*Had to put this in b/c otherwise the list would be NULL*/
+	EXPR_LIST newList;  
+	newList = (EXPR_LIST)malloc(sizeof(EXPR_LIST)); 
+	newList->expr = $<y_expr>1; 
+	$<y_exprlist>$ = newList;}
+	| index_expression_list ',' index_expression_item
+  {$<y_exprlist>$ = $<y_exprlist>1->next = $<y_expr>3;};
 
 index_expression_item	
     : expression
   {}| expression LEX_RANGE expression
+  {$<y_expr>$ = $<y_expr>1;}| expression LEX_RANGE expression
   {};
 
 /* Expressions */
