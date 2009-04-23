@@ -2807,15 +2807,16 @@ void whileLoop(char* start, char *end)
 */
 char* ifInit(EXPR eNode)
 {
-	if(debug)
-		printf("Entered ifInit function\n");
-	/*encodes the boolean expression*/
-	encode_expr(eNode);
-	/*creates a new symbol for the end of the if block*/
-	char* ifend = new_symbol();
-	/*when thte if statement is false it jumps past that block of code*/
-	b_cond_jump(TYSIGNEDCHAR,B_ZERO,ifend);
-	return ifend;	
+  if(debug)
+    printf("Entered ifInit function\n");
+ 
+  /*encodes the boolean expression*/
+  encode_expr(eNode);
+  /*creates a new symbol for the end of the if block*/
+  char* ifend = new_symbol();
+  /*when thte if statement is false it jumps past that block of code*/
+  b_cond_jump(TYSIGNEDCHAR,B_ZERO,ifend);
+  return ifend;	
 }
 /*Purpose:  finishes up an if statement
   Params:  char* ifend is the label that corresponds to the end of the if in memory
@@ -2840,4 +2841,19 @@ char* ifClose(char *ifend)
 void elseClose(char* elseend)
 {
 	b_label(elseend);
+}
+
+/*Checks to make sure an expression is a boolean expression*/
+BOOLEAN checkBoolean(EXPR exp)
+{
+  /*Checks the type, must be signed char to be boolean*/
+  if(ty_query(exp->type) == TYSIGNEDCHAR)
+    return TRUE;
+  /*Else, error return*/
+  else
+  {
+    /*Error, return false*/
+    error("Non-Boolean expression");
+    return FALSE;
+  }
 }
