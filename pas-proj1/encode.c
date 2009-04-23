@@ -766,6 +766,52 @@ void encodeFCall(EXPR func, EXPR_LIST args)
   /*Calls the function*/
   b_funcall_by_name(fGlobalName, ty_query(funcRetType));
 }
+/*Function that encodes array access*/
+void encode_array_access(EXPR expr, EXPR_LIST indices)
+{
+	long lowVal, highVal, range, elementSize;
+	TYPE arrayType, subrangeType;
+	INDEX_LIST indList;
+	EXPR_LIST currIndicies;
+	arrayType = ty_query_array(expr->type,&indList);
+	elementSize = getSkipSize(arrayType);
+	encode_expr(expr);
+	
+	
+	currIndicies = indices;
+	while(currIndicies != NULL && indList != NULL)
+	{
+		encode_expr(currIndicies->expr);
+		
+		subrangeType = ty_query_subrange(indList->type,&lowVal,&highVal);
+
+		range = highVal-lowVal;
+
+		if(indList->next == NULL)/*At the end of the list*/
+		{
+			b_push_const_int(lowVal);
+			b_arith_rel_op(B_SUB,TYSIGNEDLONGINT);
+		}
+		else if(indList->next != NULL && indList->prev != NULL)/*More than one dimension left and not at the end*/
+		{
+			b_push_const_int(range);
+			b_arith_rel_op(B_MULT,TYSIGNEDLONGINT);
+			b_arith_rel_op(B_ADD,TYSIGNEDLONGINT);
+		}
+		else if(indList->next!=NULL && indList->prev == NULL)/*At the beginning of the list*/
+		{
+			
+			b_push_const_int(range);
+			b_arith_rel_op(B_MULT,TYSIGNEDLONGINT);
+		}
+		
+		currIndicies = currIndicies->next;
+		indList = indList->next;
+	}
+	b_ptr_arith_op(B_ADD,TYSIGNEDLONGINT,elementSize);
+	
+	
+}
 
 /*Function that encodes and expression*/
 void encode_expr(EXPR expr)
@@ -863,6 +909,12 @@ void encode_expr(EXPR expr)
     case ERROR:
       if (debug) printf("ERROR\n");
       break;
+    /*Array Access case*/	
+    case ARRAY_ACCESS:
+	if (debug) printf("ARRAY_ACCESS\n");
+	printf("ARRAY_ACCESS\n\n");
+	encode_array_access(expr->u.array_access.gid,expr->u.array_access.index_list);
+	break;
   }
 }
 
