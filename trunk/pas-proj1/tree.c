@@ -1996,7 +1996,7 @@ BOOLEAN is_lval(EXPR expr)
 
 	
 	/* If tag is GID and typetag is a data type (not TYFUNC or TYERROR), expr is an lval */
-	else if (eTag == GID && eTypeTag != TYFUNC && eTypeTag != TYERROR)
+	else if ((eTag == GID || eTag == ARRAY_ACCESS) && eTypeTag != TYFUNC && eTypeTag != TYERROR)
 		return TRUE;
 		
 	/* If tag is UNOP, check the operator */

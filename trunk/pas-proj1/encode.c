@@ -910,10 +910,9 @@ void encode_expr(EXPR expr)
       break;
     /*Array Access case*/	
     case ARRAY_ACCESS:
-	if (debug) printf("ARRAY_ACCESS\n");
-	printf("ARRAY_ACCESS\n\n");
-	encode_array_access(expr->u.array_access.gid,expr->u.array_access.index_list);
-	break;
+      if (debug) printf("ARRAY_ACCESS\n");
+      encode_array_access(expr->u.array_access.gid,expr->u.array_access.index_list);
+      break;
   }
 }
 
