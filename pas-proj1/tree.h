@@ -172,6 +172,9 @@ char* ifInit(EXPR eNode);
 char* ifClose(char* ifend);
 void elseClose(char* elseend);
 
+/*Checkss to make sure an expression is a boolean type*/
+BOOLEAN checkBoolean(EXPR exp);
+
 
 #endif
 

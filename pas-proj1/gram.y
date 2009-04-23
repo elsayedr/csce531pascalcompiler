@@ -191,7 +191,7 @@ int n; // used as temp variable for debugging
 %type <y_expr> variable_or_function_access_no_standard_function
 %type <y_expr> variable_or_function_access_no_id rest_of_statement
 %type <y_expr> assignment_or_call_statement standard_procedure_statement
-%type <y_expr> variable_access_or_typename optional_par_actual_parameter
+%type <y_expr> variable_access_or_typename optional_par_actual_parameter boolean_expression
 %type <y_exprlist> actual_parameter_list optional_par_actual_parameter_list
 %type <y_nullop> rts_fun_optpar
 %type <y_unop> sign rts_fun_onepar rts_fun_parlist pointer_char
@@ -800,8 +800,12 @@ conditional_statement
 simple_if
     : LEX_IF boolean_expression
 	{
-		char* startIf = ifInit($<y_expr>2);
-		$<y_string>$ = startIf;
+	  /*Checks the expression*/
+	  if(checkBoolean($2) == TRUE)
+	  {
+	    char* startIf = ifInit($<y_expr>2);
+	    $<y_string>$ = startIf;
+	  }
 	} 
 	LEX_THEN statement
   	{
@@ -847,17 +851,19 @@ repeat_statement
   {};
 
 while_statement
-    : LEX_WHILE boolean_expression LEX_DO 
- {
-	char* startWhile;
-	startWhile = whileInit($<y_expr>2);
-	$<y_string>$ = startWhile;
- }
- {
-	char* endWhile;
-	endWhile = whileCond();
-	$<y_string>$ = endWhile;
- }
+    : LEX_WHILE boolean_expression LEX_DO {
+					    if(checkBoolean($2) == TRUE)
+					    {
+					      char* startWhile;
+					      startWhile = whileInit($<y_expr>2);
+					      $<y_string>$ = startWhile;
+					    }
+					  }
+					  {
+					    char* endWhile;
+					    endWhile = whileCond();
+					    $<y_string>$ = endWhile;
+					  }
 	statement
  {					 					 
 	whileLoop($<y_string>4,$<y_string>5);
