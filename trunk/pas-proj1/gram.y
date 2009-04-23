@@ -191,8 +191,8 @@ int n; // used as temp variable for debugging
 %type <y_expr> variable_or_function_access_no_standard_function
 %type <y_expr> variable_or_function_access_no_id rest_of_statement
 %type <y_expr> assignment_or_call_statement standard_procedure_statement
-%type <y_expr> variable_access_or_typename optional_par_actual_parameter boolean_expression
-%type <y_exprlist> actual_parameter_list optional_par_actual_parameter_list
+%type <y_expr> variable_access_or_typename optional_par_actual_parameter boolean_expression index_expression_item
+%type <y_exprlist> actual_parameter_list optional_par_actual_parameter_list index_expression_list
 %type <y_nullop> rts_fun_optpar
 %type <y_unop> sign rts_fun_onepar rts_fun_parlist pointer_char
 %type <y_binop> relational_operator multiplying_operator adding_operator
@@ -1015,20 +1015,12 @@ variable_access_or_typename
     ;
 
 index_expression_list
-    : index_expression_item
-  {	/*Had to put this in b/c otherwise the list would be NULL*/
-	EXPR_LIST newList;  
-	newList = (EXPR_LIST)malloc(sizeof(EXPR_LIST)); 
-	newList->expr = $<y_expr>1; 
-	$<y_exprlist>$ = newList;}
-	| index_expression_list ',' index_expression_item
-  {$<y_exprlist>$ = $<y_exprlist>1->next = $<y_expr>3;};
+    : index_expression_item	{ $$ = expr_prepend(NULL, $1); }
+    | index_expression_list ',' index_expression_item	{ $$ = expr_prepend($1, $3); };
 
 index_expression_item	
-    : expression
-  {}| expression LEX_RANGE expression
-  {$<y_expr>$ = $<y_expr>1;}| expression LEX_RANGE expression
-  {};
+    : expression	/*Default*/
+    | expression LEX_RANGE expression	{$$ = $1;}
 
 /* Expressions */
 
