@@ -2189,9 +2189,19 @@ EXPR checkAssign(EXPR assign)
   {
     /*Type check*/
     if(rightTag == TYFLOAT || rightTag == TYSIGNEDLONGINT)
-      assign->u.binop.right = makeConvertNode(assign->u.binop.right, ty_build_basic(TYDOUBLE));
+    {
+      /*If the element on the right is an intconst, promote*/
+      if(assign->u.binop.right->tag == INTCONST)
+	assign->u.binop.right = make_realconst_expr(assign->u.binop.right->u.intval);
+      /*Else, make convert node*/
+      else
+	assign->u.binop.right = makeConvertNode(assign->u.binop.right, ty_build_basic(TYDOUBLE));
+    }
     else
-      error("Illegal conversion");
+	{
+      		error("Illegal conversion");
+		return make_error_expr();
+	}
   }
   /*If LHS is Float, accept all numerical types*/
   else if(leftTag == TYFLOAT)
@@ -2200,16 +2210,27 @@ EXPR checkAssign(EXPR assign)
     if(rightTag == TYDOUBLE || rightTag == TYSIGNEDLONGINT)
       assign->u.binop.right = makeConvertNode(assign->u.binop.right, ty_build_basic(TYFLOAT));
     else
-      error("Illegal conversion");
+	{
+      		error("Illegal conversion");
+		return make_error_expr();
+	}
   }
   else if(leftTag == TYUNSIGNEDCHAR && right->tag == STRCONST)
-      if(strlen(right->u.strval) == 1)
-	assign->u.binop.right = make_intconst_expr(right->u.strval[0], ty_build_basic(TYSIGNEDLONGINT));
-      else
-	error("Illegal conversion");
+	{
+		if(strlen(right->u.strval) == 1)
+			assign->u.binop.right = make_intconst_expr(right->u.strval[0], ty_build_basic(TYSIGNEDLONGINT));
+		else
+		{
+			error("Illegal conversion");
+			return make_error_expr();
+		}
+	}
   /*Else illegal*/
   else if (leftTag != rightTag)
-    error("Illegal conversion");
+	{
+    		error("Illegal conversion");
+		return make_error_expr();
+	}
 
   /*Returns the node*/
   return assign;
@@ -2880,7 +2901,8 @@ EXPR make_array_access_expr(EXPR arrayExpr,EXPR_LIST indexList)
 	/*Checks to make sure if arrayExpr is an array*/	
 	if(ty_query(arrayExpr->type) != TYARRAY)
 	{
-		bug("Not an array parameter sent into make_array_access_expr\n");		
+		//bug("Not an array parameter sent into make_array_access_expr\n");
+		error("Nonarray in array access expression");	
 		return make_error_expr();
 	}
 	
@@ -2903,7 +2925,12 @@ EXPR make_array_access_expr(EXPR arrayExpr,EXPR_LIST indexList)
 		}
 		/*gets the type of the expression*/
 		currExprType = ty_query(currExprList->expr->type);
-		/*TODO put in checks here to make sure of stuff*/
+		/*Check to make sure that the correct type of parameter is passed in*/
+		if(currExprType != TYUNSIGNEDLONGINT && currExprType != TYSIGNEDLONGINT)
+		{
+			error("Incompatible index type in array access");
+			return make_error_expr();
+		}
 		
 		currExprList = currExprList->next;
 		indices = indices->next;
