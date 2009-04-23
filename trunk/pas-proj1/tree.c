@@ -1996,7 +1996,7 @@ BOOLEAN is_lval(EXPR expr)
 
 	
 	/* If tag is GID and typetag is a data type (not TYFUNC or TYERROR), expr is an lval */
-	else if ((eTag == GID || eTag == ARRAY_ACCESS) && eTypeTag != TYFUNC && eTypeTag != TYERROR)
+	else if ((eTag == GID||eTag == ARRAY_ACCESS) && eTypeTag != TYFUNC && eTypeTag != TYERROR)
 		return TRUE;
 		
 	/* If tag is UNOP, check the operator */
@@ -2207,10 +2207,6 @@ EXPR checkAssign(EXPR assign)
 	assign->u.binop.right = make_intconst_expr(right->u.strval[0], ty_build_basic(TYSIGNEDLONGINT));
       else
 	error("Illegal conversion");
-  /*If array access check types*/
-  else if(leftTag == TYARRAY)
-  {
-  }
   /*Else illegal*/
   else if (leftTag != rightTag)
     error("Illegal conversion");
@@ -2774,7 +2770,7 @@ char* popEndLabel()
 */
 char* peekEndLabel()
 {
-	return endLabels[endLabelCurr];
+	return endLabels[endLabelCurr-1];
 }
 
 /*Purpose: Used for the initialization of a while loop
@@ -2881,53 +2877,54 @@ void elseClose(char* elseend)
 
 EXPR make_array_access_expr(EXPR arrayExpr,EXPR_LIST indexList)
 {
-  /*Checks to make sure if arrayExpr is an array*/	
-  if(ty_query(arrayExpr->type) != TYARRAY)
-  {
-    bug("Not an array parameter sent into make_array_access_expr\n");		
-    return make_error_expr();
-  }
-  
-  TYPE arrayType;
-  TYPETAG currExprType;
-  INDEX_LIST indices;
-  
-  arrayType = ty_query_array(arrayExpr->type,&indices);
+	/*Checks to make sure if arrayExpr is an array*/	
+	if(ty_query(arrayExpr->type) != TYARRAY)
+	{
+		bug("Not an array parameter sent into make_array_access_expr\n");		
+		return make_error_expr();
+	}
+	
+	TYPE arrayType;
+	TYPETAG currExprType;
+	INDEX_LIST indices;
+	
+	arrayType = ty_query_array(arrayExpr->type,&indices);
 
-  TYPETAG moo;
-  
-  EXPR_LIST currExprList = indexList;
+	TYPETAG moo;
+	
+	EXPR_LIST currExprList = indexList;
 
-  while(currExprList != NULL)
-  {
-    /*All exprs must be rvals, if it is an lval it has to be dereferenced*/
-    if(is_lval(currExprList->expr) == TRUE)/*PROBLEM*/
-    {
-      currExprList->expr = make_un_expr(DEREF_OP,currExprList->expr);
-    }
-    /*gets the type of the expression*/
-    currExprType = ty_query(currExprList->expr->type);
-    /*TODO put in checks here to make sure of stuff*/
-    
-    currExprList = currExprList->next;
-    indices = indices->next;
-  }
-  if((currExprList  == NULL && indices != NULL) || (currExprList  != NULL && indices == NULL))
-  {
-    error("Wrong number of indecies");
-    return make_error_expr();
-  }
+	while(currExprList != NULL)
+	{
+		/*All exprs must be rvals, if it is an lval it has to be dereferenced*/
+		if(is_lval(currExprList->expr) == TRUE)/*PROBLEM*/
+		{
+			currExprList->expr = make_un_expr(DEREF_OP,currExprList->expr);
+		}
+		/*gets the type of the expression*/
+		currExprType = ty_query(currExprList->expr->type);
+		/*TODO put in checks here to make sure of stuff*/
+		
+		currExprList = currExprList->next;
+		indices = indices->next;
+	}
+	if((currExprList  == NULL && indices != NULL)||
+		(currExprList  != NULL && indices == NULL))
+	{
+		error("Wrong number of indecies");
+		return make_error_expr();
+	}
 
-  /*Creates the expr node to return*/
-  EXPR eNode;
-  eNode = malloc(sizeof(EXPR_NODE));
-  /*Set the attributes*/
-  eNode->tag = ARRAY_ACCESS;
-  eNode->type = arrayType;
-  eNode->u.array_access.index_list = indexList;
-  eNode->u.array_access.gid = arrayExpr;
-  
-  return eNode;
+	/*Creates the expr node to return*/
+	EXPR eNode;
+	eNode = malloc(sizeof(EXPR_NODE));
+	/*Set the attributes*/
+	eNode->tag = ARRAY_ACCESS;
+	eNode->type = arrayType;
+	eNode->u.array_access.index_list = indexList;
+	eNode->u.array_access.gid = arrayExpr;
+	
+	return eNode;
 }
 /*Checks to make sure an expression is a boolean expression*/
 BOOLEAN checkBoolean(EXPR exp)
