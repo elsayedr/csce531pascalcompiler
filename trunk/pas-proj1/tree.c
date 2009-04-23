@@ -1984,32 +1984,29 @@ BOOLEAN is_lval(EXPR expr)
 {
 	/* If expr is empty, bug */
 	if (!expr) bug("Empty expr sent to is_lval");
-	
 	/* Gets the expr_tag and type of the expr */
 	EXPR_TAG eTag = expr->tag;
 	TYPE eType = expr->type;
-	
 	/* Retrieves expr's typetag using its type */
 	TYPETAG eTypeTag = ty_query(eType);
 	
 	/* If tag is LVAR, expr is an lval */
 	if (eTag == LVAR)
 		return TRUE;
+
 	
 	/* If tag is GID and typetag is a data type (not TYFUNC or TYERROR), expr is an lval */
 	else if (eTag == GID && eTypeTag != TYFUNC && eTypeTag != TYERROR)
 		return TRUE;
-	
+		
 	/* If tag is UNOP, check the operator */
 	else if (eTag == UNOP)
 	{
 		/* Retrieve unop operator */
 		EXPR_UNOP eOp = expr->u.unop.op;
-		
 		/* If operator is the indirection operator (^), expr is an lval */
 		if (eOp == INDIR_OP) return TRUE;
 	}
-	
 	/* Expr is not an lval */
 	return FALSE;
 }/* End is_val */
@@ -2748,6 +2745,33 @@ EXPR checkVariable(EXPR eNode, TYPE argType, TYPE paramType)
   return eNode;
 
 }
+/*Purpose: Pushes a new label to the end label stack
+  Params: char* endLabel is the label to push on the stack
+  Returns: nothing
+*/
+void pushEndLabel(char* endLabel)
+{
+	endLabels[endLabelCurr] = malloc(sizeof(char*));
+	strcpy(endLabels[endLabelCurr],endLabel);
+	endLabelCurr++;
+}
+/*Purpose: Pops off the head node from the end label stack
+  Params: none
+  Returns: returns the head
+*/
+char* popEndLabel()
+{
+	endLabelCurr--;
+	return endLabels[endLabelCurr];
+}
+/*Purpose: Looks at the head but does not pop it off the stack
+  Params: none
+  Returns: the head node with out popping it	  
+*/
+char* peekEndLabel()
+{
+	return endLabels[endLabelCurr];
+}
 
 /*Purpose: Used for the initialization of a while loop
   Params: EXPR eNode is the boolean expression defined in the while
@@ -2756,8 +2780,12 @@ EXPR checkVariable(EXPR eNode, TYPE argType, TYPE paramType)
 char* whileInit(EXPR eNode)
 {
 	if(debug)
-		printf("Entered whileInit function\n");
+		printf("Entered whileInit function");
 
+	/*Creates a unique labels for the end of the while*/
+	char* end = new_symbol();
+	/*Adds the string to the end label stack*/
+	pushEndLabel(end);
 	/*Creates a unique labels for the start of the while*/ 
 	char* start = new_symbol();
 	
@@ -2774,13 +2802,15 @@ char* whileInit(EXPR eNode)
 */
 char* whileCond()
 {
-	if(debug) printf("Entered whileCond function\n");
-
+	/*-------May need to remove this
 	/*Creates a unique labels for the end of the while*/
-	char* end = new_symbol();
+	/*char* end = new_symbol();
+	/*-------------------------------*/
 	/* When the condition is false it jumps to the end of the while loop*/
-	b_cond_jump(TYSIGNEDCHAR,B_ZERO,end);
-	return end;
+	/*b_cond_jump(TYSIGNEDCHAR,B_ZERO,end);*/
+	b_cond_jump(TYSIGNEDCHAR,B_ZERO,peekEndLabel());
+	/*return end;*/
+	return peekEndLabel();
 }
 /*Purpose:  Used to loop back to the beginning of the while
   Params:  char* start start is the start label that corresponds to the beginning of the while, 
@@ -2799,7 +2829,10 @@ void whileLoop(char* start, char *end)
 	/*Jumps back to the beginning*/
 	b_jump(start);
 	/*Creates a unique label for the end of the while*/
-	b_label(end);
+	/*modded this to work with the stack, may need to take out the end param
+	b_label(end); */
+	
+	b_label(popEndLabel());
 }
 /*Purpose:  Starts the code for the if statement
   Params:  EXPR eNode corresponds to the boolean statement
@@ -2807,16 +2840,15 @@ void whileLoop(char* start, char *end)
 */
 char* ifInit(EXPR eNode)
 {
-  if(debug)
-    printf("Entered ifInit function\n");
- 
-  /*encodes the boolean expression*/
-  encode_expr(eNode);
-  /*creates a new symbol for the end of the if block*/
-  char* ifend = new_symbol();
-  /*when thte if statement is false it jumps past that block of code*/
-  b_cond_jump(TYSIGNEDCHAR,B_ZERO,ifend);
-  return ifend;	
+	if(debug)
+		printf("Entered ifInit function\n");
+	/*encodes the boolean expression*/
+	encode_expr(eNode);
+	/*creates a new symbol for the end of the if block*/
+	char* ifend = new_symbol();
+	/*when thte if statement is false it jumps past that block of code*/
+	b_cond_jump(TYSIGNEDCHAR,B_ZERO,ifend);
+	return ifend;	
 }
 /*Purpose:  finishes up an if statement
   Params:  char* ifend is the label that corresponds to the end of the if in memory
@@ -2843,6 +2875,57 @@ void elseClose(char* elseend)
 	b_label(elseend);
 }
 
+EXPR make_array_access_expr(EXPR arrayExpr,EXPR_LIST indexList)
+{
+	/*Checks to make sure if arrayExpr is an array*/	
+	if(ty_query(arrayExpr->type) != TYARRAY)
+	{
+		bug("Not an array parameter sent into make_array_access_expr\n");		
+		return make_error_expr();
+	}
+	
+	TYPE arrayType;
+	TYPETAG currExprType;
+	INDEX_LIST indices;
+	
+	arrayType = ty_query_array(arrayExpr->type,&indices);
+
+	TYPETAG moo;
+	
+	EXPR_LIST currExprList = indexList;
+
+	while(currExprList != NULL)
+	{
+		/*All exprs must be rvals, if it is an lval it has to be dereferenced*/
+		if(is_lval(currExprList->expr) == TRUE)/*PROBLEM*/
+		{
+			currExprList->expr = make_un_expr(DEREF_OP,currExprList->expr);
+		}
+		/*gets the type of the expression*/
+		currExprType = ty_query(currExprList->expr->type);
+		/*TODO put in checks here to make sure of stuff*/
+		
+		currExprList = currExprList->next;
+		indices = indices->next;
+	}
+	if((currExprList  == NULL && indices != NULL)||
+		(currExprList  != NULL && indices == NULL))
+	{
+		error("Wrong number of indecies");
+		return make_error_expr();
+	}
+
+	/*Creates the expr node to return*/
+	EXPR eNode;
+	eNode = malloc(sizeof(EXPR_NODE));
+	/*Set the attributes*/
+	eNode->tag = ARRAY_ACCESS;
+	eNode->type = arrayType;
+	eNode->u.array_access.index_list = indexList;
+	eNode->u.array_access.gid = arrayExpr;
+	
+	return eNode;
+}
 /*Checks to make sure an expression is a boolean expression*/
 BOOLEAN checkBoolean(EXPR exp)
 {
