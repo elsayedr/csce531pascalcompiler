@@ -834,7 +834,15 @@ if_statement
     ;
 
 case_statement
-    : LEX_CASE expression LEX_OF { TYPETAG tag = TYVOID; long lo, hi = 0; new_case_value(tag,lo,hi); } case_element_list optional_semicolon_or_else_branch LEX_END	{}
+    : LEX_CASE expression LEX_OF { 
+				    if(is_lval($2) == FALSE)
+				      encode_expr($2);
+				    else
+				      encode_expr(make_un_expr(DEREF_OP, $2));
+				    VAL_LIST newList = malloc(sizeof(VAL_LIST_REC));  
+				    $<y_valuelist>$ = newList; 
+				 } 
+				case_element_list optional_semicolon_or_else_branch LEX_END	{}
     ;
 
 optional_semicolon_or_else_branch
@@ -848,8 +856,8 @@ case_element_list
   {};
 
 case_element
-    : case_constant_list ':' statement
-  {};
+    : case_constant_list ':' { encode_dispatch($1, new_symbol()); } statement	{}
+    ;
 
 case_default
     : LEX_ELSE
