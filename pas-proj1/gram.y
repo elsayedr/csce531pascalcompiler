@@ -887,7 +887,7 @@ while_statement
 	;
 
 for_statement
-    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); } statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
+    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); $<y_string>$ = encode_for_preamble($2, $4, $6); } statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
     ;
 
 for_direction
