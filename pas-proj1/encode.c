@@ -916,3 +916,32 @@ void encode_expr(EXPR expr)
   }
 }
 
+/*Function that creates a new exit label*/
+void new_exit_label()
+{
+}
+
+/*Function that returns old exit label*/
+char * old_exit_label()
+{
+}
+
+/*Function that returns the current exit label*/
+char * current_exit_label()
+{
+}
+
+/*Tests whether is exit label or not*/
+BOOLEAN is_exit_label()
+{
+}
+
+/*Function that encodes dispatch*/
+void encode_dispatch(VAL_LIST vals, char * label)
+{
+}
+
+/*Funciton that encodes the loop preamble*/
+char * encode_for_preamble(EXPR var, EXPR init, int dir, EXPR limit)
+{
+}

@@ -2967,3 +2967,28 @@ BOOLEAN checkBoolean(EXPR exp)
     return FALSE;
   }
 }
+
+/*Returns a new val list node*/
+VAL_LIST new_case_value(TYPETAG type, long lo, long hi)
+{
+}
+
+/*Function that checks case values*/
+BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals)
+{
+}
+
+/*Frees up list of case constants*/
+void case_value_list_free(VAL_LIST vals)
+{
+}
+
+/*Function that gets the case value*/
+BOOLEAN get_case_value(EXPR expr, long * val, TYPETAG * type)
+{
+}
+
+/*Error checks the loop preamble*/
+BOOLEAN check_for_preamble(EXPR var, EXPR init, EXPR limit)
+{
+}
