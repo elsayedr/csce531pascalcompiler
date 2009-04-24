@@ -980,4 +980,33 @@ void encode_dispatch(VAL_LIST vals, char * label)
 /*Funciton that encodes the loop preamble*/
 char * encode_for_preamble(EXPR var, EXPR init, int dir, EXPR limit)
 {
+  /*Encodes the limit expression*/
+  encode_expr(limit);
+
+  /*If the limit is not signed long int, convert*/
+  if(ty_query(limit->type) != TYSIGNEDLONGINT)
+    b_convert(ty_query(limit->type), TYSIGNEDLONGINT);
+
+  /*Duplicates the value on top*/
+  b_duplicate(TYSIGNEDLONGINT);
+
+  /*Encodes the init expression*/
+  encode_expr(init);
+
+  /*Emits new label*/
+  b_label(new_symbol());
+
+  /*If the init is not signed long int, convert*/
+  if(ty_query(init->type) != TYSIGNEDLONGINT)
+    b_convert(ty_query(init->type), TYSIGNEDLONGINT);
+
+  /*Comparison based on direction*/
+  if(dir == 0)
+    b_arith_rel_op(B_LT, TYSIGNEDLONGINT);
+  else
+    b_arith_rel_op(B_GT, TYSIGNEDLONGINT);
+
+  /*Conditional jump*/
+  char * lab = peekEndLabel();
+  b_cond_jump(TYSIGNEDLONGINT, B_NONZERO, lab);
 }

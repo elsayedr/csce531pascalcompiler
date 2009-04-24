@@ -59,6 +59,7 @@ Josh Van Buren */
 #include "tree.h"
 #include "symtab.h"
 #include "string.h"
+#include "backend.h"
 
 /* Cause the `yydebug' variable to be defined. */
 #define YYDEBUG 1
@@ -107,6 +108,8 @@ int n; // used as temp variable for debugging
     FUNC_HEAD	y_funchead;
     DIRECTIVE	y_dir;
     NAME_OFFSET	y_nameoffset;
+    VAL_LIST	y_valuelist;
+    CASE_RECORD	y_caserec;
 }
 
 %token <y_string> LEX_ID
@@ -218,6 +221,7 @@ int n; // used as temp variable for debugging
 %type <y_string> simple_if if_statement case_statement conditional_statement
 %type <y_cint> variable_declaration_part variable_declaration_list
 %type <y_cint> variable_declaration simple_decl any_decl any_declaration_part function_declaration
+%type <y_cint> repetitive_statement for_direction
 %type <y_int> enumerator enumerated_type enum_list
 
 %%
@@ -871,13 +875,13 @@ while_statement
 	;
 
 for_statement
-    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO statement
-  {};
+    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO statement	{if($5 == LEX_TO) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
+    ;
 
 for_direction
-    : LEX_TO
-  {}| LEX_DOWNTO
-  {};
+    : LEX_TO	{}
+    | LEX_DOWNTO	{}	
+    ;
 
 simple_statement
     : empty_statement	{}
