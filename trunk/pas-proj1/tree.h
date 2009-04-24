@@ -187,6 +187,7 @@ static int endLabelCurr = 0;
 
 void pushEndLabel(char* endLabel);
 char* popEndLabel();
+char * peekEndLabel();
 
 /*While Loop Definitions*/
 char* whileInit(EXPR eNode);

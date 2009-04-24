@@ -60,6 +60,7 @@ Josh Van Buren */
 #include "symtab.h"
 #include "string.h"
 #include "backend.h"
+#include "encode.h"
 
 /* Cause the `yydebug' variable to be defined. */
 #define YYDEBUG 1
@@ -851,9 +852,11 @@ optional_semicolon_or_else_branch
   {};
 
 case_element_list
-    : case_element
-  {}| case_element_list semi case_element
-  {};
+    : case_element	{ $$ = $1; }
+    | case_element_list semi { $<y_caserec>$ = $1; } case_element	{
+									  /*Checks for case duplicates*/
+									}
+    ;
 
 case_element
     : case_constant_list ':' { encode_dispatch($1, new_symbol()); } statement	{}
@@ -895,7 +898,7 @@ while_statement
 	;
 
 for_statement
-    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); $<y_string>$ = encode_for_preamble($2, $4, $6); } statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
+    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); $<y_string>$ = encode_for_preamble($2, $4, $5, $6); } statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
     ;
 
 for_direction
@@ -908,7 +911,7 @@ simple_statement
     | goto_statement	{}
     | assignment_or_call_statement	{ encode_expr($1); }
     | standard_procedure_statement	{ encode_expr($1); }
-    | statement_extensions	{ $$ = peekEndLabel(); }
+    | statement_extensions	{ $<y_string>$ = peekEndLabel(); }
     ;
 
 empty_statement
