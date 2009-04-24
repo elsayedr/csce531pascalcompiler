@@ -3107,7 +3107,7 @@ BOOLEAN get_case_value(EXPR expr, long * val, TYPETAG * type)
   if(expr->tag == INTCONST)
   {
     /*Sets the type, gets the val, returns true*/
-    *type = ty_query(expr->type);
+    *type = TYSIGNEDLONGINT;
     *val = expr->u.intval;
     return TRUE;
   }
@@ -3118,9 +3118,9 @@ BOOLEAN get_case_value(EXPR expr, long * val, TYPETAG * type)
     if(strlen(expr->u.strval) == 1)
     {
       /*Sets the type, val, changes the expression, returns true*/
-      *type = TYUNSIGNEDCHAR;
+      *type = TYSIGNEDLONGINT;
       *val = expr->u.strval[0];
-      expr = make_intconst_expr(expr->u.strval[0], ty_build_basic(TYUNSIGNEDCHAR));
+      expr = make_intconst_expr(expr->u.strval[0], ty_build_basic(TYSIGNEDLONGINT));
       return TRUE;
     }
     /*Else, error, return*/

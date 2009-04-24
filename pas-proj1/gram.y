@@ -858,7 +858,7 @@ case_element_list
     : case_element	{ $$ = $1; }
     | case_element_list semi { $<y_caserec>$ = $1; } case_element	{
 									  /*Checks for case duplicates*/
-									  if(check_case_values($1.type, $<y_caserec>3.values, $1.values) == TRUE)
+									  //if(check_case_values($1.type, $<y_caserec>3.values, $1.values) == TRUE)
 									    $$.values = $1.values;
 									}
     ;
