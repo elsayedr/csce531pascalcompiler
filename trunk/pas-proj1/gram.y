@@ -630,9 +630,9 @@ case_constant_list
   {};
 
 one_case_constant
-    : static_expression
-  {}| static_expression LEX_RANGE static_expression
-  {};
+    : static_expression	{}
+    | static_expression LEX_RANGE static_expression	{}
+    ;
 
 /* Variable declaration part */
 
