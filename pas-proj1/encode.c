@@ -919,21 +919,57 @@ void encode_expr(EXPR expr)
 /*Function that creates a new exit label*/
 void new_exit_label()
 {
+  /*Gets the new label*/
+  char * newLabel = new_symbol();
+
+  /*Increments*/
+  endLabelCurr++;
+
+  /*Pushes the label onto the stack*/
+  endLabels[endLabelCurr] = newLabel;
 }
 
 /*Function that returns old exit label*/
 char * old_exit_label()
 {
+  /*If the current index is zero, bug*/
+  if(endLabelCurr <= 0)
+  {
+    /*Bug, return*/
+    bug("Exit label stack empty");
+    return;
+  }
+
+  /*Gets the top label off the stack, decrements, returns the label*/
+  char * retLabel = endLabels[endLabelCurr];
+  endLabelCurr--;
+  return retLabel;
 }
 
 /*Function that returns the current exit label*/
 char * current_exit_label()
 {
+  /*If the current index is zero, bug*/
+  if(endLabelCurr <= 0)
+  {
+    /*Bug, return*/
+    bug("Exit label stack empty");
+    return;
+  }
+
+  /*Gets the top label off the stack, returns the label*/
+  char * retLabel = endLabels[endLabelCurr];
+  return retLabel;
 }
 
 /*Tests whether is exit label or not*/
 BOOLEAN is_exit_label()
 {
+  /*If index greater than or equal to zero, not empty*/
+  if(endLabelCurr > 0)
+    return TRUE;
+  else
+    return FALSE;
 }
 
 /*Function that encodes dispatch*/
