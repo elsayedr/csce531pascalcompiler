@@ -24,5 +24,12 @@ void enter_main_body();
 void exit_main_body();
 void encode_expr(EXPR expr);
 int get_local_var_offset();
+void new_exit_label();
+char * old_exit_label();
+char * current_exit_label();
+BOOLEAN is_exit_label();
+void encode_dispatch(VAL_LIST vals, char * label);
+char * encode_for_preamble(EXPR var, EXPR init, int dir, EXPR limit);
+
 
 #endif
