@@ -776,11 +776,11 @@ unlabelled_statement
     ;
 
 structured_statement
-    : compound_statement
-  {}| with_statement
-  {}| conditional_statement
-  {}| repetitive_statement
-  {};
+    : compound_statement	{}
+    | with_statement	{}
+    | conditional_statement	{}
+    | repetitive_statement	{}
+    ;
 
 with_statement
     : LEX_WITH structured_variable_list LEX_DO statement
