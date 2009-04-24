@@ -630,16 +630,16 @@ variant
   {};
 
 case_constant_list
-    : one_case_constant
-  {}| case_constant_list ',' one_case_constant
-  {};
+    : one_case_constant	/*Default*/
+    | case_constant_list ',' one_case_constant	{}
+    ;
 
 one_case_constant
     : static_expression	{
 			  TYPETAG cType;
 			  long lo;
 			  if(get_case_value($1, &lo, &cType) == TRUE)
-			    new_case_value(cType, lo, lo);
+			    $$ = new_case_value(cType, lo, lo);
 			}
     | static_expression LEX_RANGE static_expression	{
 							  TYPETAG cType1, cType2;
@@ -647,7 +647,7 @@ one_case_constant
 							  if(cType1 != cType2)
 							    error("Range limits are of unequal type");
 							  if(get_case_value($1, &lo, &cType1) == TRUE && get_case_value($3, &hi, &cType2))
-							    new_case_value(cType1, lo, hi);
+							    $$ = new_case_value(cType1, lo, hi);
 							}
     ;
 
