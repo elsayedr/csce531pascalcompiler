@@ -798,28 +798,23 @@ conditional_statement
   {};
 
 simple_if
-    : LEX_IF boolean_expression
-	{
-	  /*Checks the expression*/
+    : LEX_IF boolean_expression {
+				  /*Checks the expression*/
+				  if(checkBoolean($2) == TRUE)
+				  {
+				    char* startIf = ifInit($<y_expr>2);
+				    $<y_string>$ = startIf;
+				  }
 	
-	  if(checkBoolean($2) == TRUE)
-	  {
-	    char* startIf = ifInit($<y_expr>2);
-	    $<y_string>$ = startIf;
-	  }
-	
-	} 
-	LEX_THEN statement
-  	{
-  		$<y_string>$ = $<y_string>3;/*$<y_string>$=ifClose($<y_string>3)*/;
-  	};
+				} LEX_THEN statement	{
+							  $<y_string>$ = $<y_string>3;/*$<y_string>$=ifClose($<y_string>3)*/;
+							}
+    ;
 
 if_statement
-    : simple_if LEX_ELSE {$<y_string>$  = ifClose($<y_string>1);} 
-			statement 
-			{b_label($<y_string>3);}
-  | simple_if {b_label($<y_string>1);}%prec prec_if
-  {};
+    : simple_if LEX_ELSE { $<y_string>$ = ifClose($<y_string>1);} statement { b_label($<y_string>3); }
+    | simple_if %prec prec_if { b_label($<y_string>1); }
+    ;
 
 case_statement
     : LEX_CASE expression LEX_OF case_element_list optional_semicolon_or_else_branch LEX_END
@@ -869,9 +864,10 @@ while_statement
 					    $<y_string>$ = endWhile;
 					  }
 	statement
- {					 					 
-	whileLoop($<y_string>4,$<y_string>5);
- };
+	{					 					 
+	  whileLoop($<y_string>4,$<y_string>5);
+	}
+	;
 
 for_statement
     : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO statement
