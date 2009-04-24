@@ -836,10 +836,13 @@ if_statement
 
 case_statement
     : LEX_CASE expression LEX_OF { 
-				    if(is_lval($2) == FALSE)
-				      encode_expr($2);
-				    else
-				      encode_expr(make_un_expr(DEREF_OP, $2));
+				    if(is_lval($2) == TRUE)
+				      $2 = make_un_expr(DEREF_OP, $2);
+				    if(ty_query($2->type) != TYSIGNEDLONGINT)
+				      $2 = makeConvertNode($2, ty_build_basic(TYSIGNEDLONGINT));
+
+				    encode_expr($2);
+				      
 				    VAL_LIST newList = malloc(sizeof(VAL_LIST_REC));  
 				    $<y_valuelist>$ = newList; 
 				 } 
@@ -847,8 +850,8 @@ case_statement
     ;
 
 optional_semicolon_or_else_branch
-    : optional_semicolon	{}
-    | case_default statement_sequence	{}
+    : optional_semicolon	{ b_pop(); }
+    | case_default { b_pop(); } statement_sequence	{}
     ;
 
 case_element_list
