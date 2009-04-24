@@ -634,8 +634,20 @@ case_constant_list
   {};
 
 one_case_constant
-    : static_expression	{}
-    | static_expression LEX_RANGE static_expression	{}
+    : static_expression	{
+			  TYPETAG cType;
+			  long lo;
+			  if(get_case_value($1, &lo, &cType) == TRUE)
+			    new_case_value(cType, lo, 0);
+			}
+    | static_expression LEX_RANGE static_expression	{
+							  TYPETAG cType1, cType2;
+							  long lo, hi;
+							  if(cType1 != cType2)
+							    error("Range limits are of unequal type");
+							  if(get_case_value($1, &lo, &cType1) == TRUE && get_case_value($3, &hi, &cType2))
+							    new_case_value(cType1, lo, hi);
+							}
     ;
 
 /* Variable declaration part */
@@ -822,8 +834,8 @@ if_statement
     ;
 
 case_statement
-    : LEX_CASE expression LEX_OF case_element_list optional_semicolon_or_else_branch LEX_END
-  {};
+    : LEX_CASE expression LEX_OF { TYPETAG tag = TYVOID; long lo, hi = 0; new_case_value(tag,lo,hi); } case_element_list optional_semicolon_or_else_branch LEX_END	{}
+    ;
 
 optional_semicolon_or_else_branch
     : optional_semicolon
@@ -875,7 +887,7 @@ while_statement
 	;
 
 for_statement
-    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
+    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); } statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
     ;
 
 for_direction
