@@ -975,7 +975,36 @@ BOOLEAN is_exit_label()
 /*Function that encodes dispatch*/
 void encode_dispatch(VAL_LIST vals, char * label)
 {
-  
+  /*New match label*/
+  char * matchLabel = new_symbol();
+
+  /*If there are elements in the val list*/
+  if(vals != NULL)
+    while(vals != NULL)
+    {
+      /*Comparison based on whether type is subrange or not*/
+      if(vals->lo != vals->hi)
+      {
+	/*Subrange case*/
+	char *  newLabel = new_symbol();
+	b_dispatch(B_GT, vals->type, vals->lo, newLabel, TRUE);
+	b_dispatch(B_LT, vals->type, vals->hi, matchLabel, TRUE);
+	b_label(newLabel);
+      }
+      else
+      {
+	/*Calls b_dispatch for comparison*/
+	b_dispatch(B_EQ, vals->type, vals->lo, matchLabel, TRUE);
+      }
+      /*Moves onto the next item*/
+      vals = vals->next;
+    }
+
+  /*Unconditional jump to the no match label*/
+  b_jump(label);
+
+  /*Emits the match label*/
+  b_label(matchLabel);
 }
 
 /*Funciton that encodes the loop preamble*/
