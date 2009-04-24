@@ -2971,24 +2971,206 @@ BOOLEAN checkBoolean(EXPR exp)
 /*Returns a new val list node*/
 VAL_LIST new_case_value(TYPETAG type, long lo, long hi)
 {
+  /*Checks the case type to make sure ordinal*/
+  if(type != TYSIGNEDLONGINT && type != TYUNSIGNEDCHAR && type != TYSIGNEDCHAR)
+    error("Case expression is not of ordinal type");
+
+  /*Creates the new val list and allocates memory*/
+  VAL_LIST newVList;
+  newVList = malloc(sizeof(VAL_LIST_REC));
+
+  /*Sets the attributes*/
+  newVList->lo = lo;
+  newVList->hi = hi;
+  newVList->type = type;
+  
+  /*Returns the val list node*/
+  return newVList;
 }
 
 /*Function that checks case values*/
 BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals)
 {
+   /*Copies the val list*/
+   VAL_LIST valsC = vals;
+   VAL_LIST pValsC = prev_vals;
+
+  /*While loop to run through the vals list*/
+  while(valsC != NULL)
+  {
+     /*Checks for type match between case constants and expressions*/
+     if(type != vals->type)
+     {
+	/*Error, return false*/
+	error("Case constant type does not match case expression type");
+	return FALSE;
+     }
+
+    /*If it is subrange, check range*/
+    if(vals->type == TYSUBRANGE)
+      if(vals->lo >= vals->hi)
+	warning("Empty range in case constant (ignored)");
+
+    /*While loop that runs through the previous list*/
+    while(pValsC != NULL)
+    {
+      /*Checks for overlap differently if subrange or not*/
+      if(pValsC->type == TYSUBRANGE)
+      {
+	/*If comparing element is subrange*/
+	if(valsC->type == TYSUBRANGE)
+	{
+	   /*If subranges overlap*/
+	   if((valsC->lo >= pValsC->lo && valsC->lo <= pValsC->hi) || (valsC->hi >= pValsC->lo && valsC->hi <= pValsC->hi))
+	   {
+	      /*Error, return false*/
+	      error("Overlapping constants in case statement");
+	      return FALSE;
+	   }
+	}
+	else
+	{
+	   /*If inside subrange, overlap*/
+	   if(valsC->lo >= pValsC->lo && valsC->lo <= pValsC->hi)
+	   {
+	      /*Error, return false*/
+	      error("Overlapping constants in case statement");
+	      return FALSE;
+	   }
+	}
+      }
+      /*Else, not subrange*/
+      else
+      {
+	/*If comparing element is subrange*/
+	if(valsC->type == TYSUBRANGE)
+	{
+	  /*Checks to see if inside subrange*/
+	  if(pValsC->lo >= valsC->lo && pValsC->lo <= valsC->hi)
+	  {
+	     /*Error, return false*/
+	     error("Overlapping constants in case statement");
+	     return FALSE;
+	  }
+	}
+	else
+	{
+	  /*Checks to see if same*/
+	  if(valsC->lo == pValsC->lo)
+	  {
+	     /*Error, return false*/
+	     error("Overlapping constants in case statement");
+	     return FALSE;
+	  }
+	}
+      }
+      /*If last item all checks passed add to end of list*/
+      if(pValsC->next == NULL)
+      {
+	/*Adds to list*/
+	pValsC->next = valsC;
+	pValsC = NULL;
+      }
+      else
+      {
+	/*Moves onto the next item*/
+	pValsC = pValsC->next;
+      }
+    }
+    /*Moves onto the next item*/
+    valsC = valsC->next;
+    pValsC = prev_vals;
+  }
+
+  /*All checks passed return true*/
+  return TRUE;
 }
 
 /*Frees up list of case constants*/
 void case_value_list_free(VAL_LIST vals)
 {
+  /* If the next element exists */
+  if(vals->next)
+  {
+    /* Frees the next node in the list */
+    case_value_list_free(vals->next);
+  }
+
+  /* Frees the list */
+  free(vals);
 }
 
 /*Function that gets the case value*/
 BOOLEAN get_case_value(EXPR expr, long * val, TYPETAG * type)
 {
+  /*Checks the tag of the expression*/
+  if(expr->tag == INTCONST)
+  {
+    /*Sets the type, gets the val, returns true*/
+    *type = ty_query(expr->type);
+    *val = expr->u.intval;
+    return TRUE;
+  }
+  /*Else string const*/
+  else if(expr->tag == STRCONST)
+  {
+    /*Checks to see if the string constant is length one, if so expr made into int const*/
+    if(strlen(expr->u.strval) == 1)
+    {
+      /*Sets the type, val, changes the expression, returns true*/
+      *type = TYUNSIGNEDCHAR;
+      *val = expr->u.strval[0];
+      expr = make_intconst_expr(expr->u.strval[0], ty_build_basic(TYUNSIGNEDCHAR));
+      return TRUE;
+    }
+    /*Else, error, return*/
+    else
+    {
+      /*Error, return false*/
+      error("Case constant has non-ordinal type");
+      return FALSE;
+    }
+  }
+  /*Else error*/
+  else
+  {
+    /*Error, return false*/
+    error("Case constant has non-ordinal type");
+    return FALSE;
+  }
 }
 
 /*Error checks the loop preamble*/
 BOOLEAN check_for_preamble(EXPR var, EXPR init, EXPR limit)
 {
+  /*Checks to determine if the control variable is an lval*/
+  if(is_lval(var) == FALSE)
+  {
+    /*Error, return false*/
+    error("For-loop control variable not an l-val");
+    return FALSE;
+  }
+
+  /*Checks to make sure the type is ordinal type*/
+  TYPETAG cTag = ty_query(var->type);
+  if(cTag != TYSIGNEDLONGINT && cTag != TYUNSIGNEDCHAR && cTag != TYSIGNEDCHAR)
+  {
+    /*Error, return*/
+    error("For-loop control variable not of ordinal type");
+    return FALSE;
+  }
+
+  /*Checks type equality between the parts of of the for loop*/
+  BOOLEAN t1 = ty_test_equality(var->type, init->type);
+  BOOLEAN t2 = ty_test_equality(var->type, limit->type);
+  BOOLEAN t3 = ty_test_equality(limit->type, init->type);
+  if(t1 == FALSE || t2 == FALSE || t3 == FALSE)
+  {
+    /*Error, return*/
+    error("Type mismatch in for-loop control");
+    return FALSE;
+  }
+
+  /*All checks passed, return true*/
+  return TRUE;
 }
