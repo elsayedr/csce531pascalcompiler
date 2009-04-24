@@ -218,7 +218,7 @@ int n; // used as temp variable for debugging
 %type <y_dir> directive_list directive
 %type <y_valuelist> case_constant_list one_case_constant
 %type <y_caserec> case_element_list case_element
-%type <y_string> simple_if if_statement case_statement conditional_statement
+%type <y_string> simple_if if_statement case_statement conditional_statement simple_statement structured_statement
 %type <y_cint> variable_declaration_part variable_declaration_list
 %type <y_cint> variable_declaration simple_decl any_decl any_declaration_part function_declaration
 %type <y_cint> repetitive_statement for_direction
@@ -795,7 +795,7 @@ structured_statement
     : compound_statement	{}
     | with_statement	{}
     | conditional_statement	{}
-    | repetitive_statement	{}
+    | { char * newSymb = new_symbol(); pushEndLabel(newSymb); } repetitive_statement	{ $$ = popEndLabel(); }
     ;
 
 with_statement
@@ -900,7 +900,7 @@ simple_statement
     | goto_statement	{}
     | assignment_or_call_statement	{ encode_expr($1); }
     | standard_procedure_statement	{ encode_expr($1); }
-    | statement_extensions	{}
+    | statement_extensions	{ $$ = peekEndLabel(); }
     ;
 
 empty_statement
@@ -1008,8 +1008,8 @@ rts_proc_parlist
 statement_extensions
     : return_statement
   {}| continue_statement
-  {}| break_statement
-  {};
+  {}| break_statement	{ if(is_exit_label() == FALSE) error("Break statement not inside loop"); }
+    ;
 
 return_statement
     : RETURN_
