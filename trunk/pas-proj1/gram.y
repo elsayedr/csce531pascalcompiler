@@ -638,7 +638,7 @@ one_case_constant
 			  TYPETAG cType;
 			  long lo;
 			  if(get_case_value($1, &lo, &cType) == TRUE)
-			    new_case_value(cType, lo, 0);
+			    new_case_value(cType, lo, lo);
 			}
     | static_expression LEX_RANGE static_expression	{
 							  TYPETAG cType1, cType2;
