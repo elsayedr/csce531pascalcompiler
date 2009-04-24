@@ -213,6 +213,9 @@ int n; // used as temp variable for debugging
 %type <y_member> record_field_list fixed_part record_section variant_part
 %type <y_funchead> function_heading
 %type <y_dir> directive_list directive
+%type <y_valuelist> case_constant_list one_case_constant
+%type <y_caserec> case_element_list case_element
+%type <y_string> simple_if if_statement case_statement conditional_statement
 %type <y_cint> variable_declaration_part variable_declaration_list
 %type <y_cint> variable_declaration simple_decl any_decl any_declaration_part function_declaration
 %type <y_int> enumerator enumerated_type enum_list
@@ -803,16 +806,14 @@ simple_if
 				  if(checkBoolean($2) == TRUE)
 				  {
 				    char* startIf = ifInit($<y_expr>2);
-				    $<y_string>$ = startIf;
+				    $$ = startIf;
 				  }
 	
-				} LEX_THEN statement	{
-							  $<y_string>$ = $<y_string>3;/*$<y_string>$=ifClose($<y_string>3)*/;
-							}
+				} LEX_THEN statement	{ $$ = $<y_string>3; }
     ;
 
 if_statement
-    : simple_if LEX_ELSE { $<y_string>$ = ifClose($<y_string>1);} statement { b_label($<y_string>3); }
+    : simple_if LEX_ELSE { $$ = ifClose($<y_string>1);} statement { b_label($<y_string>3); }
     | simple_if %prec prec_if { b_label($<y_string>1); }
     ;
 

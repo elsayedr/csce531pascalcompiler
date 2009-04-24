@@ -33,11 +33,22 @@ typedef struct {
     TYPE	type;
 } PTR_OBJ, FUNC_HEAD;
 
+typedef struct val_node {
+    long lo, hi;
+    TYPETAG type;
+    struct val_node * next;
+} VAL_LIST_REC, *VAL_LIST;
+
 typedef struct {
     char * name;
     int    offset;
 } NAME_OFFSET;
 
+typedef struct {
+    TYPETAG	type;
+    char * 	label;
+    VAL_LIST	values;
+} CASE_RECORD;
 
 /*Structures for syntax tree nodes (EXPR and EXPR_LIST)*/
 /*------------Added array_access to this*/
@@ -193,6 +204,12 @@ BOOLEAN checkBoolean(EXPR exp);
 /*Array Access*/
 EXPR make_array_access_expr(EXPR arrayExpr,EXPR_LIST indexList);
 
+/*Fenner's functions*/
+VAL_LIST new_case_value(TYPETAG type, long lo, long hi);
+BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals);
+void case_value_list_free(VAL_LIST vals);
+BOOLEAN get_case_value(EXPR expr, long * val, TYPETAG * type);
+BOOLEAN check_for_preamble(EXPR var, EXPR init, EXPR limit);
 
 #endif
 
