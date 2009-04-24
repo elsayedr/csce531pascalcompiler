@@ -8,6 +8,8 @@
 /*External reference to variables in other files*/
 extern int base_offset_stack[BS_DEPTH];
 extern int bo_top;
+extern char* endLabels[100];
+extern int endLabelCurr;
 
 /*Function declarations*/
 void declareVariable(ST_ID, TYPE);
