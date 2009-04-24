@@ -847,19 +847,27 @@ case_statement
     ;
 
 optional_semicolon_or_else_branch
-    : optional_semicolon
-  {}| case_default statement_sequence
-  {};
+    : optional_semicolon	{}
+    | case_default statement_sequence	{}
+    ;
 
 case_element_list
     : case_element	{ $$ = $1; }
     | case_element_list semi { $<y_caserec>$ = $1; } case_element	{
 									  /*Checks for case duplicates*/
+									  if(check_case_values($1.type, $<y_caserec>3.values, $1.values) == TRUE)
+									    $$.values = $1.values;
 									}
     ;
 
 case_element
-    : case_constant_list ':' { encode_dispatch($1, new_symbol()); } statement	{}
+    : case_constant_list ':' { 
+				$<y_caserec>$.type = $1->type; 
+				$<y_caserec>$.values = $1;
+				$<y_caserec>$.label = new_symbol();
+				encode_dispatch($1, $<y_caserec>$.label);
+			     } 
+			     statement	{ $$ = $<y_caserec>3; }
     ;
 
 case_default
@@ -898,7 +906,7 @@ while_statement
 	;
 
 for_statement
-    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); $<y_string>$ = encode_for_preamble($2, $4, $5, $6); } statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
+    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); $<y_string>$ = encode_for_preamble($2, $4, $5, $6); } statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); b_jump($<y_string>8); }
     ;
 
 for_direction
