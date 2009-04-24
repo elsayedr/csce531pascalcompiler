@@ -975,6 +975,7 @@ BOOLEAN is_exit_label()
 /*Function that encodes dispatch*/
 void encode_dispatch(VAL_LIST vals, char * label)
 {
+  
 }
 
 /*Funciton that encodes the loop preamble*/
@@ -1009,4 +1010,7 @@ char * encode_for_preamble(EXPR var, EXPR init, int dir, EXPR limit)
   /*Conditional jump*/
   char * lab = peekEndLabel();
   b_cond_jump(TYSIGNEDLONGINT, B_NONZERO, lab);
+
+  /*Returns the label*/
+  return lab;
 }
