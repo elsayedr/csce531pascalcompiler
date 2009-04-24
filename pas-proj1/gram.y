@@ -875,12 +875,12 @@ while_statement
 	;
 
 for_statement
-    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO statement	{if($5 == LEX_TO) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
+    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); }
     ;
 
 for_direction
-    : LEX_TO	{}
-    | LEX_DOWNTO	{}	
+    : LEX_TO	{ $$ = 0; }
+    | LEX_DOWNTO	{ $$ = 1; }	
     ;
 
 simple_statement
