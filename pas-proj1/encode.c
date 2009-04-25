@@ -987,14 +987,14 @@ void encode_dispatch(VAL_LIST vals, char * label)
       {
 	/*Subrange case*/
 	char *  newLabel = new_symbol();
-	b_dispatch(B_GT, vals->type, vals->lo, newLabel, FALSE);
-	b_dispatch(B_LE, vals->type, vals->hi, matchLabel, TRUE);
+	b_dispatch(B_GT, TYSIGNEDLONGINT, vals->lo, newLabel, FALSE);
+	b_dispatch(B_LE, TYSIGNEDLONGINT, vals->hi, matchLabel, TRUE);
 	b_label(newLabel);
       }
       else
       {
 	/*Calls b_dispatch for comparison*/
-	b_dispatch(B_EQ, vals->type, vals->lo, matchLabel, TRUE);
+	b_dispatch(B_EQ, TYSIGNEDLONGINT, vals->lo, matchLabel, FALSE);
       }
       /*Moves onto the next item*/
       vals = vals->next;
@@ -1005,6 +1005,7 @@ void encode_dispatch(VAL_LIST vals, char * label)
 
   /*Emits the match label*/
   b_label(matchLabel);
+  b_pop();
 }
 
 /*Funciton that encodes the loop preamble*/
