@@ -858,8 +858,8 @@ case_element_list
     : case_element	{ $$ = $1; }
     | case_element_list semi { $<y_caserec>$ = $1; } case_element	{
 									  /*Checks for case duplicates*/
-									  //if(check_case_values($1.type, $<y_caserec>3.values, $1.values) == TRUE)
-									    $$.values = $1.values;
+									    if(check_case_values($1.type, $1.values, $4.values) == TRUE)
+									      b_label($1.label);
 									}
     ;
 
