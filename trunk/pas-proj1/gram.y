@@ -631,7 +631,7 @@ variant
 
 case_constant_list
     : one_case_constant	/*Default*/
-    | case_constant_list ',' one_case_constant	{}
+    | case_constant_list ',' one_case_constant	{ check_case_values($1->type, $3, $1); $$ = $1; }
     ;
 
 one_case_constant
@@ -835,18 +835,18 @@ if_statement
     ;
 
 case_statement
-    : LEX_CASE expression LEX_OF { 
-				    if(is_lval($2) == TRUE)
-				      $2 = make_un_expr(DEREF_OP, $2);
-				    if(ty_query($2->type) != TYSIGNEDLONGINT)
-				      $2 = makeConvertNode($2, ty_build_basic(TYSIGNEDLONGINT));
+    : { char * newSymb = new_symbol(); pushEndLabel(newSymb); }LEX_CASE expression LEX_OF { 
+				    if(is_lval($3) == TRUE)
+				      $3 = make_un_expr(DEREF_OP, $3);
+				    if(ty_query($3->type) != TYSIGNEDLONGINT)
+				      $3 = makeConvertNode($3, ty_build_basic(TYSIGNEDLONGINT));
 
-				    encode_expr($2);
+				    encode_expr($3);
 				      
 				    VAL_LIST newList = malloc(sizeof(VAL_LIST_REC));  
 				    $<y_valuelist>$ = newList; 
 				 } 
-				case_element_list optional_semicolon_or_else_branch LEX_END	{}
+				case_element_list optional_semicolon_or_else_branch LEX_END	{ $$ = new_symbol(); b_label(peekEndLabel()); }
     ;
 
 optional_semicolon_or_else_branch
@@ -856,10 +856,13 @@ optional_semicolon_or_else_branch
 
 case_element_list
     : case_element	{ $$ = $1; }
-    | case_element_list semi { $<y_caserec>$ = $1; } case_element	{
+    | case_element_list semi case_element	{
 									  /*Checks for case duplicates*/
-									    if(check_case_values($1.type, $1.values, $4.values) == TRUE)
+									    if(check_case_values($1.type, $3.values, $1.values) == TRUE)
+									    {
+									      $$ = $1;
 									      b_label($1.label);
+									    }
 									}
     ;
 
@@ -870,13 +873,13 @@ case_element
 				$<y_caserec>$.label = new_symbol();
 				encode_dispatch($1, $<y_caserec>$.label);
 			     } 
-			     statement	{ $$ = $<y_caserec>3; }
+			     statement	{ $$ = $<y_caserec>3; b_jump(peekEndLabel()); }
     ;
 
 case_default
-    : LEX_ELSE
-  {}| semi LEX_ELSE
-  {};
+    : LEX_ELSE	{}
+    | semi LEX_ELSE	{}
+    ;
 
 repetitive_statement
     : repeat_statement
