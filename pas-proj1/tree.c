@@ -3007,7 +3007,7 @@ BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals)
      }
 
     /*If it is subrange, check range*/
-    if(vals->type == TYSUBRANGE)
+    if(vals->lo != vals->hi)
       if(vals->lo >= vals->hi)
 	warning("Empty range in case constant (ignored)");
 
@@ -3015,10 +3015,10 @@ BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals)
     while(pValsC != NULL)
     {
       /*Checks for overlap differently if subrange or not*/
-      if(pValsC->type == TYSUBRANGE)
+      if(pValsC->lo != pValsC->hi)
       {
 	/*If comparing element is subrange*/
-	if(valsC->type == TYSUBRANGE)
+	if(valsC->lo != valsC->hi)
 	{
 	   /*If subranges overlap*/
 	   if((valsC->lo >= pValsC->lo && valsC->lo <= pValsC->hi) || (valsC->hi >= pValsC->lo && valsC->hi <= pValsC->hi))
@@ -3043,7 +3043,7 @@ BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals)
       else
       {
 	/*If comparing element is subrange*/
-	if(valsC->type == TYSUBRANGE)
+	if(valsC->lo != valsC->hi)
 	{
 	  /*Checks to see if inside subrange*/
 	  if(pValsC->lo >= valsC->lo && pValsC->lo <= valsC->hi)
