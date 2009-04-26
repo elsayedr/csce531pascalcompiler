@@ -76,7 +76,16 @@ int bo_top = -1;
 ST_ID func_id_stack[BS_DEPTH];
 int fi_top = -1;
 
-int n; // used as temp variable for debugging
+/*Exit labels stack*/
+char* endLabels[100];
+int endLabelCurr = -1;
+
+/*Case record stack variables*/
+CASE_RECORD caseRecords[100];
+int caseTop = -1;
+
+/*Variable used for debugging*/
+int n; 
 
 /* Like YYERROR but do call yyerror */
 #define YYERROR1 { yyerror ("syntax error"); YYERROR; }
@@ -796,7 +805,7 @@ structured_statement
     : compound_statement	{}
     | with_statement	{}
     | conditional_statement	{}
-    | { char * newSymb = new_symbol(); pushEndLabel(newSymb); } repetitive_statement	{ $$ = popEndLabel(); }
+    | { new_exit_label(); } repetitive_statement	{ $$ = old_exit_label(); }
     ;
 
 with_statement
@@ -835,18 +844,27 @@ if_statement
     ;
 
 case_statement
-    : { char * newSymb = new_symbol(); pushEndLabel(newSymb); }LEX_CASE expression LEX_OF { 
+    : { $<y_string>$ = new_symbol(); }LEX_CASE expression LEX_OF { 
 				    if(is_lval($3) == TRUE)
 				      $3 = make_un_expr(DEREF_OP, $3);
 				    if(ty_query($3->type) != TYSIGNEDLONGINT)
 				      $3 = makeConvertNode($3, ty_build_basic(TYSIGNEDLONGINT));
 
+				    /*Encodes the expression*/
 				    encode_expr($3);
-				      
+
+				    /*Creates the val list for the empty case record*/
 				    VAL_LIST newList = malloc(sizeof(VAL_LIST_REC));  
-				    $<y_valuelist>$ = newList; 
+
+				    /*Creates the case record*/
+				    CASE_RECORD caseRec;
+				    caseRec.values = newList;
+				    caseRec.label = $<y_string>1;
+				    caseRec.type = ty_query($3->type);
+				    caseTop++;
+				    caseRecords[caseTop] = caseRec;
 				 } 
-				case_element_list optional_semicolon_or_else_branch LEX_END	{ $$ = new_symbol(); b_label(popEndLabel()); }
+				case_element_list optional_semicolon_or_else_branch LEX_END	{ b_label(caseRecords[caseTop].label); caseTop--; }
     ;
 
 optional_semicolon_or_else_branch
@@ -856,23 +874,19 @@ optional_semicolon_or_else_branch
 
 case_element_list
     : case_element	{ $$ = $1; b_label($1.label); }
-    | case_element_list semi case_element	{
-									  /*Checks for case duplicates*/
-								  if(check_case_values($1.type, $3.values, $1.values) == TRUE)
-                                                                           {
-                                                                             $$ = $1;
-                                                                             b_label($3.label);}
-									}
+    | case_element_list semi case_element	{ $$ = $1; b_label($3.label); }
     ;
 
 case_element
-    : case_constant_list ':' { 
-				$<y_caserec>$.type = $1->type; 
-				$<y_caserec>$.values = $1;
-				$<y_caserec>$.label = new_symbol();
-				encode_dispatch($1, $<y_caserec>$.label);
+    : case_constant_list ':' { 	if(check_case_values(caseRecords[caseTop].type, $1 ,caseRecords[caseTop].values) == TRUE)
+				{
+				  $<y_caserec>$.type = $1->type; 
+				  $<y_caserec>$.values = $1;
+				  $<y_caserec>$.label = new_symbol();
+				  encode_dispatch($1, $<y_caserec>$.label);
+				}
 			     } 
-			     statement	{ $$ = $<y_caserec>3; b_jump(peekEndLabel()); }
+			     statement	{ $$ = $<y_caserec>3; b_jump(caseRecords[caseTop].label); }
     ;
 
 case_default
@@ -924,7 +938,7 @@ simple_statement
     | goto_statement	{}
     | assignment_or_call_statement	{ encode_expr($1); }
     | standard_procedure_statement	{ encode_expr($1); }
-    | statement_extensions	{ $<y_string>$ = peekEndLabel(); }
+    | statement_extensions	{ $<y_string>$ = current_exit_label(); }
     ;
 
 empty_statement
@@ -1032,7 +1046,7 @@ rts_proc_parlist
 statement_extensions
     : return_statement
   {}| continue_statement
-  {}| break_statement	{ if(is_exit_label() == FALSE) error("Break statement not inside loop"); }
+  {}| break_statement	{ if(is_exit_label() == FALSE) error("Break statement not inside loop"); else b_jump(current_exit_label()); }
     ;
 
 return_statement
