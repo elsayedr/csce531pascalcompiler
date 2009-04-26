@@ -653,10 +653,11 @@ one_case_constant
     | static_expression LEX_RANGE static_expression	{
 							  TYPETAG cType1, cType2;
 							  long lo, hi;
-							  if(cType1 != cType2)
-							    error("Range limits are of unequal type");
 							  if(get_case_value($1, &lo, &cType1) == TRUE && get_case_value($3, &hi, &cType2))
-							    $$ = new_case_value(cType1, lo, hi);
+							    if(cType1 != cType2)
+							      error("Range limits are of unequal type");
+							    else
+							      $$ = new_case_value(cType1, lo, hi);
 							}
     ;
 
