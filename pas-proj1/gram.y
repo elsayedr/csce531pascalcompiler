@@ -846,7 +846,7 @@ case_statement
 				    VAL_LIST newList = malloc(sizeof(VAL_LIST_REC));  
 				    $<y_valuelist>$ = newList; 
 				 } 
-				case_element_list optional_semicolon_or_else_branch LEX_END	{ $$ = new_symbol(); b_label(peekEndLabel()); }
+				case_element_list optional_semicolon_or_else_branch LEX_END	{ $$ = new_symbol(); b_label(popEndLabel()); }
     ;
 
 optional_semicolon_or_else_branch
