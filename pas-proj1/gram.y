@@ -640,7 +640,7 @@ variant
 
 case_constant_list
     : one_case_constant		{ if($1 != NULL) { $$ = $1; caseRecords[caseTop].values = $1; } else $$ = NULL; }
-    | case_constant_list ',' one_case_constant	{ if($3 != NULL) check_case_values($1->type, $3, $1); $$ = $1; caseRecords[caseTop].values = $1; }
+    | case_constant_list ',' one_case_constant	{ if($3 != NULL) check_case_values(caseRecords[caseTop].type, $3, $1); $$ = $1; caseRecords[caseTop].values = $1; }
     ;
 
 one_case_constant
@@ -851,6 +851,7 @@ if_statement
 
 case_statement
     : { $<y_string>$ = new_symbol(); }LEX_CASE expression LEX_OF { 
+				    TYPETAG tag = ty_query($3->type);
 				    if(is_lval($3) == TRUE)
 				      $3 = make_un_expr(DEREF_OP, $3);
 				    if(ty_query($3->type) != TYSIGNEDLONGINT)
@@ -860,15 +861,24 @@ case_statement
 				    encode_expr($3);
 
 				    /*Creates the val list for the empty case record*/
-				    VAL_LIST newList = NULL;  
-
-				    /*Creates the case record*/
-				    CASE_RECORD caseRec;
-				    caseRec.values = newList;
-				    caseRec.label = $<y_string>1;
-				    caseRec.type = ty_query($3->type);
-				    caseTop++;
-				    caseRecords[caseTop] = caseRec;
+				    VAL_LIST newList = NULL;
+				    
+				    /*Checks the case expression type*/
+				    if(tag != TYSIGNEDLONGINT && tag != TYUNSIGNEDCHAR && tag != TYSIGNEDCHAR)
+				    {	
+				      error("Case expression is not of ordinal type");
+				    }
+				    /*Else error*/
+				    else
+				    {
+				      /*Creates the case record*/
+				      CASE_RECORD caseRec;
+				      caseRec.values = newList;
+				      caseRec.label = $<y_string>1;
+				      caseRec.type = tag;
+				      caseTop++;
+				      caseRecords[caseTop] = caseRec;
+				    }
 				 } 
 				case_element_list optional_semicolon_or_else_branch LEX_END	{ b_label(caseRecords[caseTop].label); caseTop--; }
     ;
@@ -932,7 +942,17 @@ while_statement
 	;
 
 for_statement
-    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); $<y_string>$ = encode_for_preamble($2, $4, $5, $6); } statement	{if($5 == 0) b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); else b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); b_jump($<y_string>8); }
+    : LEX_FOR variable_or_function_access LEX_ASSIGN expression for_direction expression LEX_DO { BOOLEAN check = check_for_preamble($2, $4, $6); $<y_string>$ = encode_for_preamble($2, $4, $5, $6); } statement	{
+								      b_duplicate(TYSIGNEDLONGINT);	
+								      b_push_ext_addr(st_get_id_str($2->u.gid));
+
+								      if($5 == 0) 
+									b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); 
+								      else 
+									b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); 
+								      
+								      b_jump($<y_string>8); 
+								    }
     ;
 
 for_direction
