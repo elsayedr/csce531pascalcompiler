@@ -23,6 +23,7 @@ Print_big()
 {
 	printf("a is big\n");
 }
+
 Print_just()
 {
 	printf("c just is\n");
@@ -57,6 +58,7 @@ Print_grooviest()
 {
 	printf("grooviest");
 }
+
 Print_newline()
 {
 	printf("...\n");
