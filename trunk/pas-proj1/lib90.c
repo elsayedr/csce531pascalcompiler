@@ -22,7 +22,7 @@ Print_dunno()
 Print_big()
 {
 	printf("a is big\n");
-
+}
 Print_just()
 {
 	printf("c just is\n");
