@@ -938,7 +938,7 @@ simple_statement
     | goto_statement	{}
     | assignment_or_call_statement	{ encode_expr($1); }
     | standard_procedure_statement	{ encode_expr($1); }
-    | statement_extensions	{ $<y_string>$ = current_exit_label(); }
+    | statement_extensions	{}
     ;
 
 empty_statement
@@ -1046,7 +1046,7 @@ rts_proc_parlist
 statement_extensions
     : return_statement
   {}| continue_statement
-  {}| break_statement	{ if(is_exit_label() == FALSE) error("Break statement not inside loop"); else b_jump(current_exit_label()); }
+  {}| break_statement	{ if(is_exit_label() == FALSE){ error("Break statement not inside loop"); } else{ b_jump(current_exit_label()); } }
     ;
 
 return_statement
