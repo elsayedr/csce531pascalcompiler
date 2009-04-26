@@ -639,8 +639,8 @@ variant
   {};
 
 case_constant_list
-    : one_case_constant	/*Default*/
-    | case_constant_list ',' one_case_constant	{ check_case_values($1->type, $3, $1); $$ = $1; }
+    : one_case_constant		{ if($1 != NULL) { $$ = $1; caseRecords[caseTop].values = $1; } else $$ = NULL; }
+    | case_constant_list ',' one_case_constant	{ if($3 != NULL) check_case_values($1->type, $3, $1); $$ = $1; caseRecords[caseTop].values = $1; }
     ;
 
 one_case_constant
@@ -649,13 +649,18 @@ one_case_constant
 			  long lo;
 			  if(get_case_value($1, &lo, &cType) == TRUE)
 			    $$ = new_case_value(cType, lo, lo);
+			  else
+			    $$ = NULL;
 			}
     | static_expression LEX_RANGE static_expression	{
 							  TYPETAG cType1, cType2;
 							  long lo, hi;
 							  if(get_case_value($1, &lo, &cType1) == TRUE && get_case_value($3, &hi, &cType2))
 							    if(cType1 != cType2)
+							    {
 							      error("Range limits are of unequal type");
+							      $$ = NULL;
+							    }
 							    else
 							      $$ = new_case_value(cType1, lo, hi);
 							}
@@ -879,13 +884,14 @@ case_element_list
     ;
 
 case_element
-    : case_constant_list ':' { 	if(check_case_values(caseRecords[caseTop].type, $1 ,caseRecords[caseTop].values) == TRUE)
-				{
-				  $<y_caserec>$.type = $1->type; 
-				  $<y_caserec>$.values = $1;
-				  $<y_caserec>$.label = new_symbol();
-				  encode_dispatch($1, $<y_caserec>$.label);
-				}
+    : case_constant_list ':' { 	if($1 != NULL)
+				  if(check_case_values(caseRecords[caseTop].type, $1 ,$<y_caserec>-1.values) == TRUE)
+				  {
+				    $<y_caserec>$.type = $1->type; 
+				    $<y_caserec>$.label = new_symbol();
+				    $<y_caserec>$.values = $1;
+				    encode_dispatch($1, $<y_caserec>$.label);
+				  }
 			     } 
 			     statement	{ $$ = $<y_caserec>3; b_jump(caseRecords[caseTop].label); }
     ;
