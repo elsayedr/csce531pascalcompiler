@@ -1018,14 +1018,28 @@ char * encode_for_preamble(EXPR var, EXPR init, int dir, EXPR limit)
   if(ty_query(limit->type) != TYSIGNEDLONGINT)
     b_convert(ty_query(limit->type), TYSIGNEDLONGINT);
 
+	if(is_lval(limit)==TRUE)
+	{
+		TYPETAG tag = ty_query(init->type);
+		b_deref(tag);
+	}
+
   /*Duplicates the value on top*/
-  b_duplicate(TYSIGNEDLONGINT);
+  b_duplicate(TYSIGNEDLONGINT);	
+  
+  /*Added Stuff*/
+  b_push_ext_addr(st_get_id_str(var->u.gid));
 
   /*Encodes the init expression*/
   encode_expr(init);
 
+  /*Now it assigns the var to the value on the stack*/
+  TYPETAG lTag = ty_query(var->type);
+  b_assign(lTag);
+
   /*Emits new label*/
-  b_label(new_symbol());
+  char* lab = new_symbol();
+  b_label(lab);
 
   /*If the init is not signed long int, convert*/
   if(ty_query(init->type) != TYSIGNEDLONGINT)
