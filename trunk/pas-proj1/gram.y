@@ -855,14 +855,13 @@ optional_semicolon_or_else_branch
     ;
 
 case_element_list
-    : case_element	{ $$ = $1; }
+    : case_element	{ $$ = $1; b_label($1.label); }
     | case_element_list semi case_element	{
 									  /*Checks for case duplicates*/
-									    if(check_case_values($1.type, $3.values, $1.values) == TRUE)
-									    {
-									      $$ = $1;
-									      b_label($1.label);
-									    }
+								  if(check_case_values($1.type, $3.values, $1.values) == TRUE)
+                                                                           {
+                                                                             $$ = $1;
+                                                                             b_label($3.label);}
 									}
     ;
 
