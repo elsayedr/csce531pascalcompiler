@@ -933,7 +933,7 @@ void new_exit_label()
 char * old_exit_label()
 {
   /*If the current index is zero, bug*/
-  if(endLabelCurr <= 0)
+  if(endLabelCurr < 0)
   {
     /*Bug, return*/
     bug("Exit label stack empty");
@@ -950,7 +950,7 @@ char * old_exit_label()
 char * current_exit_label()
 {
   /*If the current index is zero, bug*/
-  if(endLabelCurr <= 0)
+  if(endLabelCurr < 0)
   {
     /*Bug, return*/
     bug("Exit label stack empty");
@@ -966,7 +966,7 @@ char * current_exit_label()
 BOOLEAN is_exit_label()
 {
   /*If index greater than or equal to zero, not empty*/
-  if(endLabelCurr > 0)
+  if(endLabelCurr >= 0)
     return TRUE;
   else
     return FALSE;
@@ -1038,9 +1038,8 @@ char * encode_for_preamble(EXPR var, EXPR init, int dir, EXPR limit)
     b_arith_rel_op(B_GT, TYSIGNEDLONGINT);
 
   /*Conditional jump*/
-  char * lab = peekEndLabel();
-  b_cond_jump(TYSIGNEDLONGINT, B_NONZERO, lab);
+  b_cond_jump(TYSIGNEDLONGINT, B_NONZERO, current_exit_label());
 
   /*Returns the label*/
-  return lab;
+  return current_exit_label();
 }

@@ -181,9 +181,13 @@ EXPR promoteInt(EXPR eNode);
 For generality I only put the end labels for loops since a break
 statement that occurs inside of an if which is inside of a while loop
 will exit the if and the while*/
-char* endLabels[100];
+extern char* endLabels[100];
 /*Current index of the end label*/
-static int endLabelCurr = 0;
+extern int endLabelCurr;
+
+/*Case record stack variables*/
+extern CASE_RECORD caseRecords[100];
+extern int caseTop;
 
 void pushEndLabel(char* endLabel);
 char* popEndLabel();
