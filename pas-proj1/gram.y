@@ -855,7 +855,7 @@ case_statement
 				    encode_expr($3);
 
 				    /*Creates the val list for the empty case record*/
-				    VAL_LIST newList = malloc(sizeof(VAL_LIST_REC));  
+				    VAL_LIST newList = NULL;  
 
 				    /*Creates the case record*/
 				    CASE_RECORD caseRec;
