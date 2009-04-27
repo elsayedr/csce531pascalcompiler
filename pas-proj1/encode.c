@@ -987,8 +987,8 @@ void encode_dispatch(VAL_LIST vals, char * label)
       {
 	/*Subrange case*/
 	char *  newLabel = new_symbol();
-	b_dispatch(B_GT, TYSIGNEDLONGINT, vals->lo, newLabel, FALSE);
-	b_dispatch(B_LE, TYSIGNEDLONGINT, vals->hi, matchLabel, TRUE);
+	b_dispatch(B_LT, TYSIGNEDLONGINT, vals->lo, newLabel, FALSE);
+	b_dispatch(B_LE, TYSIGNEDLONGINT, vals->hi, matchLabel, FALSE);
 	b_label(newLabel);
       }
       else
