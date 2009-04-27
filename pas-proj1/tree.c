@@ -3154,3 +3154,30 @@ BOOLEAN check_for_preamble(EXPR var, EXPR init, EXPR limit)
   /*All checks passed, return true*/
   return TRUE;
 }
+
+/*Function that checks a single case constant*/
+BOOLEAN checkCaseConst(VAL_LIST list, TYPETAG tag)
+{
+  /*If the list is not equal to null*/
+  if(list != NULL)
+  {
+    /*Copies the list*/
+    VAL_LIST copy = list;
+
+    /*While loop*/
+    while(copy != NULL)
+    {
+      if(list->type != tag)
+      {
+	/*Error, return false*/
+	error("Case constant type does not match case expression type");
+	return FALSE;
+      }
+      /*Moves onto the next element*/
+      copy = copy->next;
+    }
+  }
+  
+  /*Passed, return true*/
+  return TRUE;
+}
