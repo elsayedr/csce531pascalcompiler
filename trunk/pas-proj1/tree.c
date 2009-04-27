@@ -3048,8 +3048,7 @@ BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals)
       if(pValsC->next == NULL)
       {
 	/*Adds to list*/
-	valsC->next = NULL;
-	pValsC->next = valsC;
+	pValsC->next = new_case_value(valsC->type, valsC->lo, valsC->hi);
 	pValsC = NULL;
       }
       else
