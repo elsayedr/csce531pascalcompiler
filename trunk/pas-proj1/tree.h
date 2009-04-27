@@ -216,6 +216,9 @@ void case_value_list_free(VAL_LIST vals);
 BOOLEAN get_case_value(EXPR expr, long * val, TYPETAG * type);
 BOOLEAN check_for_preamble(EXPR var, EXPR init, EXPR limit);
 
+/*Checks a single case constant*/
+BOOLEAN checkCaseConst(VAL_LIST list, TYPETAG tag);
+
 #endif
 
 

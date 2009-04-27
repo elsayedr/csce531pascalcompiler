@@ -639,7 +639,7 @@ variant
   {};
 
 case_constant_list
-    : one_case_constant		{ if($1 != NULL) { $$ = $1; caseRecords[caseTop].values = $1; } else $$ = NULL; }
+    : one_case_constant		{ if($1 != NULL) { if(checkCaseConst($1, caseRecords[caseTop].type) == TRUE) { $$ = $1; caseRecords[caseTop].values = $1;} } else $$ = NULL; }
     | case_constant_list ',' one_case_constant	{ if($3 != NULL) check_case_values(caseRecords[caseTop].type, $3, $1); $$ = $1; caseRecords[caseTop].values = $1; }
     ;
 
