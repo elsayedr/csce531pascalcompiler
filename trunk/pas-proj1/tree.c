@@ -3037,9 +3037,9 @@ BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals)
 	{
 	  /*Checks to see if same*/
 	  if(valsC->lo == pValsC->lo)
-	  {
+	  {	
 	     /*Error, return false*/
-	     error("Overlapping constants in case statement");
+	     error("Overlapping constants in case statement4");
 	     return FALSE;
 	  }
 	}
@@ -3048,6 +3048,7 @@ BOOLEAN check_case_values(TYPETAG type, VAL_LIST vals, VAL_LIST prev_vals)
       if(pValsC->next == NULL)
       {
 	/*Adds to list*/
+	valsC->next = NULL;
 	pValsC->next = valsC;
 	pValsC = NULL;
       }
