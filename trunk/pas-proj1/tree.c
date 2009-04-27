@@ -3152,6 +3152,9 @@ BOOLEAN check_for_preamble(EXPR var, EXPR init, EXPR limit)
     return FALSE;
   }
 
+  /*Pushes the exit label for the for*/
+  new_exit_label();
+
   /*All checks passed, return true*/
   return TRUE;
 }
