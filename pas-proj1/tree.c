@@ -2889,7 +2889,7 @@ EXPR make_array_access_expr(EXPR arrayExpr,EXPR_LIST indexList)
 	
 	EXPR_LIST currExprList = indexList;
 
-	while(currExprList != NULL)
+	while(currExprList != NULL && indices != NULL)
 	{
 		/*All exprs must be rvals, if it is an lval it has to be dereferenced*/
 		if(is_lval(currExprList->expr) == TRUE)/*PROBLEM*/
@@ -2905,13 +2905,16 @@ EXPR make_array_access_expr(EXPR arrayExpr,EXPR_LIST indexList)
 			return make_error_expr();
 		}
 		
-		currExprList = currExprList->next;
-		indices = indices->next;
+		if(currExprList != NULL)
+		  currExprList = currExprList->next;
+
+		if(indices != NULL)
+		  indices = indices->next;
 	}
 	if((currExprList  == NULL && indices != NULL)||
 		(currExprList  != NULL && indices == NULL))
 	{
-		error("Wrong number of indecies");
+		error("Wrong number of indices in array access");
 		return make_error_expr();
 	}
 
@@ -3124,6 +3127,9 @@ BOOLEAN get_case_value(EXPR expr, long * val, TYPETAG * type)
 /*Error checks the loop preamble*/
 BOOLEAN check_for_preamble(EXPR var, EXPR init, EXPR limit)
 {
+  /*Pushes the exit label for the for*/
+  new_exit_label();
+
   /*Checks to determine if the control variable is an lval*/
   if(is_lval(var) == FALSE)
   {
@@ -3151,9 +3157,6 @@ BOOLEAN check_for_preamble(EXPR var, EXPR init, EXPR limit)
     error("Type mismatch in for-loop control");
     return FALSE;
   }
-
-  /*Pushes the exit label for the for*/
-  new_exit_label();
 
   /*All checks passed, return true*/
   return TRUE;
