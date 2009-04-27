@@ -785,7 +785,6 @@ void encode_array_access(EXPR expr, EXPR_LIST indices)
    
     subrangeType = ty_query_subrange(indList->type,&lowVal,&highVal);
 
-    /*range = highVal-lowVal;*/
     range = highVal-lowVal-1;
 
     if(indList->next == NULL)/*At the end of the list*/
@@ -803,11 +802,11 @@ void encode_array_access(EXPR expr, EXPR_LIST indices)
     }
     else if(indList->next!=NULL && indList->prev == NULL)/*At the beginning of the list*/
     { 
-      /*b_push_const_int(range);*/
+
     b_push_const_int(lowVal);
     shiftSize = range*elementSize;
     b_arith_rel_op(B_SUB,TYSIGNEDLONGINT);
-      /*b_arith_rel_op(B_MULT,TYSIGNEDLONGINT);*/
+ 
     b_ptr_arith_op(B_ADD,TYSIGNEDLONGINT,shiftSize);
     }
    

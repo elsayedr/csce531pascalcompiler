@@ -930,14 +930,15 @@ while_statement
 					      $<y_string>$ = startWhile;
 					    }
 					  }
-					  {
+					  { if(checkBoolean($2) == TRUE)
+					    {
 					    char* endWhile;
 					    endWhile = whileCond();
-					    $<y_string>$ = endWhile;
+					    $<y_string>$ = endWhile;}
 					  }
 	statement
 	{					 					 
-	  whileLoop($<y_string>4,$<y_string>5);
+	  if(checkBoolean($2) == TRUE)whileLoop($<y_string>4,$<y_string>5);
 	}
 	;
 
