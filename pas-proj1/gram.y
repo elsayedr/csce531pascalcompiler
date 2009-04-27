@@ -811,7 +811,7 @@ structured_statement
     : compound_statement	{}
     | with_statement	{}
     | conditional_statement	{}
-    | { new_exit_label(); } repetitive_statement	{ $$ = old_exit_label(); }
+    | repetitive_statement	{}
     ;
 
 with_statement
@@ -947,11 +947,13 @@ for_statement
 								      b_push_ext_addr(st_get_id_str($2->u.gid));
 
 								      if($5 == 0) 
-									b_inc_dec(TYSIGNEDLONGINT, B_PRE_INC,1); 
+									b_inc_dec(ty_query($4->type), B_PRE_INC,1); 
 								      else 
-									b_inc_dec(TYSIGNEDLONGINT, B_PRE_DEC, 1); 
+									b_inc_dec(ty_query($4->type), B_PRE_DEC, 1); 
 								      
 								      b_jump($<y_string>8); 
+								      b_label(old_exit_label());
+								      b_pop();
 								    }
     ;
 

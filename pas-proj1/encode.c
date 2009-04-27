@@ -779,6 +779,8 @@ void encode_array_access(EXPR expr, EXPR_LIST indices)
   
   currIndicies = indices;
 
+  currIndicies = expr_list_reverse(indices);
+
   while(currIndicies != NULL && indList != NULL)
   {
     encode_expr(currIndicies->expr);
@@ -994,7 +996,7 @@ void encode_dispatch(VAL_LIST vals, char * label)
       else
       {
 	/*Calls b_dispatch for comparison*/
-	b_dispatch(B_EQ, TYSIGNEDLONGINT, vals->lo, matchLabel, FALSE);
+	b_dispatch(B_EQ, TYSIGNEDLONGINT, vals->hi, matchLabel, FALSE);
       }
       /*Moves onto the next item*/
       vals = vals->next;
